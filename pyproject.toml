@@ -1,0 +1,20 @@
+[project]
+name = "llm-plays-harness"
+version = "0.1.0"
+description = "Autonomous game-playing harness: local LLM decisions, watchdog liveness, Claude checkpoints"
+requires-python = ">=3.11"
+dependencies = [
+    "pillow>=10.0",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+]
+
+[project.scripts]
+harness = "harness.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["harness*"]

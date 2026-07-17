@@ -1,0 +1,160 @@
+"""The main decision loop: ties eyes, watchdog, executor, ratchet, stuckness,
+and logging together. This is invariants I1–I3 in motion.
+"""
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
+from .executor import Executor
+from .interfaces import Extras, Eyes, Unsupported
+from .profile import GameProfile
+from .runlog import RunLog
+from .stream import StreamState
+from .stuckness import StucknessMonitor
+from .types import Observation, phash_diff
+
+
+class GameLoop:
+    def __init__(self, profile: GameProfile, eyes: Eyes, executor: Executor,
+                 extras: Extras | None, watchdog, runlog: RunLog, base: Path,
+                 stream: StreamState | None = None, sync=None):
+        self.profile = profile
+        self.eyes = eyes
+        self.executor = executor
+        self.extras = extras
+        self.watchdog = watchdog
+        self.runlog = runlog
+        self.base = base
+        self.stream = stream
+        self.sync = sync
+        self.stuckness = StucknessMonitor(profile.escalation)
+        self._recent: list[str] = []
+        self._last_ram: dict[str, int] = {}
+        self._last_save_ts = 0.0
+        self._last_snapshot_ts = 0.0
+
+    def run(self, max_iterations: int | None = None) -> None:
+        i = 0
+        while max_iterations is None or i < max_iterations:
+            i += 1
+            started = time.time()
+            try:
+                self._tick()
+            except KeyboardInterrupt:
+                break
+            except Exception as e:  # noqa: BLE001 — the loop must survive anything
+                self.runlog.log_metric("tick_error", error=repr(e))
+                time.sleep(2.0)
+                continue
+            # pace to the profile's decision cadence
+            remaining = self.profile.decision_cadence_s - (time.time() - started)
+            if remaining > 0:
+                time.sleep(remaining)
+        self.runlog.close()
+
+    def _tick(self) -> None:
+        started = time.time()
+        if self.sync is not None:
+            changed = self.sync.poll()  # checkpoint-authored skills go live here
+            if changed:
+                self.runlog.log_metric("skills_sync", files=changed)
+                errs = self.sync.library.load_errors
+                if errs:
+                    # a bad write must self-report, not silently vanish
+                    self.runlog.log_metric("skills_invalid", errors=errs)
+                    self.runlog.escalate(
+                        "skills_invalid",
+                        f"skill files rejected and skipped: {'; '.join(errs)}")
+        frame = self.eyes.get_frame()
+        fhash = frame.phash()
+
+        ram = None
+        if self.extras is not None and self.profile.ram_map:
+            try:
+                ram = self.extras.read_ram(self.profile.ram_map)
+            except Unsupported:
+                pass
+        if ram is not None and ram != self._last_ram:
+            # milestone events (badge gained, map changed, ...) — the raw material
+            # for the benchmark progress curves (BENCHMARKS.md §2)
+            changed = {k: v for k, v in ram.items() if self._last_ram.get(k) != v}
+            self.runlog.log_metric("milestone", **changed)
+            self._last_ram = ram
+            self.runlog.snapshot(frame, tag="milestone")
+
+        obs = Observation(frame=frame, ram=ram, goals=self.runlog.goals(),
+                          recent=self._recent, memory=self.runlog.memory())
+        decision = self.watchdog.decide(obs)
+        if decision.memory_update is not None:
+            # the model rewrote its own notes; store verbatim, never interpret
+            self.runlog.set_memory(decision.memory_update)
+
+        # Execute the plan; abort remaining steps if the screen changes more than
+        # expected between steps (wild encounter, dialogue popup, scene change).
+        executed = 0
+        prev_hash = fhash
+        for i, behavior in enumerate(decision.behaviors):
+            if i > 0:
+                cur_hash = self.eyes.get_frame().phash()
+                if phash_diff(prev_hash, cur_hash) > self.profile.ladder.plan_abort_pct:
+                    self.runlog.log_metric("plan_abort", step=i,
+                                           total=len(decision.behaviors))
+                    break
+                prev_hash = cur_hash
+            self.executor.execute(behavior)
+            executed += 1
+
+        self._recent.extend(b.name for b in decision.behaviors[:executed])
+        del self._recent[:-20]
+        self.runlog.log_decision(decision, fhash, ram, time.time() - started, executed)
+        if self.stream is not None:
+            display = " → ".join(b.name for b in decision.behaviors[:executed])
+            self.stream.push_decision(display, int(decision.rung),
+                                      decision.reason, ram, obs.goals,
+                                      memory=self.runlog.memory())
+
+        self._ratchet()
+        self._watch_stuckness(frame, fhash)
+        self._periodic_snapshot(frame)
+
+    # -- invariant I2: progress ratchet --------------------------------------
+    def _ratchet(self) -> None:
+        if time.time() - self._last_save_ts < self.profile.ratchet.interval_s:
+            return
+        if self.executor.savestate():
+            self.runlog.log_metric("savestate", slot=self.profile.ratchet.savestate_slot)
+            if self.stream is not None:
+                self.stream.bump("savestates")
+        elif self.profile.ratchet.ingame_save_behavior:
+            b = self.watchdog.library.get(self.profile.ratchet.ingame_save_behavior)
+            if b:
+                self.executor.execute(b)
+                self.runlog.log_metric("ingame_save", behavior=b.name)
+        self._last_save_ts = time.time()
+
+    # -- invariant I3: bounded stuckness --------------------------------------
+    def _watch_stuckness(self, frame, fhash: str) -> None:
+        self.stuckness.observe(fhash)
+        if not self.stuckness.is_stuck():
+            return
+        snap = self.runlog.snapshot(frame, tag="stuck")
+        if self.stuckness.may_wake_claude():
+            self.runlog.escalate("stuck", "screen stagnant beyond threshold", snap)
+            self.runlog.log_metric("escalation", reason="stuck")
+            if self.stream is not None:
+                self.stream.bump("escalations")
+            try:
+                # an early-woken Claude should find a fresh context bundle
+                from .briefing import write_briefing
+                write_briefing(self.runlog.dir)
+            except Exception as e:  # noqa: BLE001 — briefing must never kill the loop
+                self.runlog.log_metric("briefing_error", error=repr(e))
+        else:
+            self.runlog.log_metric("escalation_suppressed", reason="stuck")
+        self.stuckness.reset()
+
+    def _periodic_snapshot(self, frame, every_s: float = 600.0) -> None:
+        if time.time() - self._last_snapshot_ts > every_s:
+            self.runlog.snapshot(frame)
+            self._last_snapshot_ts = time.time()

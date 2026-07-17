@@ -1,0 +1,9 @@
+# Get through title screens and intro sequences: START to leave the title,
+# then A presses to advance whatever follows. Safe to repeat.
+name: boot_mash
+description: Advance from a title screen / intro (START, then mash A).
+steps:
+  - {button: START, hold_frames: 6, wait_frames: 40}
+  - {button: A, hold_frames: 6, wait_frames: 30}
+  - {button: A, hold_frames: 6, wait_frames: 30}
+  - {button: A, hold_frames: 6, wait_frames: 30}

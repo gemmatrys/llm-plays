@@ -1,0 +1,47 @@
+# Pokémon Red (Game Boy, via mGBA) — the Phase 1 target.
+name: pokemon_red
+platform: gb
+driver: mgba
+rom: null  # informational; the ROM is loaded in mGBA manually for now
+
+buttons: [A, B, START, SELECT, UP, DOWN, LEFT, RIGHT]
+decision_cadence_s: 3.0
+
+ladder:
+  scripted_fallback: mash_a
+  safe_idle: wait
+  allow_random: true          # the fish clause: Red is fish-beatable
+  llm_timeout_s: 20.0
+  demote_after_failures: 3
+  promote_after_successes: 5
+  max_plan_len: 8             # one LLM call may plan up to 8 behaviors
+  plan_abort_pct: 0.4         # cancel remaining plan if the screen changes this much
+
+ratchet:
+  interval_s: 300             # savestate every 5 minutes
+  savestate_slot: 1
+  ingame_save_behavior: null  # not needed while savestates work
+
+escalation:
+  stagnant_after_s: 1200      # 20 min of same-screen = stuck
+  max_wakes_per_window: 2
+  window_s: 18000             # 5 h
+
+# WRAM addresses (Gen 1, US Red/Blue) — verify against a memory map in Phase 0.
+ram_map:
+  badges: "0xD356"
+  map_id: "0xD35E"
+  party_count: "0xD163"
+
+driver_opts:
+  host: 127.0.0.1
+  port: 8765
+
+skills_dirs:
+  - skills/common
+  - skills/pokemon_red
+
+# NOTE: this file configures the HARNESS only. It is COLD config: editing it
+# requires tearing down the harness and starting a new run segment (each run
+# snapshots the profile it ran under). Gemma-facing prompt assets live in
+# prompts/pokemon_red/ — that is the HOT surface checkpoints rewrite mid-run.

@@ -1,0 +1,25 @@
+# run artifacts: logs, snapshots, savestates, per-run state — data, not code
+runs/
+
+# never commit game ROMs or dumps, in any location
+*.gb
+*.gbc
+*.gba
+*.nds
+*.sav
+*.ss0
+*.ss1
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+
+# editor/os noise
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
