@@ -7,6 +7,7 @@ Layout (PLAN §4):
 from __future__ import annotations
 
 import json
+import threading
 import time
 from pathlib import Path
 
@@ -38,6 +39,8 @@ class RunLog:
         self._log = (self.dir / "log.jsonl").open("a", encoding="utf-8")
         self._metrics = (self.dir / "metrics.jsonl").open("a", encoding="utf-8")
         self._escalations = self.dir / "escalations.jsonl"
+        # the loop and the live-publisher thread both log; keep lines whole
+        self._write_lock = threading.Lock()
 
     def goals(self) -> str:
         return self.goals_path.read_text(encoding="utf-8")
@@ -81,11 +84,14 @@ class RunLog:
         frame.image.save(path)
         return str(path)
 
-    @staticmethod
-    def _write(fh, obj: dict) -> None:
-        fh.write(json.dumps(obj, separators=(",", ":")) + "\n")
-        fh.flush()
+    def _write(self, fh, obj: dict) -> None:
+        with self._write_lock:
+            if fh.closed:
+                return  # async writers (live-publisher) may outlive the loop
+            fh.write(json.dumps(obj, separators=(",", ":")) + "\n")
+            fh.flush()
 
     def close(self) -> None:
-        self._log.close()
-        self._metrics.close()
+        with self._write_lock:
+            self._log.close()
+            self._metrics.close()

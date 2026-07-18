@@ -36,6 +36,9 @@ def main() -> None:
     ap.add_argument("--run-id", default=None)
     ap.add_argument("--stream-port", type=int, default=8600,
                     help="port for the OBS overlay / state.json (0 = off)")
+    ap.add_argument("--publish", action="store_true",
+                    help="live-stream goals/memory to the git remote: an async "
+                         "watcher types changes into live/ a chunk per commit")
     args = ap.parse_args()
 
     base = Path.cwd()
@@ -92,10 +95,22 @@ def main() -> None:
 
     sync = HotSync(base, profile.skills_dirs, library)
 
+    publisher = None
+    if args.publish:
+        from .publish import LivePublisher
+        publisher = LivePublisher(base, runlog)
+        publisher.start()
+        print("[harness] live-publishing goals/memory to the 'live' branch "
+              "on the git remote (main stays code-only)")
+
     print(f"[harness] game={profile.name} driver={profile.driver} "
           f"policy={args.policy} run={runlog.dir}")
-    GameLoop(profile, eyes, executor, extras, watchdog, runlog, base,
-             stream=stream, sync=sync).run(args.iterations)
+    try:
+        GameLoop(profile, eyes, executor, extras, watchdog, runlog, base,
+                 stream=stream, sync=sync).run(args.iterations)
+    finally:
+        if publisher is not None:
+            publisher.stop()
 
 
 if __name__ == "__main__":

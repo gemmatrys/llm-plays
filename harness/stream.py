@@ -140,6 +140,18 @@ OVERLAY_HTML = """<!DOCTYPE html>
 </div>
 <script>
 const LBL = {1:"GEMMA",2:"SCRIPT",3:"IDLE",4:"FISH"};
+// typewriter: the current thought "streams" onto the screen
+let twTarget = "", twPos = 0, twTimer = null;
+function setThought(t) {
+  if (t === twTarget) return;
+  twTarget = t; twPos = 0;
+  if (twTimer) clearInterval(twTimer);
+  twTimer = setInterval(() => {
+    twPos = Math.min(twPos + 2, twTarget.length);
+    document.getElementById("thought").textContent = twTarget.slice(0, twPos);
+    if (twPos >= twTarget.length) { clearInterval(twTimer); twTimer = null; }
+  }, 35);
+}
 async function tick() {
   try {
     const s = await (await fetch("/state.json")).json();
@@ -150,7 +162,7 @@ async function tick() {
     el("rung").textContent = LBL[s.rung] || "–";
     el("rung").className = "r" + (s.rung || 4);
     el("behavior").textContent = s.behavior || "…";
-    el("thought").textContent = s.thought || "";
+    setThought(s.thought || "");
     el("notes").innerHTML = s.memory
       ? "<b>notes:</b> " + s.memory.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"})[c])
       : "";
