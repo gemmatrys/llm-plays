@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am mashing through his dialogue so I can pick my starter Pokemon (Bulbasaur).
+I am in Professor Oak's lab. I am mashing through the dialogue to receive my starter Pokemon (Bulbasaur).
