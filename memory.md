@@ -1,1 +1,1 @@
-I am inside my house in Pallet Town. I need to walk up and out the door to reach the tall grass North of town.
+I am inside my house in Pallet Town. I need to go downstairs and exit the house to head North toward the tall grass.
