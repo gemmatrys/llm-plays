@@ -1,1 +1,1 @@
-I am on the naming screen for my rival. I will select a preset name to avoid the letter grid and then proceed to start the game in Pallet Town.
+I am in the opening sequence. I have finished the naming process and am advancing through the introductory dialogue before starting the game in Pallet Town.
