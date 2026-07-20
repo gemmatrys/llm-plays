@@ -102,6 +102,8 @@ def main() -> None:
         stream = StreamState(game=profile.name,
                              policy=args.model if args.policy == "llm" else args.policy)
         start_server(stream, args.stream_port)
+        if args.policy == "llm":
+            policy.on_stream = stream.stream_thinking  # live-stream reasoning
         print(f"[harness] overlay: http://127.0.0.1:{args.stream_port}/ "
               f"(add as OBS Browser Source)")
 

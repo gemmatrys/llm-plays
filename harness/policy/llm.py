@@ -74,37 +74,13 @@ def render_prompt(template: str, behaviors: list[str], goals: str,
             .replace("{max_plan}", str(max_plan)))
 
 
-# --- Gemma4 thinking-transcript recovery -------------------------------------
-# Gemma4 wraps its chain-of-thought in `<|channel>thought\n ... <channel|>`
-# before the answer. On the llm-scaler XPU build the detokenizer strips these
-# special tokens from both `content` and `reasoning_content` regardless of
-# skip_special_tokens, so `reasoning_content` comes back empty (vllm#38855).
-# The per-token logprobs stream preserves them verbatim, so we request logprobs
-# and rebuild the transcript ourselves by splitting on the delimiters. The
-# answer JSON still arrives clean in `content`, so plan parsing is unaffected.
-_THINK_START = "<|channel>"
-_THINK_END = "<channel|>"
-_THOUGHT_PREFIX = "thought\n"
+# Gemma4's chain-of-thought (<|channel>thought\n ... <channel|>) is unrecoverable
+# from a NON-streaming reply on this llm-scaler build — the detokenizer strips
+# the delimiters from both `content` and `reasoning_content` regardless of
+# skip_special_tokens (vllm#38855). Streaming sidesteps this entirely: the server
+# emits clean incremental `delta.reasoning` chunks, which is why LLMPolicy always
+# streams when reasoning is on (see decide()).
 MAX_THINKING_CHARS = 2000  # keep the logged/streamed record bounded
-
-
-def _thinking_from_logprobs(choice: dict) -> str:
-    """Rebuild the thinking transcript from the per-token logprobs stream, which
-    keeps the channel delimiters the detokenized strings drop. Returns "" when
-    logprobs or the delimiters are absent (nothing to recover)."""
-    tokens = (choice.get("logprobs") or {}).get("content") or []
-    if not tokens:
-        return ""
-    stream = "".join(t.get("token", "") for t in tokens)
-    start = stream.find(_THINK_START)
-    if start == -1:
-        return ""
-    start += len(_THINK_START)
-    end = stream.find(_THINK_END, start)
-    thinking = stream[start:end] if end != -1 else stream[start:]
-    if thinking.startswith(_THOUGHT_PREFIX):
-        thinking = thinking[len(_THOUGHT_PREFIX):]
-    return thinking.strip()
 
 
 class LLMPolicy:
@@ -123,6 +99,9 @@ class LLMPolicy:
         self.max_image_px = max_image_px
         self.max_plan = max_plan
         self.on_prompt_invalid = on_prompt_invalid  # called once per bad version
+        # optional callback(text, done) to stream the thinking transcript into the
+        # overlay live as tokens arrive (set by cli when an overlay is running)
+        self.on_stream = None
         # Gemma 4 thinking: "none" disables; "low"/"medium"/"high" require the
         # server to run with --reasoning-parser gemma4 (which strips the
         # thinking tokens before the JSON schema is applied). Caveat: with the
@@ -213,29 +192,55 @@ class LLMPolicy:
             # reasoning_effort is ignored by the current llm-scaler build;
             # enable_thinking works (and coexists with the JSON schema).
             payload["chat_template_kwargs"] = {"enable_thinking": True}
-            # Request logprobs so we can rebuild the thinking transcript from the
-            # raw token stream — reasoning_content is empty on this build because
-            # the detokenizer strips the channel tokens (see
-            # _thinking_from_logprobs). The answer JSON is unaffected.
-            payload["logprobs"] = True
-        # HTTP deadline sits BELOW the watchdog's so a slow request always
-        # frees the single policy worker before the next call queues behind it
-        r = requests.post(f"{self.endpoint}/v1/chat/completions", json=payload,
-                          timeout=max(10.0, self.timeout_s - 10.0))
-        r.raise_for_status()
-        choice = r.json()["choices"][0]
-        message = choice["message"]
-        # reasoning_content is populated on builds where the parser works;
-        # otherwise reconstruct the transcript from the logprobs token stream.
-        thinking = message.get("reasoning_content") or ""
-        if not thinking and self.reasoning != "none":
-            thinking = _thinking_from_logprobs(choice)
-        self.last_thinking = thinking[:MAX_THINKING_CHARS]
-        content = message["content"]
-        if content is None:
-            raise ValueError("thinking consumed the whole max_tokens budget; "
-                             "no answer was produced")
-        action = json.loads(content)
+        # STREAM the generation: the overlay shows the model reasoning live as
+        # delta.reasoning chunks arrive, and only once the stream finishes do we
+        # parse the plan and act — so the reasoning appears BEFORE the button
+        # press, not after. In streaming mode the server emits clean incremental
+        # `reasoning` deltas directly (unlike the non-streaming reply, where the
+        # channel delimiters get stripped before we ever see them — vllm#38855),
+        # so no logprobs reconstruction is needed here. HTTP read deadline sits
+        # BELOW the watchdog's so a slow call frees the worker before it gives up.
+        payload["stream"] = True
+        reasoning_parts, content_parts, pushed = [], [], 0
+        if self.on_stream is not None:
+            self.on_stream("", False)  # clear the panel for a fresh generation
+        try:
+            r = requests.post(f"{self.endpoint}/v1/chat/completions", json=payload,
+                              stream=True, timeout=max(10.0, self.timeout_s - 10.0))
+            r.raise_for_status()
+            for line in r.iter_lines(decode_unicode=True):
+                if not line or not line.startswith("data:"):
+                    continue
+                data = line[5:].strip()
+                if data == "[DONE]":
+                    break
+                try:
+                    delta = json.loads(data)["choices"][0].get("delta") or {}
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
+                if delta.get("content"):
+                    content_parts.append(delta["content"])
+                if delta.get("reasoning"):
+                    reasoning_parts.append(delta["reasoning"])
+                    if self.on_stream is not None and pushed < len(reasoning_parts):
+                        text = "".join(reasoning_parts)[:MAX_THINKING_CHARS]
+                        self.on_stream(text, False)
+                        pushed = len(reasoning_parts)
+        finally:
+            self.last_thinking = "".join(reasoning_parts)[:MAX_THINKING_CHARS]
+            if self.on_stream is not None:
+                self.on_stream(self.last_thinking, True)  # mark generation done
+        content = "".join(content_parts).strip()
+        if not content:
+            raise ValueError("no answer content; thinking may have consumed the "
+                             "max_tokens budget")
+        try:
+            action = json.loads(content)
+        except json.JSONDecodeError:  # tolerate any leading text before the JSON
+            i, j = content.find("{"), content.rfind("}")
+            if i == -1 or j == -1:
+                raise ValueError(f"no JSON object in content: {content[:80]!r}")
+            action = json.loads(content[i:j + 1])
         plan = []
         for name in action["plan"]:
             behavior = self.library.get(name)

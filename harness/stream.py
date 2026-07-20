@@ -31,6 +31,7 @@ class StreamState:
             "behavior": "",
             "rung": 0,
             "thought": "",
+            "generating": False,  # True while the policy is streaming thinking
             "goals": "",
             "ram": {},
             "rung_counts": {},
@@ -51,11 +52,19 @@ class StreamState:
             d["goals"] = goals
             d["memory"] = memory
             d["thinking"] = thinking
+            d["generating"] = False
             d["ram"] = ram or {}
             d["rung_counts"][str(rung)] = d["rung_counts"].get(str(rung), 0) + 1
             d["recent"].append({"ts": time.time(), "behavior": behavior,
                                 "rung": rung, "thought": thought})
             del d["recent"][:-12]
+
+    def stream_thinking(self, text: str, done: bool = False) -> None:
+        """Live push of the (growing) thinking transcript from the policy, so the
+        overlay streams it token by token; done=True marks generation finished."""
+        with self._lock:
+            self._d["thinking"] = text
+            self._d["generating"] = not done
 
     def bump(self, counter: str) -> None:
         with self._lock:
@@ -164,35 +173,6 @@ OVERLAY_HTML = """<!DOCTYPE html>
 </div>
 <script>
 const LBL = {1:"GEMMA",2:"SCRIPT",3:"IDLE",4:"FISH"};
-// typewriter for the thinking channel (streams in when the model's
-// chain-of-thought becomes available server-side)
-let twTarget = null, twPos = 0, twTimer = null;
-// setThinking types the transcript out, then calls onDone() — which is how the
-// decision reveal waits for the reasoning to finish. Empty thinking (fallback
-// rungs, thinking off) calls onDone immediately so the move still shows.
-function setThinking(t, onDone) {
-  const el = document.getElementById("thinking");
-  if (!t) {
-    if (twTarget !== "") { twTarget = "";
-      el.textContent = "warming up…"; el.className = "offline"; el.scrollTop = 0; }
-    if (onDone) onDone();
-    return;
-  }
-  if (t === twTarget) { if (onDone) onDone(); return; }  // already shown -> reveal
-  twTarget = t; twPos = 0; el.className = "";
-  if (twTimer) clearInterval(twTimer);
-  // adaptive speed: finish the reveal in ~7s regardless of length, so a long
-  // transcript still completes within the decision cadence; auto-scroll keeps
-  // the newest thought in view while older lines slide up under the mask.
-  const step = Math.max(3, Math.ceil(twTarget.length / 240));
-  twTimer = setInterval(() => {
-    twPos = Math.min(twPos + step, twTarget.length);
-    el.textContent = twTarget.slice(0, twPos);
-    el.scrollTop = el.scrollHeight;
-    if (twPos >= twTarget.length) { clearInterval(twTimer); twTimer = null;
-      if (onDone) onDone(); }
-  }, 30);
-}
 let curDecision = -1;
 function revealDecision(s) {
   const el = id => document.getElementById(id);
@@ -209,11 +189,16 @@ async function tick() {
     el("game").textContent = s.game + "  ·  " + s.policy;
     const h = Math.floor(s.uptime_s/3600), m = Math.floor(s.uptime_s%3600/60);
     el("up").textContent = h + "h " + String(m).padStart(2,"0") + "m";
-    if (s.decisions !== curDecision) {   // new decision: reason first, then reveal
-      curDecision = s.decisions;
-      el("decision").classList.add("pending");
-      setThinking(s.thinking || "", () => revealDecision(s));
-    }
+    // stream the model's reasoning straight into the DOM as it generates — no
+    // fake typewriter; the text IS the live server output growing token by token.
+    const th = document.getElementById("thinking");
+    if (s.thinking) { th.className = ""; th.textContent = s.thinking;
+                      th.scrollTop = th.scrollHeight; }
+    else { th.className = "offline"; th.textContent = "warming up…"; }
+    // reveal the move only once a new decision is committed (stream finished and
+    // plan executed); keep it hidden while the model is still generating.
+    if (s.decisions !== curDecision) { curDecision = s.decisions; revealDecision(s); }
+    else if (s.generating) { el("decision").classList.add("pending"); }
     el("notes").textContent = s.memory || "–";
     el("n").textContent = s.decisions;
     el("dph").textContent = s.decisions_per_hour;
@@ -224,6 +209,6 @@ async function tick() {
       (r.thought ? " — " + r.thought : "") + "</div>").join("");
   } catch (e) { /* harness restarting; keep polling */ }
 }
-setInterval(tick, 1000); tick();
+setInterval(tick, 250); tick();  // fast poll so streamed thinking looks live
 </script></body></html>
 """
