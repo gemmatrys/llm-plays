@@ -1,1 +1,1 @@
-I am in Pallet Town, at the north exit. I am walking into the grass to trigger Professor Oak so I can get my starter Pokemon from his lab.
+I am in Pallet Town. Professor Oak has stopped me from leaving. I am mashing through his dialogue so he can lead me to his lab to get my starter Pokemon.
