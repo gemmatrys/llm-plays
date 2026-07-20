@@ -1,1 +1,1 @@
-I am outside my house in Pallet Town. I need to walk North into the tall grass to trigger Oak's appearance.
+I am inside my house in Pallet Town. I need to go upstairs, then exit the house and walk North into the tall grass to trigger Oak's appearance.
