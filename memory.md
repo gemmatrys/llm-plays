@@ -1,0 +1,1 @@
+I am at the title screen/intro. I need to start a new game and follow the route to Viridian City via Oak's lab.
