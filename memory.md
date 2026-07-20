@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am about to choose Bulbasaur as my starter Pokemon. Next, I will decline the nickname prompt and fight my rival.
+I am in Professor Oak's lab. I accidentally inspected Charmander; I need to exit this screen and choose Bulbasaur as my starter, then fight my rival.
