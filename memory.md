@@ -1,1 +1,1 @@
-I am on the naming screen for the rival. I am jumping to the end of the letter grid and confirming the name to start the game in Pallet Town.
+I am starting the game in Pallet Town. I have finished the naming process and am now advancing through the opening dialogue to begin the adventure.
