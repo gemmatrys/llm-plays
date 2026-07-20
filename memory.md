@@ -1,1 +1,1 @@
-I am inside my house in Pallet Town. I need to go upstairs, leave the house, and walk North into the tall grass to trigger Oak's appearance.
+I am on the first floor of my house in Pallet Town. I need to exit the house and walk North into the tall grass to trigger Professor Oak's appearance.
