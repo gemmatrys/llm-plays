@@ -1,1 +1,1 @@
-I am on the naming screen for the rival in the introduction sequence. I will select a preset name to advance to the overworld in Pallet Town.
+I am on the naming screen for the rival. I am stuck in the letter grid, so I will jump to the end and confirm the name to advance to the overworld in Pallet Town.
