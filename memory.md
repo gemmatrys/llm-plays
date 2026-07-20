@@ -1,1 +1,1 @@
-I am in Pallet Town, outside my house. I am moving away from the door to avoid the door trap, then heading north to the tall grass to trigger the encounter with Professor Oak.
+I am in Pallet Town, outside my house. I have stepped away from the door and am now heading north to enter the tall grass to trigger the encounter with Professor Oak.
