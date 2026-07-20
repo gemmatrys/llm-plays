@@ -54,7 +54,7 @@ class TilemapConfig:
     # map dimensions (blocks; x2 = tiles) so off-map tiles render blocked
     height_addr: int = 0xD368      # wCurMapHeight
     width_addr: int = 0xD369       # wCurMapWidth
-    # warps = doors/stairs/holes; count then 4-byte entries (x, y, destWarp, destMap)
+    # warps = doors/stairs/holes; count then 4-byte entries (y, x, destWarp, destMap)
     warp_count_addr: int = 0xD3AE  # wNumberOfWarps
     warp_entry_addr: int = 0xD3AF  # wWarpEntries
 

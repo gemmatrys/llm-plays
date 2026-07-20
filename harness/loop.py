@@ -155,12 +155,14 @@ class GameLoop:
             # map size (blocks -> tiles) so off-map tiles render blocked
             hw = self.extras.read_block(tm.height_addr, 2)  # [height, width] blocks
             map_wh = (hw[1] * 2, hw[0] * 2)
-            # warps: doors/stairs/holes -> (x, y) map tiles
+            # warps: doors/stairs/holes. Gen 1 stores each entry y-FIRST
+            # (y, x, destWarp, destMap) — confirmed by walking onto one — so the
+            # map tile is (x = byte1, y = byte0).
             n = self.extras.read_block(tm.warp_count_addr, 1)[0]
             warps = []
             if n:
                 wb = self.extras.read_block(tm.warp_entry_addr, 4 * min(n, 32))
-                warps = [(wb[4 * i], wb[4 * i + 1]) for i in range(min(n, 32))]
+                warps = [(wb[4 * i + 1], wb[4 * i]) for i in range(min(n, 32))]
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             return ""
