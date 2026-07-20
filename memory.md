@@ -1,1 +1,1 @@
-I am at the main menu. I am starting a new game to begin the adventure.
+I am starting a new game. I am currently in the introductory dialogue sequence with Professor Oak.
