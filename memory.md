@@ -1,1 +1,1 @@
-I am on the naming screen for the rival. I am stuck in the letter grid, so I will jump to the end and confirm the name to advance to the overworld in Pallet Town.
+I am on the naming screen for the rival. I am jumping to the end of the letter grid and confirming the name to start the game in Pallet Town.
