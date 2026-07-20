@@ -47,13 +47,19 @@ class MGBADriver:
     def _cmd(self, line: str) -> str:
         if self._sock is None:
             self.connect()
-        self._sock.sendall(line.encode() + b"\n")
-        while b"\n" not in self._buf:
-            chunk = self._sock.recv(4096)
-            if not chunk:
-                self._sock = None
-                raise ConnectionError("mgba bridge closed the connection")
-            self._buf += chunk
+        try:
+            self._sock.sendall(line.encode() + b"\n")
+            while b"\n" not in self._buf:
+                chunk = self._sock.recv(4096)
+                if not chunk:
+                    raise ConnectionError("mgba bridge closed the connection")
+                self._buf += chunk
+        except OSError:
+            # drop the dead socket so the next command reconnects — an aborted
+            # connection (emulator restarted) must not wedge the driver forever
+            self._sock = None
+            self._buf = b""
+            raise
         reply, self._buf = self._buf.split(b"\n", 1)
         reply = reply.decode().strip()
         if reply.startswith("OK"):

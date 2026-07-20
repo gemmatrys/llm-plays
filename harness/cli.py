@@ -30,7 +30,13 @@ def main() -> None:
                     help="'none' = pure watchdog fallback (ladder test)")
     ap.add_argument("--endpoint", default="http://127.0.0.1:8000",
                     help="OpenAI-compatible inference endpoint (llm policy)")
-    ap.add_argument("--model", default="google/gemma-3-27b-it")
+    ap.add_argument("--model", default="gemma",
+                    help="served model name (serve_gemma.sh registers 'gemma')")
+    ap.add_argument("--reasoning", choices=["none", "low", "medium", "high"],
+                    default="low",
+                    help="Gemma 4 thinking effort; server must run "
+                         "--reasoning-parser gemma4 for any value except none "
+                         "(and with the parser on, keep this on: vllm#39130)")
     ap.add_argument("--iterations", type=int, default=None,
                     help="stop after N decisions (default: run forever)")
     ap.add_argument("--run-id", default=None)
@@ -63,13 +69,16 @@ def main() -> None:
                            prompt_path=prompts.prompt_path,
                            timeout_s=profile.ladder.llm_timeout_s,
                            max_plan=profile.ladder.max_plan_len,
-                           on_prompt_invalid=_prompt_alarm)
+                           on_prompt_invalid=_prompt_alarm,
+                           reasoning=args.reasoning)
     else:
         policy = None
 
     eyes, hands, extras = drivers.create(profile)
     executor = Executor(hands, extras, profile.ratchet.savestate_slot)
-    watchdog = Watchdog(policy, library, profile.ladder)
+    watchdog = Watchdog(policy, library, profile.ladder,
+                        on_llm_failure=lambda why: runlog.log_metric(
+                            "llm_failure", detail=str(why)[:300]))
     # bind the run to its harness config: a profile edit = teardown + new run,
     # and this snapshot keeps every run's numbers attributable to one config
     shutil.copyfile(args.profile, runlog.dir / "profile.yaml")
@@ -89,7 +98,9 @@ def main() -> None:
 
     stream = None
     if args.stream_port:
-        stream = StreamState(game=profile.name, policy=args.policy)
+        # the overlay header shows the player's name, not harness internals
+        stream = StreamState(game=profile.name,
+                             policy=args.model if args.policy == "llm" else args.policy)
         start_server(stream, args.stream_port)
         print(f"[harness] overlay: http://127.0.0.1:{args.stream_port}/ "
               f"(add as OBS Browser Source)")

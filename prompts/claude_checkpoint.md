@@ -106,3 +106,8 @@ files itself (its memory.md is written FOR it by the harness from its replies).
   not silently reset anything.
 - Spend your budget where the log says the problem is, not where it is
   interesting. A boring fix that unsticks the run beats an elegant theory.
+- Before any server/emulator maintenance, STOP the harness first: the
+  fallback ladder plays on through outages (by design), and blind fallback
+  input must never reach irreversible choices (starter selection, save
+  prompts). Restore order: emulator+bridge -> loadstate -> goals refresh ->
+  relaunch harness.

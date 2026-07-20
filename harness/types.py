@@ -85,6 +85,7 @@ class Decision:
     reason: str = ""
     prompt_hash: str = ""  # which prompt.md version produced this (rung 1 only)
     memory_update: str | None = None  # model rewrote its notes (None = unchanged)
+    thinking: str = ""  # reasoning_content when thinking mode is on (truncated)
 
 
 def phash_diff(a: str, b: str) -> float:

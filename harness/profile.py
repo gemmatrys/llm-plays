@@ -9,7 +9,10 @@ import yaml
 
 @dataclass
 class LadderConfig:
-    scripted_fallback: str = "mash_a"  # rung-2 behavior name
+    # rung-2 behavior name(s). A list cycles one entry per fallback invocation:
+    # a single behavior can't fit every context (mash_a is right in dialogue,
+    # useless facing a wall), but a movement+interact rotation progresses both.
+    scripted_fallback: str | list[str] = "mash_a"
     safe_idle: str = "wait"  # rung-3 behavior name
     allow_random: bool = True  # rung 4 permitted? (the fish clause)
     llm_timeout_s: float = 20.0  # rung-1 patience

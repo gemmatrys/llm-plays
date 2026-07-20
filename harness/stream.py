@@ -40,7 +40,8 @@ class StreamState:
         }
 
     def push_decision(self, behavior: str, rung: int, thought: str,
-                      ram: dict | None, goals: str, memory: str = "") -> None:
+                      ram: dict | None, goals: str, memory: str = "",
+                      thinking: str = "") -> None:
         with self._lock:
             d = self._d
             d["decisions"] += 1
@@ -49,6 +50,7 @@ class StreamState:
             d["thought"] = thought
             d["goals"] = goals
             d["memory"] = memory
+            d["thinking"] = thinking
             d["ram"] = ram or {}
             d["rung_counts"][str(rung)] = d["rung_counts"].get(str(rung), 0) + 1
             d["recent"].append({"ts": time.time(), "behavior": behavior,
@@ -111,25 +113,34 @@ OVERLAY_HTML = """<!DOCTYPE html>
           border-radius:9px; margin-right:8px; color:#0b0d14; }
   .r1{background:var(--gemma)} .r2{background:var(--script)}
   .r3{background:var(--idle)} .r4{background:var(--fish)}
-  #behavior { font-weight:600; }
-  #thought { margin:8px 0 10px; min-height:3.5em; font-size:17px; }
-  #thought::before { content:"\\201C"; color:var(--dim); }
-  #thought::after  { content:"\\201D"; color:var(--dim); }
-  #notes { font-size:12px; color:var(--dim); margin-bottom:10px; }
-  #notes b { color:var(--fg); font-weight:600; }
+  #pressed { margin-top:8px; font-size:12px; color:var(--dim); }
+  #behavior { display:block; font-size:19px; font-weight:700; color:var(--fg);
+              letter-spacing:.3px; }
+  .label { margin-top:10px; font-size:11px; letter-spacing:.12em;
+           text-transform:uppercase; color:var(--dim); }
+  #thinking { min-height:2.6em; font-size:14px; color:var(--fg); opacity:.95; }
+  #thinking.offline { color:var(--dim); font-style:italic; opacity:.7; }
+  #why { font-size:14px; color:var(--fg); margin-top:2px; }
+  #why:empty { display:none; }
+  #why::before { content:"\\201C"; color:var(--dim); }
+  #why::after  { content:"\\201D"; color:var(--dim); }
+  #notes { min-height:2.4em; font-size:14px; }
   #stats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
-           text-align:center; font-size:12px; color:var(--dim); }
+           text-align:center; font-size:12px; color:var(--dim); margin-top:10px; }
   #stats b { display:block; font-size:16px; color:var(--fg); }
-  #feed { margin-top:10px; font-size:12px; color:var(--dim); max-height:9em;
+  #feed { margin-top:10px; font-size:12px; color:var(--dim); max-height:8em;
           overflow:hidden; }
   #feed div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style></head><body>
 <div id="panel">
   <div id="head"><span id="game">–</span><span id="up">–</span></div>
-  <div style="margin-top:6px"><span id="rung" class="r4">–</span>
-       <span id="behavior">waiting for first decision…</span></div>
-  <div id="thought"></div>
-  <div id="notes"></div>
+  <div id="pressed"><span id="rung" class="r4">–</span>pressed
+    <span id="behavior">…</span></div>
+  <div class="label">thinking</div>
+  <div id="thinking" class="offline">(thinking channel not available yet)</div>
+  <div id="why"></div>
+  <div class="label">notes</div>
+  <div id="notes">–</div>
   <div id="stats">
     <span>decisions<b id="n">0</b></span>
     <span>per hour<b id="dph">0</b></span>
@@ -140,17 +151,25 @@ OVERLAY_HTML = """<!DOCTYPE html>
 </div>
 <script>
 const LBL = {1:"GEMMA",2:"SCRIPT",3:"IDLE",4:"FISH"};
-// typewriter: the current thought "streams" onto the screen
-let twTarget = "", twPos = 0, twTimer = null;
-function setThought(t) {
+// typewriter for the thinking channel (streams in when the model's
+// chain-of-thought becomes available server-side)
+let twTarget = null, twPos = 0, twTimer = null;
+function setThinking(t) {
+  const el = document.getElementById("thinking");
+  if (!t) {
+    if (twTarget !== "") { twTarget = "";
+      el.textContent = "(thinking channel not available yet)";
+      el.className = "offline"; }
+    return;
+  }
   if (t === twTarget) return;
-  twTarget = t; twPos = 0;
+  twTarget = t; twPos = 0; el.className = "";
   if (twTimer) clearInterval(twTimer);
   twTimer = setInterval(() => {
-    twPos = Math.min(twPos + 2, twTarget.length);
-    document.getElementById("thought").textContent = twTarget.slice(0, twPos);
+    twPos = Math.min(twPos + 3, twTarget.length);
+    el.textContent = twTarget.slice(0, twPos);
     if (twPos >= twTarget.length) { clearInterval(twTimer); twTimer = null; }
-  }, 35);
+  }, 30);
 }
 async function tick() {
   try {
@@ -162,16 +181,15 @@ async function tick() {
     el("rung").textContent = LBL[s.rung] || "–";
     el("rung").className = "r" + (s.rung || 4);
     el("behavior").textContent = s.behavior || "…";
-    setThought(s.thought || "");
-    el("notes").innerHTML = s.memory
-      ? "<b>notes:</b> " + s.memory.replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"})[c])
-      : "";
+    setThinking(s.thinking || "");
+    el("why").textContent = s.thought || "";
+    el("notes").textContent = s.memory || "–";
     el("n").textContent = s.decisions;
     el("dph").textContent = s.decisions_per_hour;
     el("badges").textContent = (s.ram && "badges" in s.ram) ? s.ram.badges : "–";
     el("esc").textContent = s.escalations;
     el("feed").innerHTML = (s.recent || []).slice(0,-1).reverse().map(r =>
-      "<div>" + (LBL[r.rung]||"?") + " · " + r.behavior +
+      "<div>" + (LBL[r.rung]||"?") + " " + r.behavior +
       (r.thought ? " — " + r.thought : "") + "</div>").join("");
   } catch (e) { /* harness restarting; keep polling */ }
 }

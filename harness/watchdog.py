@@ -16,14 +16,19 @@ from .types import Behavior, Decision, Observation, Rung, Step
 
 
 class Watchdog:
-    def __init__(self, policy: Policy | None, library: BehaviorLibrary, cfg: LadderConfig):
+    def __init__(self, policy: Policy | None, library: BehaviorLibrary, cfg: LadderConfig,
+                 on_llm_failure=None):
         self.policy = policy
         self.library = library
         self.cfg = cfg
+        self.on_llm_failure = on_llm_failure  # called with a reason string
         self._pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="policy")
         self._consecutive_failures = 0
         self._successes_since_demotion = 0
         self._demoted = policy is None  # no policy (fish-only run) = permanently demoted
+        fb = cfg.scripted_fallback
+        self._fallback_cycle = [fb] if isinstance(fb, str) else list(fb)
+        self._fallback_i = 0
 
     def decide(self, obs: Observation) -> Decision:
         if not self._demoted:
@@ -61,13 +66,16 @@ class Watchdog:
                 return self._llm_failed(f"unknown behavior {b.name!r}")
             resolved.append(known)
         self._consecutive_failures = 0
-        reason = getattr(self.policy, "last_reason", "") or "policy"
+        reason = getattr(self.policy, "last_reason", "") or ""
         return Decision(behaviors=resolved, rung=Rung.LLM, reason=reason,
                         prompt_hash=getattr(self.policy, "last_prompt_hash", ""),
-                        memory_update=getattr(self.policy, "last_memory", None))
+                        memory_update=getattr(self.policy, "last_memory", None),
+                        thinking=getattr(self.policy, "last_thinking", ""))
 
     def _llm_failed(self, why: str) -> None:
         self._consecutive_failures += 1
+        if self.on_llm_failure is not None:
+            self.on_llm_failure(why)  # a silent brain outage cost us a debug cycle once
         if self._consecutive_failures >= self.cfg.demote_after_failures:
             self._demoted = True
             self._successes_since_demotion = 0
@@ -75,10 +83,15 @@ class Watchdog:
 
     # -- rungs 2–4 ----------------------------------------------------------
     def _fallback(self) -> Decision:
-        scripted = self.library.get(self.cfg.scripted_fallback)
-        if scripted is not None:
-            return Decision(behaviors=[scripted], rung=Rung.SCRIPTED,
-                            reason=f"fallback:{self.cfg.scripted_fallback}")
+        # cycle the configured list so sustained fallback stretches vary their
+        # behavior (interact AND move) instead of repeating one wrong answer
+        for _ in range(len(self._fallback_cycle)):
+            name = self._fallback_cycle[self._fallback_i % len(self._fallback_cycle)]
+            self._fallback_i += 1
+            scripted = self.library.get(name)
+            if scripted is not None:
+                return Decision(behaviors=[scripted], rung=Rung.SCRIPTED,
+                                reason=f"fallback:{name}")
         if self.cfg.allow_random:
             button = random.choice(self.library.buttons)
             fish = Behavior(name=f"fish_{button}", source="builtin",

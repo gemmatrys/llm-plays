@@ -1,19 +1,23 @@
 # Goals
 
-Default: when text or menus are on screen, mash A. It advances all dialogue,
-picks the first menu option, and in battle it fights with the first move -
-that is usually right.
+0. Boot: at the title screen press START (or boot_mash). Main menu: this is a
+   FRESH run, choose NEW GAME. (Once this run has saved, choose CONTINUE.)
+   Mash A through Professor Oak's intro. Naming screens: DOWN to a preset
+   name then A - never NEW NAME.
 
-Exceptions - the only places A-mashing goes wrong:
-- Main menu: this is a fresh run, choose NEW GAME. After this run has saved
-  once, choose CONTINUE instead.
-- Naming screens: A-mashing opens the letter grid. Press DOWN to a preset
-  name, then A. (Stuck in the grid: START, then A.)
-- Starter: in Oak's lab, face each pokeball and press A to inspect; take
-  BULBASAUR.
-- Nickname prompt: NO (press B).
+Default: when text or menus are on screen, mash A. It advances dialogue,
+picks the first option, and in battle fights with the first move.
+
+Exceptions - where A-mashing goes wrong:
+- Naming screens (see above).
+- Leaving a building: you exit standing ON the doorstep and UP re-enters it.
+  Step DOWN and around first.
+- Starter: in Oak's lab (map 40), face each pokeball, A to inspect; take
+  BULBASAUR. Nickname prompt: NO (press B).
 - Never save over anything or delete a save.
 
-Route: leave the bedroom (downstairs, out the door), walk NORTH into the tall
-grass so Oak stops you, follow him to the lab, take the starter, fight the
-rival (win or lose is fine), then NORTH through Route 1 to Viridian City.
+Route: exit your house (map 37), step away from the door. Pallet Town's west
+edge is WATER - stay off it. Walk to about pos_x=10 and go UP through the
+north gap; Oak stops you in the grass and leads you to his lab. Take
+BULBASAUR, fight the rival (win or lose is fine), then NORTH up Route 1 to
+Viridian City.

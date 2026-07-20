@@ -36,16 +36,27 @@ class GameLoop:
 
     def run(self, max_iterations: int | None = None) -> None:
         i = 0
+        consecutive_errors = 0
         while max_iterations is None or i < max_iterations:
             i += 1
             started = time.time()
             try:
                 self._tick()
+                consecutive_errors = 0
             except KeyboardInterrupt:
                 break
             except Exception as e:  # noqa: BLE001 — the loop must survive anything
                 self.runlog.log_metric("tick_error", error=repr(e))
-                time.sleep(2.0)
+                consecutive_errors += 1
+                if consecutive_errors == 5:
+                    # eyes/hands are down (emulator killed, bridge gone) —
+                    # scream once instead of quietly erroring forever
+                    self.runlog.escalate(
+                        "driver_down",
+                        f"{consecutive_errors} consecutive tick errors; latest: {e!r}")
+                    if self.stream is not None:
+                        self.stream.bump("escalations")
+                time.sleep(min(2.0 * consecutive_errors, 15.0))
                 continue
             # pace to the profile's decision cadence
             remaining = self.profile.decision_cadence_s - (time.time() - started)
@@ -76,12 +87,19 @@ class GameLoop:
             except Unsupported:
                 pass
         if ram is not None and ram != self._last_ram:
-            # milestone events (badge gained, map changed, ...) — the raw material
-            # for the benchmark progress curves (BENCHMARKS.md §2)
             changed = {k: v for k, v in ram.items() if self._last_ram.get(k) != v}
-            self.runlog.log_metric("milestone", **changed)
+            if "map_id" in changed and self._last_ram:
+                # visible in the model's recent-actions context: bouncing
+                # between two maps = walking into a door, and now it can see it
+                self._recent.append(f"[entered map {ram['map_id']}]")
+            if any(k not in ("pos_x", "pos_y") for k in changed):
+                # milestone events (badge gained, map changed, ...) — raw
+                # material for the progress curves; position isn't a milestone
+                marks = {k: v for k, v in changed.items()
+                         if k not in ("pos_x", "pos_y")}
+                self.runlog.log_metric("milestone", **marks)
+                self.runlog.snapshot(frame, tag="milestone")
             self._last_ram = ram
-            self.runlog.snapshot(frame, tag="milestone")
 
         obs = Observation(frame=frame, ram=ram, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory())
@@ -112,7 +130,8 @@ class GameLoop:
             display = " → ".join(b.name for b in decision.behaviors[:executed])
             self.stream.push_decision(display, int(decision.rung),
                                       decision.reason, ram, obs.goals,
-                                      memory=self.runlog.memory())
+                                      memory=self.runlog.memory(),
+                                      thinking=decision.thinking)
 
         self._ratchet()
         self._watch_stuckness(frame, fhash)

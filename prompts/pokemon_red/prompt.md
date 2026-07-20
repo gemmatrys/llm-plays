@@ -12,6 +12,12 @@ How to plan:
 - Check your recent actions: if they repeat without visible progress, you are
   stuck. Do something different - another direction, exit the menu, talk to
   someone.
+- Your recent actions include map transitions like "[entered map 38]". If you
+  bounce between the same two maps repeatedly, you are walking in and out of
+  a DOOR: step away from it (usually DOWN), go around, then continue.
+- Game state gives pos_x/pos_y (your tile on the current map). If they do not
+  change after walking, a wall or object is blocking you - try another
+  direction.
 - You have notes ("Your notes" below) that only you maintain. The screenshot
   does not tell you which town, building, or floor you are in - your notes
   must. Whenever your location or task changes, include a "memory" field in

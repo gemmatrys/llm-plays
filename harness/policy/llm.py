@@ -60,7 +60,7 @@ def render_prompt(template: str, behaviors: list[str], goals: str,
     """Plain string substitution — no logic, no formatting surprises."""
     ram_text = ("\n".join(f"- {k}: {v}" for k, v in ram.items())
                 if ram else "(unknown)")
-    recent_text = ", ".join(recent[-10:]) if recent else "(none)"
+    recent_text = ", ".join(recent[-15:]) if recent else "(none)"
     return (template
             .replace("{behaviors}", ", ".join(behaviors))
             .replace("{goals}", goals.strip())
@@ -76,7 +76,8 @@ class LLMPolicy:
     def __init__(self, endpoint: str, model: str, library: BehaviorLibrary,
                  prompt_path: str | Path | None = None,
                  timeout_s: float = 30.0, max_image_px: int = 480,
-                 max_plan: int = 8, on_prompt_invalid=None):
+                 max_plan: int = 8, on_prompt_invalid=None,
+                 reasoning: str = "none"):
         self.endpoint = endpoint.rstrip("/")
         self.model = model
         self.library = library
@@ -85,7 +86,14 @@ class LLMPolicy:
         self.max_image_px = max_image_px
         self.max_plan = max_plan
         self.on_prompt_invalid = on_prompt_invalid  # called once per bad version
+        # Gemma 4 thinking: "none" disables; "low"/"medium"/"high" require the
+        # server to run with --reasoning-parser gemma4 (which strips the
+        # thinking tokens before the JSON schema is applied). Caveat: with the
+        # parser enabled, requests WITHOUT thinking silently lose structured
+        # output (vllm#39130) — so keep reasoning on when the server has it on.
+        self.reasoning = reasoning
         self.last_reason = ""  # the model's "why" — logged and shown on stream
+        self.last_thinking = ""  # reasoning_content, logged for the record
         self.last_memory = None  # notes rewrite from the last decision, if any
         self.last_prompt_hash = ""  # logged per decision for attribution
         self._last_good = DEFAULT_TEMPLATE
@@ -127,7 +135,12 @@ class LLMPolicy:
                      "image_url": {"url": self._frame_data_url(obs)}},
                 ]},
             ],
-            "max_tokens": 200,
+            # thinking budget: when confused the model thinks LONGEST, and if
+            # thinking eats all of max_tokens the answer never comes (content
+            # is None) — exactly when a decision matters most. Budget must be
+            # generous enough that hard situations still yield an answer,
+            # while staying inside the ladder's llm_timeout_s.
+            "max_tokens": 1100 if self.reasoning != "none" else 200,
             "temperature": 0.7,
             "response_format": {
                 "type": "json_schema",
@@ -156,10 +169,24 @@ class LLMPolicy:
                 },
             },
         }
+        if self.reasoning != "none":
+            # reasoning_effort is ignored by the current llm-scaler build;
+            # enable_thinking works (and coexists with the JSON schema). The
+            # thinking transcript is lost to vllm#38855 (parser strips the
+            # channel tokens) — last_thinking stays empty until that's fixed,
+            # but the quality benefit is real (~7s of reasoning per decision).
+            payload["chat_template_kwargs"] = {"enable_thinking": True}
+        # HTTP deadline sits BELOW the watchdog's so a slow request always
+        # frees the single policy worker before the next call queues behind it
         r = requests.post(f"{self.endpoint}/v1/chat/completions", json=payload,
-                          timeout=self.timeout_s)
+                          timeout=max(10.0, self.timeout_s - 10.0))
         r.raise_for_status()
-        content = r.json()["choices"][0]["message"]["content"]
+        message = r.json()["choices"][0]["message"]
+        self.last_thinking = (message.get("reasoning_content") or "")[:500]
+        content = message["content"]
+        if content is None:
+            raise ValueError("thinking consumed the whole max_tokens budget; "
+                             "no answer was produced")
         action = json.loads(content)
         plan = []
         for name in action["plan"]:

@@ -68,6 +68,8 @@ class RunLog:
             entry["prompt"] = d.prompt_hash  # segment metrics by prompt version
         if d.memory_update is not None:
             entry["memory"] = d.memory_update  # notes rewrite, for replay/debug
+        if d.thinking:
+            entry["thinking"] = d.thinking  # chain-of-thought, for the record
         self._write(self._log, entry)
 
     def log_metric(self, kind: str, **data) -> None:
