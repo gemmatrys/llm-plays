@@ -8,7 +8,9 @@ talk-track version.
 ## Quick start (Phase 1: fish plays Pokémon Red)
 
 1. `pip install -e .`
-2. Start mGBA, load your ROM, then Tools → Scripting → load
+2. Launch the emulator: `powershell emulator\launch_mgba.ps1` (starts mGBA in
+   GBC mode, borderless; pass `-Rom <path>` for other games), then the one
+   manual step — Tools → Scripting → load
    [emulator/mgba_bridge.lua](emulator/mgba_bridge.lua)
    (console should say `llm-plays bridge listening on port 8765`).
 3. ```
