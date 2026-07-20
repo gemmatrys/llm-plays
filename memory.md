@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am choosing Bulbasaur as my starter Pokemon. I need to finish the dialogue and then select Bulbasaur from the table.
+I am in Professor Oak's lab. I am finishing the dialogue before choosing Bulbasaur as my starter Pokemon from the table.
