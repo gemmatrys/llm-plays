@@ -1,12 +1,13 @@
 # Goals
 
-Current objective: get to the tall grass at the TOP of Pallet Town.
+Current objective: reach the Route 1 exit at the top of Pallet Town.
 
-CAUTION - the door trap: you keep re-entering your house. When you exit the
-house you are standing ON the doorstep; pressing UP walks you straight back
-in through the door. After exiting: first press DOWN once, then LEFT or
-RIGHT twice, and only then head UP along a clear path. If the screen suddenly
-shows an indoor room again, you walked into a door - go DOWN to leave.
+YOU ARE STUCK at the north-west corner (pos_x=1): the blue tiles to your
+LEFT are WATER and the bumpy row above you is the town boundary - neither
+can be walked through. The exit gap is EAST of you along the north edge:
+press RIGHT repeatedly until pos_x is about 10 (past the houses), THEN press
+UP into the opening. Grass and Professor Oak are through that gap. Do not
+press LEFT or UP again while pos_x is less than 8.
 
 Default: when text or menus are on screen, mash A. In battle it fights with
 the first move - usually right.
