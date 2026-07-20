@@ -1,1 +1,1 @@
-I am in the introduction sequence after naming the character. I need to advance the dialogue to get to the overworld and begin the journey to Oak's lab.
+I am in the introduction sequence in Pallet Town. I am advancing the dialogue to reach the overworld and begin the journey to Oak's lab.
