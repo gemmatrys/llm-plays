@@ -1,1 +1,1 @@
-I am in my bedroom in Pallet Town, starting the game. I need to go downstairs and leave the house.
+I am in my bedroom in Pallet Town. I need to go downstairs and leave the house.
