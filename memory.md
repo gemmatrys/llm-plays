@@ -1,1 +1,1 @@
-I am in my house in Pallet Town. I have come downstairs and am now moving toward the exit to leave the house and head North into the tall grass.
+I am in my house in Pallet Town on the first floor. I am moving toward the exit to leave the house and head North into the tall grass.
