@@ -1,1 +1,1 @@
-I am at the north exit of Pallet Town, entering Route 1. Professor Oak has appeared to stop me. I will listen to him and then follow the route back to the lab.
+I am at the north exit of Pallet Town. Professor Oak has stopped me to tell me I need a Pokemon. I will listen to him and then return to the lab to get a starter.
