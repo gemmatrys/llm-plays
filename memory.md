@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am finishing the dialogue to choose my starter Pokemon, Bulbasaur.
+I am in Professor Oak's lab. I am about to choose my starter Pokemon, Bulbasaur.
