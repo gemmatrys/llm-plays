@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am mashing through the dialogue to reach the pokeballs and choose Bulbasaur.
+I am in Professor Oak's lab. I am finishing the dialogue to choose my starter Pokemon, Bulbasaur.
