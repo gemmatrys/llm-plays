@@ -1,1 +1,1 @@
-I am at the north exit of Pallet Town. Professor Oak has stopped me to tell me I need a Pokemon. I will listen to him and then return to the lab to get a starter.
+I am in Pallet Town. Professor Oak stopped me from leaving; I am now returning to the lab to get a starter Pokemon.
