@@ -1,1 +1,1 @@
-I am in Pallet Town. I am moving east to reach the Route 1 exit at the north edge of town to trigger the encounter with Professor Oak.
+I am in Pallet Town, at the north exit. I am stepping into the grass of Route 1 to trigger the encounter with Professor Oak.
