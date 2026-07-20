@@ -213,16 +213,23 @@ open multi-Arc vision-crash and dual-B70 TP bugs are fixed. Intel AI Playground 
 only to smoke-test the card — the harness requires a headless OpenAI-compatible API.
 Full steps: INSTALL.md.
 
-Validation checklist (all must pass before Phase 2 work starts):
-- [ ] Serve a Gemma 3 vision model via IPEX-LLM Ollama; text generation on-GPU confirmed.
-- [ ] **Vision request works** (image in → sensible description out). Known IPEX-LLM bug:
-      vision models crash on Arc Pro B-series in multi-GPU configs; pin to a single card.
-- [ ] **Constrained JSON output enforced** (Ollama `format`/JSON schema) — required by
-      fallback-ladder rung 1; malformed actions must be impossible, not just unlikely.
-- [ ] Measure time-to-first-token and tokens/s **with an image in the prompt** — this
-      number sets the real decision cadence in game profiles.
-- [ ] Degradation path exercised once: OpenVINO OCR/CV on a game frame, feeding a
-      text-only decision prompt (the fallback if Arc VLM support stays rough).
+Validation checklist — **run 2026-07-20 against the live box** (Gemma-4-31B-it-QAT
+w4a16-ct on `intel/llm-scaler-vllm:0.21.0-b1`, single B70, server 192.168.1.30:8000):
+- [x] Vision model served; text generation on-GPU confirmed. (Plan evolved: Gemma 4
+      31B QAT compressed-tensors, loaded natively — `XPUwNa16LinearKernel`.)
+- [x] **Vision request works** (synthetic GB frame correctly described), single card.
+- [x] **Constrained JSON output enforced** (vLLM json_schema guided decoding; the
+      harness's actual plan schema validated end-to-end).
+- [x] **Latency measured: ~1.1 s per vision+JSON decision** (steady-state; 20-23
+      completion tokens). 3-5× better than the 3-6 s planning estimate — plan-of-8
+      amortizes to ~0.14 s/action. decision_cadence_s set to 2.0 in the profile.
+- [ ] Degradation path (OpenVINO OCR/CV → text-only prompt) — deferred; vision works
+      well enough that this drops to a Phase 4 nice-to-have.
+
+Container gotchas found during bring-up (for future rebuilds): the image bakes in
+Intel's corporate proxy (`http_proxy=proxy.iil.intel.com:911` — override with empty
+`-e http_proxy=`); `--group-add render` must use the numeric GID; use bridged
+networking + explicit `--dns`, not `--net=host`. See `serve_gemma.sh` on the box.
 
 **Phase 1 — Harness skeleton (no LLM).** Eyes/Hands drivers for mGBA, executor with
 trivial behaviors, watchdog, fish mode, structured logging, snapshots. *Exit: fish plays

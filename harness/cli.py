@@ -34,8 +34,9 @@ def main() -> None:
     ap.add_argument("--iterations", type=int, default=None,
                     help="stop after N decisions (default: run forever)")
     ap.add_argument("--run-id", default=None)
-    ap.add_argument("--stream-port", type=int, default=8600,
-                    help="port for the OBS overlay / state.json (0 = off)")
+    ap.add_argument("--stream-port", type=int, default=8700,
+                    help="port for the OBS overlay / state.json (0 = off); note "
+                         "Windows reserves 8563-8662 for Hyper-V on some machines")
     ap.add_argument("--publish", action="store_true",
                     help="live-stream goals/memory to the git remote: an async "
                          "watcher types changes into live/ a chunk per commit")

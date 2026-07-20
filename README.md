@@ -22,11 +22,11 @@ talk-track version.
 
 ## Streaming (what Gemma is thinking, on screen)
 
-The harness serves a live overlay at `http://127.0.0.1:8600/` (`--stream-port`,
-0 disables). OBS setup:
+The harness serves a live overlay at `http://127.0.0.1:8700/` (`--stream-port`,
+0 disables; avoid 8563-8662, which Windows reserves for Hyper-V). OBS setup:
 
 1. **Game Capture / Window Capture** → the mGBA window (the gameplay).
-2. **Browser Source** → `http://127.0.0.1:8600/`, ~440×360. Transparent background;
+2. **Browser Source** → `http://127.0.0.1:8700/`, ~440×360. Transparent background;
    shows the current thought, chosen behavior, which ladder rung is in control
    (GEMMA / SCRIPT / IDLE / FISH), badges, decisions/hour, escalations, and a feed
    of recent thoughts.

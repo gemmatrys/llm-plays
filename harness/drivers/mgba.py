@@ -70,6 +70,11 @@ class MGBADriver:
                 img = Image.open(path)
                 img.load()
                 path.unlink(missing_ok=True)
+                if img.size == (256, 224):
+                    # Super Game Boy frame: the GB screen sits at (48,40);
+                    # crop away the decorative border so the model (and
+                    # phash) only ever see actual game pixels
+                    img = img.crop((48, 40, 208, 184))
                 return Frame(image=img)
             except (FileNotFoundError, OSError):
                 time.sleep(0.02)
