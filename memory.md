@@ -1,1 +1,1 @@
-I am in the opening sequence. I have finished the naming process and am advancing through the introductory dialogue before starting the game in Pallet Town.
+I am in the opening sequence, advancing through the introductory dialogue before starting the game in Pallet Town.
