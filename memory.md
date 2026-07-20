@@ -1,1 +1,1 @@
-I am in the intro sequence. I am advancing the dialogue to reach the game start and eventually start a new game.
+I am in the intro sequence, advancing the dialogue to reach the game start and eventually start a new game.
