@@ -1,1 +1,1 @@
-I am on the naming screen in Pallet Town. I need to name my rival using a preset name to avoid the letter grid, then proceed to start the game.
+I am on the naming screen for my rival. I will select a preset name to avoid the letter grid and then proceed to start the game in Pallet Town.
