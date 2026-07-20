@@ -1,1 +1,1 @@
-I am at the title screen/intro. I need to start a new game and follow the route to Viridian City via Oak's lab.
+I am in the intro sequence. I am advancing the dialogue to reach the game start and eventually start a new game.
