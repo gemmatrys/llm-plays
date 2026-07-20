@@ -42,11 +42,13 @@ def mash_dialogue_steps(rng: "random.Random | None" = None) -> list[Step]:
     """Randomized dialogue advance, generated fresh each invocation so a fixed
     pattern can't get wedged on a particular box, text speed, or yes/no prompt.
     Mostly A (advance); an occasional B escapes a yes/no stuck on YES; count and
-    pacing vary. Only A/B here — directions could move/menu-cancel wrongly."""
+    pacing vary. Only A/B here — directions could move/menu-cancel wrongly.
+    Short and bursty on purpose: quick taps in rapid succession advance text and
+    confirm menus/naming screens fastest, with no long wait between presses."""
     r = rng or random
     return [Step(button=("B" if r.random() < 0.25 else "A"),
-                 hold_frames=r.randint(4, 8), wait_frames=r.randint(12, 28))
-            for _ in range(r.randint(3, 6))]
+                 hold_frames=r.randint(3, 5), wait_frames=r.randint(4, 9))
+            for _ in range(r.randint(4, 8))]
 
 
 def wander_steps(rng: "random.Random | None" = None) -> list[Step]:
@@ -116,7 +118,9 @@ def fish_move(buttons: list[str], rng: "random.Random | None" = None) -> Behavio
 def builtins(buttons: list[str]) -> dict[str, Behavior]:
     lib: dict[str, Behavior] = {
         "wait": _builtin("wait", [Step(op="wait", wait_frames=30)]),
-        "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=6, wait_frames=10)] * 4),
+        # short, bursty taps — quick presses in rapid succession clear dialogue
+        # and confirm menus/naming screens faster than long-held/spaced presses
+        "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=4, wait_frames=6)] * 6),
         # randomized each run via step_factory (see mash_dialogue_steps)
         "mash_through_dialogue": Behavior(
             name="mash_through_dialogue", steps=mash_dialogue_steps(),

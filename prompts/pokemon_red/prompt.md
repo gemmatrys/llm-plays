@@ -14,8 +14,8 @@ Planning:
   mash_through_dialogue, or one direction) with no change to the screen or your
   position, it is NOT working - its randomized length does not mean progress, so
   break the pattern and try something different. If several different tries still
-  change nothing, use get_unstuck (random inputs to break out of a menu/naming
-  grid you cannot exit).
+  change nothing, use get_unstuck (random inputs to break out of any state you
+  cannot exit cleanly).
 - pos_x/pos_y is your tile; if it does not change after walking, a wall or object
   blocks you - turn. RAM map/pos can be STALE on menu/naming screens - trust the
   screenshot. Bouncing between two maps = walking in/out a DOOR: step away
@@ -33,10 +33,10 @@ Screens:
 - Title / "Press Start" (also after a reset): press START or boot_mash. Main
   menu: CONTINUE resumes a save, NEW GAME restarts - goals say which. NEVER pick
   anything that deletes or overwrites a save.
-- Naming screen (letter grid, or presets like RED/ASH): a TRAP, not normal play -
-  mashing A types a garbage name. Best: pick a preset (highlight RED, press A).
-  Stuck in the grid: default to B (erases, never worse), then START then A to
-  finish; never mash A. Cannot escape: get_unstuck.
+- Naming screen (letter grid, or presets like RED/ASH): mash_a is fine here -
+  it picks the highlighted preset name and confirms; the exact name does not
+  matter. If you end up inside the letter grid instead, B backs out to the
+  preset list. Cannot exit at all: get_unstuck.
 - Overworld: UP/DOWN/LEFT/RIGHT walk a tile; A talks to who/what you face; walk
   onto doors/stairs to enter.
 - Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
