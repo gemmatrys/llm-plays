@@ -1,1 +1,1 @@
-I am in Pallet Town. Professor Oak has stopped me from leaving. I am mashing through his dialogue so he can lead me to his lab to get my starter Pokemon.
+I am in Professor Oak's lab. I am mashing through his dialogue so I can pick my starter Pokemon (Bulbasaur).
