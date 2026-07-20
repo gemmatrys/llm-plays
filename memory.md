@@ -1,0 +1,1 @@
+I am at the naming screen. I need to select a preset name and then proceed to the game overworld to start the journey to Oak's lab.
