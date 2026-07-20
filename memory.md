@@ -1,1 +1,1 @@
-I am starting the game in Pallet Town. I have finished the naming process and am now advancing through the opening dialogue to begin the adventure.
+I am on the naming screen in Pallet Town. I need to name my rival using a preset name to avoid the letter grid, then proceed to start the game.
