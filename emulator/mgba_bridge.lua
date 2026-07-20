@@ -65,6 +65,18 @@ local function handle(line)
     local addr = tonumber(args[2])
     if addr == nil then return "ERR bad address" end
     return "OK " .. tostring(emu:read8(addr))
+  elseif cmd == "READBLOCK" then
+    -- READBLOCK <addr> <len> -> OK <hex>  (2 hex chars per byte, no spaces)
+    -- one round-trip for a whole region (e.g. the 360-byte screen tilemap),
+    -- instead of <len> separate READ8 calls.
+    local addr = tonumber(args[2])
+    local len = tonumber(args[3])
+    if addr == nil or len == nil then return "ERR bad args" end
+    if len < 1 or len > 4096 then return "ERR bad length" end
+    local data = emu:readRange(addr, len)   -- raw byte string
+    local hex = {}
+    for i = 1, #data do hex[i] = string.format("%02x", data:byte(i)) end
+    return "OK " .. table.concat(hex)
   elseif cmd == "SAVESTATE" then
     emu:saveStateSlot(tonumber(args[2]) or 1)
     return "OK"

@@ -1,8 +1,0 @@
-# Advance dialogue boxes: alternate A/B so yes/no prompts don't trap us on "yes".
-name: mash_through_dialogue
-description: Advance several dialogue boxes; safe when text is on screen.
-steps:
-  - {button: A, hold_frames: 6, wait_frames: 20}
-  - {button: A, hold_frames: 6, wait_frames: 20}
-  - {button: B, hold_frames: 6, wait_frames: 20}
-  - {button: A, hold_frames: 6, wait_frames: 20}

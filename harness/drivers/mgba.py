@@ -8,6 +8,7 @@ Protocol (one command per line, one "OK ..." / "ERR ..." reply per line):
     DOWN <BUTTON>               -> OK                (held until UP)
     UP <BUTTON>                 -> OK
     READ8 <addr>                -> OK <value>
+    READBLOCK <addr> <len>      -> OK <hex>          (2 hex chars/byte, one round-trip)
     SAVESTATE <slot>            -> OK
     LOADSTATE <slot>            -> OK
     RESET                       -> OK
@@ -102,6 +103,16 @@ class MGBADriver:
     # -- Extras ---------------------------------------------------------------------
     def read_ram(self, ram_map: dict[str, int]) -> dict[str, int]:
         return {name: int(self._cmd(f"READ8 {addr:#x}")) for name, addr in ram_map.items()}
+
+    def read_block(self, addr: int, length: int) -> bytes:
+        """Bulk-read `length` bytes from `addr` in one round-trip (e.g. the
+        360-byte screen tilemap). Returns raw bytes; length is validated by the
+        bridge (<=4096)."""
+        hexstr = self._cmd(f"READBLOCK {addr:#x} {length}")
+        data = bytes.fromhex(hexstr)
+        if len(data) != length:
+            raise ValueError(f"READBLOCK returned {len(data)} bytes, expected {length}")
+        return data
 
     def savestate(self, slot: int) -> None:
         self._cmd(f"SAVESTATE {slot}")

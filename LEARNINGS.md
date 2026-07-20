@@ -13,10 +13,16 @@ phases don't relearn them. Format: lesson → where it now lives.
   time + `chat_template_kwargs {"enable_thinking": true}` per request
   (`reasoning_effort` is ignored by llm-scaler 0.21.0-b1). Thinking coexists
   with JSON-schema guided decoding. → llm.py `reasoning` option, default low.
-- **The thinking transcript is currently unrecoverable** (vllm#38855: parser
-  strips channel tokens; `reasoning_content` comes back empty). The full
-  pipeline for it (log field, overlay panel) is wired and waits. → stream UI
-  shows an explicit "(thinking channel not available yet)" placeholder.
+- **The thinking transcript is recovered from logprobs** (2026-07-20). On the
+  llm-scaler XPU build `reasoning_content` comes back empty because the
+  detokenizer strips the `<|channel>…<channel|>` markers regardless of
+  skip_special_tokens (vllm#38855) — BUT the per-token `logprobs` stream keeps
+  them verbatim. So `llm.py` requests `logprobs:true` when thinking is on and
+  rebuilds the transcript by splitting on the delimiters
+  (`_thinking_from_logprobs`); the answer JSON still arrives clean in `content`,
+  so plan parsing is untouched. The overlay/runlog pipeline that was "wired and
+  waiting" now shows real chain-of-thought. Verified end-to-end through
+  LLMPolicy against the live 31B.
 - **Thinking starves under a tight token cap exactly when confused** — long
   reasoning eats max_tokens and `content` comes back None, so the hardest
   states produced no decision. → generous budget (1100), explicit error text,
@@ -44,7 +50,11 @@ phases don't relearn them. Format: lesson → where it now lives.
   ram_map + loop.py markers.
 - **A-mash is the game's default gravity; goals should list exceptions, not
   steps.** Battle cursor defaults to FIGHT; naming screens are the trap
-  (fallback-era mashing named the player "AA").
+  (fallback-era mashing named the player "AA"). Mitigations (2026-07-20):
+  prompt.md now teaches the control flow explicitly (A = confirm/forward/commit,
+  B = cancel/back/erase) and flags the naming grid as a TRAP where the default is
+  B (never mash A); and the scripted_fallback rotation gained press_B so even a
+  brain outage backs out of menus/naming instead of typing a garbage name.
 
 ## Harness & ops
 

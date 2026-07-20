@@ -23,6 +23,7 @@ Claude checkpoints grow this library over time; the local LLM selects from it by
 """
 from __future__ import annotations
 
+import random
 from pathlib import Path
 
 import yaml
@@ -34,10 +35,99 @@ def _builtin(name: str, steps: list[Step]) -> Behavior:
     return Behavior(name=name, steps=steps, source="builtin")
 
 
+MOVES = ("UP", "DOWN", "LEFT", "RIGHT")
+
+
+def mash_dialogue_steps(rng: "random.Random | None" = None) -> list[Step]:
+    """Randomized dialogue advance, generated fresh each invocation so a fixed
+    pattern can't get wedged on a particular box, text speed, or yes/no prompt.
+    Mostly A (advance); an occasional B escapes a yes/no stuck on YES; count and
+    pacing vary. Only A/B here — directions could move/menu-cancel wrongly."""
+    r = rng or random
+    return [Step(button=("B" if r.random() < 0.25 else "A"),
+                 hold_frames=r.randint(4, 8), wait_frames=r.randint(12, 28))
+            for _ in range(r.randint(3, 6))]
+
+
+def wander_steps(rng: "random.Random | None" = None) -> list[Step]:
+    """A short random walk: head a random direction for a few tiles, maybe turn
+    once — so 'fish mode' (and a lost model) explores the map instead of
+    jittering on one tile. Movement buttons only. Fresh each call; pass an rng
+    to keep a seeded fish reproducible, else module random via step_factory."""
+    r = rng or random
+    d = r.choice(MOVES)
+    steps = [Step(button=d, hold_frames=8, wait_frames=8)
+             for _ in range(r.randint(2, 5))]
+    if r.random() < 0.4:  # occasional turn so it doesn't only go one way
+        d2 = r.choice([m for m in MOVES if m != d])
+        steps += [Step(button=d2, hold_frames=8, wait_frames=8)
+                  for _ in range(r.randint(1, 3))]
+    return steps
+
+
+def mash_button_steps(button: str, rng: "random.Random | None" = None) -> list[Step]:
+    """Press one button several times (commit to a direction, or mash B/A)."""
+    r = rng or random
+    return [Step(button=button, hold_frames=r.randint(4, 8),
+                 wait_frames=r.randint(8, 16))
+            for _ in range(r.randint(3, 6))]
+
+
+def random_mash_steps(buttons: list[str],
+                      rng: "random.Random | None" = None) -> list[Step]:
+    """Crazy random presses across ALL buttons — the last-ditch 'get me out of
+    here' when the model is wedged in a state it can't exit cleanly (e.g. the
+    naming grid). Chaotic on purpose: START may jump to END, B erases/cancels,
+    directions move — something usually breaks the stuck state."""
+    r = rng or random
+    return [Step(button=r.choice(buttons), hold_frames=r.randint(4, 8),
+                 wait_frames=r.randint(6, 14))
+            for _ in range(r.randint(5, 9))]
+
+
+def fish_move(buttons: list[str], rng: "random.Random | None" = None) -> Behavior:
+    """The fish's repertoire: each call randomly picks ONE randomized macro —
+    wander, mash-dialogue, commit to a direction, mash B, or a single random
+    button — so pure-random play still does structured things (walk a route,
+    clear a speech, back out of a menu) instead of only twitching one button.
+    Pass a seeded rng to keep calibration runs reproducible."""
+    r = rng or random
+    roll = r.random()
+    if roll < 0.30:
+        return Behavior(name="wander", source="builtin", steps=wander_steps(r))
+    if roll < 0.50:
+        return Behavior(name="mash_through_dialogue", source="builtin",
+                        steps=mash_dialogue_steps(r))
+    if roll < 0.64:
+        d = r.choice(MOVES)
+        return Behavior(name=f"mash_{d}", source="builtin",
+                        steps=mash_button_steps(d, r))
+    if roll < 0.76:
+        return Behavior(name="mash_B", source="builtin",
+                        steps=mash_button_steps("B", r))
+    if roll < 0.88:
+        return Behavior(name="get_unstuck", source="builtin",
+                        steps=random_mash_steps(buttons, r))
+    b = r.choice(buttons)
+    return Behavior(name=f"press_{b}", source="builtin",
+                    steps=[Step(button=b, hold_frames=8, wait_frames=8)])
+
+
 def builtins(buttons: list[str]) -> dict[str, Behavior]:
     lib: dict[str, Behavior] = {
         "wait": _builtin("wait", [Step(op="wait", wait_frames=30)]),
         "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=6, wait_frames=10)] * 4),
+        # randomized each run via step_factory (see mash_dialogue_steps)
+        "mash_through_dialogue": Behavior(
+            name="mash_through_dialogue", steps=mash_dialogue_steps(),
+            source="builtin", step_factory=mash_dialogue_steps),
+        # explore: a fresh short random walk each run (fish + lost-model use)
+        "wander": Behavior(name="wander", steps=wander_steps(),
+                           source="builtin", step_factory=wander_steps),
+        # escape hatch: crazy random inputs to break out of a wedged state
+        "get_unstuck": Behavior(name="get_unstuck",
+                                steps=random_mash_steps(buttons), source="builtin",
+                                step_factory=lambda: random_mash_steps(buttons)),
         "savestate": _builtin("savestate", [Step(op="savestate")]),
     }
     for b in buttons:

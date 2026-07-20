@@ -37,6 +37,29 @@ class EscalationConfig:
 
 
 @dataclass
+class TilemapConfig:
+    """On-screen tile grid -> ASCII walkability map for the model. addr/cols/rows
+    are solid (Gen 1 wTileMap is a 20x18 WRAM buffer at 0xC3A0). player_col/row
+    and `walkable` are GAME-SPECIFIC and must be confirmed against a LIVE
+    overworld screen — they're seeded with best-known Gen 1 values, not verified.
+    An empty `walkable` list makes the renderer fall back to raw tile ids."""
+    addr: int                      # wTileMap start (0xC3A0 for Gen 1)
+    cols: int = 20
+    rows: int = 18
+    player_col: int = 8            # player's on-screen tile column
+    player_row: int = 8            # player's on-screen tile row
+    scale: int = 2                 # screen tiles per map tile (Gen 1 blocks are 2x2)
+    window: int = 4                # render a (2*window+1) box around player; 0 = full
+    walkable: list[int] = field(default_factory=list)  # passable tile ids (per tileset)
+    # map dimensions (blocks; x2 = tiles) so off-map tiles render blocked
+    height_addr: int = 0xD368      # wCurMapHeight
+    width_addr: int = 0xD369       # wCurMapWidth
+    # warps = doors/stairs/holes; count then 4-byte entries (x, y, destWarp, destMap)
+    warp_count_addr: int = 0xD3AE  # wNumberOfWarps
+    warp_entry_addr: int = 0xD3AF  # wWarpEntries
+
+
+@dataclass
 class GameProfile:
     name: str
     platform: str  # gba | gb | nds | switch ...
@@ -48,6 +71,7 @@ class GameProfile:
     ratchet: RatchetConfig = field(default_factory=RatchetConfig)
     escalation: EscalationConfig = field(default_factory=EscalationConfig)
     ram_map: dict[str, int] = field(default_factory=dict)
+    tilemap: TilemapConfig | None = None
     driver_opts: dict = field(default_factory=dict)
     # Gemma-facing prompts are NOT part of the profile — see harness/prompts.py.
     # Profiles are COLD config: loaded once at startup; changing one requires
@@ -64,4 +88,10 @@ class GameProfile:
         # RAM addresses in YAML may be hex strings
         raw["ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
                           for k, v in raw.get("ram_map", {}).items()}
+        if raw.get("tilemap"):
+            tm = dict(raw["tilemap"])
+            _hex = lambda v: int(v, 0) if isinstance(v, str) else v  # noqa: E731
+            tm["addr"] = _hex(tm["addr"])
+            tm["walkable"] = [_hex(v) for v in tm.get("walkable", [])]
+            raw["tilemap"] = TilemapConfig(**tm)
         return cls(**raw)

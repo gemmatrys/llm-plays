@@ -5,14 +5,22 @@ driver: mgba
 rom: null  # informational; the ROM is loaded in mGBA manually for now
 
 buttons: [A, B, START, SELECT, UP, DOWN, LEFT, RIGHT]
-decision_cadence_s: 2.0  # measured 2026-07-20: ~1.1s/vision decision (B70, 31B QAT)
+decision_cadence_s: 30.0  # AIM 120 decisions/hr (one per 30s); the loop paces
+                          # fast decisions up to this floor. Slow thinking runs
+                          # at its natural pace, capped by ladder.llm_timeout_s.
 
 ladder:
-  # rotated one per fallback: advances dialogue AND walks in all directions
-  scripted_fallback: [mash_a, press_RIGHT, press_UP, mash_a, press_DOWN, press_LEFT]
+  # rotated one per fallback: advances dialogue (A), backs out of menus/naming
+  # traps (B), and walks all directions - so a brain outage can't get wall-stuck,
+  # menu-stuck, OR mash a garbage name on the naming grid (the old "AA" bug).
+  scripted_fallback: [mash_a, press_RIGHT, press_UP, press_B, mash_a, press_DOWN, press_LEFT]
   safe_idle: wait
   allow_random: true          # the fish clause: Red is fish-beatable
-  llm_timeout_s: 60.0  # thinking mode: worst-case ~1100 tokens at ~30 tok/s
+  llm_timeout_s: 240.0  # ENFORCE >=15 decisions/hr: the watchdog forces a
+                        # fallback action if rung-1 hasn't answered in 240s, so
+                        # deep thinking gets room but liveness is guaranteed.
+                        # HTTP timeout in llm.py sits 10s below this (frees the
+                        # single worker before the watchdog gives up).
   demote_after_failures: 3
   promote_after_successes: 5
   max_plan_len: 8             # one LLM call may plan up to 8 behaviors
@@ -35,6 +43,23 @@ ram_map:
   pos_y: "0xD361"   # player tile coords on the current map: movement/stuck signal
   pos_x: "0xD362"
   party_count: "0xD163"
+
+# On-screen tile grid -> ASCII walkability map (harness/tilemap.py). addr/cols/
+# rows are SOLID (Gen 1 wTileMap = 20x18 WRAM buffer). player_col/row and the
+# `walkable` id set are SEEDED, NOT VERIFIED — confirm against a live overworld
+# screen (drive to the overworld, read the block, check P sits on the player and
+# open tiles read '.'), then tune. `walkable` here is the Gen 1 OVERWORLD set;
+# interiors/caves use other tilesets and will need their own ids. Empty walkable
+# -> renderer dumps raw tile ids (still useful for figuring the right set out).
+tilemap:
+  addr: "0xC3A0"
+  cols: 20
+  rows: 18
+  player_col: 8       # VERIFY LIVE
+  player_row: 8       # VERIFY LIVE
+  window: 4           # 9x9 box around the player
+  walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
+             "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
 
 driver_opts:
   host: 127.0.0.1

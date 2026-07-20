@@ -12,6 +12,7 @@ from .profile import GameProfile
 from .runlog import RunLog
 from .stream import StreamState
 from .stuckness import StucknessMonitor
+from .tilemap import render_ascii
 from .types import Observation, phash_diff
 
 
@@ -102,7 +103,8 @@ class GameLoop:
             self._last_ram = ram
 
         obs = Observation(frame=frame, ram=ram, goals=self.runlog.goals(),
-                          recent=self._recent, memory=self.runlog.memory())
+                          recent=self._recent, memory=self.runlog.memory(),
+                          tilemap=self._read_tilemap())
         decision = self.watchdog.decide(obs)
         if decision.memory_update is not None:
             # the model rewrote its own notes; store verbatim, never interpret
@@ -136,6 +138,32 @@ class GameLoop:
         self._ratchet()
         self._watch_stuckness(frame, fhash)
         self._periodic_snapshot(frame)
+
+    def _read_tilemap(self) -> str:
+        """Bulk-read the screen tilemap + map dims + warps and render an ASCII
+        walkability map with blocked borders and marked exits. Fully optional:
+        no tilemap config, a console driver without read_block, or an old Lua
+        bridge lacking READBLOCK all degrade to "" — the harness must run
+        identically with or without this context."""
+        tm = self.profile.tilemap
+        if tm is None or self.extras is None or not hasattr(self.extras, "read_block"):
+            return ""
+        try:
+            raw = self.extras.read_block(tm.addr, tm.cols * tm.rows)
+            px, py = self._last_ram.get("pos_x"), self._last_ram.get("pos_y")
+            player = (px, py) if px is not None and py is not None else None
+            # map size (blocks -> tiles) so off-map tiles render blocked
+            hw = self.extras.read_block(tm.height_addr, 2)  # [height, width] blocks
+            map_wh = (hw[1] * 2, hw[0] * 2)
+            # warps: doors/stairs/holes -> (x, y) map tiles
+            n = self.extras.read_block(tm.warp_count_addr, 1)[0]
+            warps = []
+            if n:
+                wb = self.extras.read_block(tm.warp_entry_addr, 4 * min(n, 32))
+                warps = [(wb[4 * i], wb[4 * i + 1]) for i in range(min(n, 32))]
+            return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps)
+        except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
+            return ""
 
     # -- invariant I2: progress ratchet --------------------------------------
     def _ratchet(self) -> None:

@@ -113,13 +113,24 @@ OVERLAY_HTML = """<!DOCTYPE html>
           border-radius:9px; margin-right:8px; color:#0b0d14; }
   .r1{background:var(--gemma)} .r2{background:var(--script)}
   .r3{background:var(--idle)} .r4{background:var(--fish)}
-  #pressed { margin-top:8px; font-size:12px; color:var(--dim); }
+  /* the chosen move is hidden while the reasoning types out, then fades in —
+     the broadcast beat is "watch it think, THEN see what it decided". */
+  #decision { margin-top:10px; transition:opacity .5s ease; }
+  #decision.pending { opacity:.1; }
+  #pressed { font-size:12px; color:var(--dim); }
   #behavior { display:block; font-size:19px; font-weight:700; color:var(--fg);
               letter-spacing:.3px; }
   .label { margin-top:10px; font-size:11px; letter-spacing:.12em;
            text-transform:uppercase; color:var(--dim); }
-  #thinking { min-height:2.6em; font-size:14px; color:var(--fg); opacity:.95; }
-  #thinking.offline { color:var(--dim); font-style:italic; opacity:.7; }
+  /* bounded "stream of thought": fixed window, newest at the bottom, older
+     lines scroll up and fade under the top mask. Without the height cap a long
+     transcript (now real — up to ~2k chars) would blow up the whole overlay. */
+  #thinking { height:7.2em; font-size:14px; color:var(--fg); opacity:.97;
+              overflow:hidden; white-space:pre-wrap; word-break:break-word;
+              -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 1.5em);
+              mask-image:linear-gradient(to bottom,transparent 0,#000 1.5em); }
+  #thinking.offline { height:auto; color:var(--dim); font-style:italic;
+              opacity:.7; -webkit-mask-image:none; mask-image:none; }
   #why { font-size:14px; color:var(--fg); margin-top:2px; }
   #why:empty { display:none; }
   #why::before { content:"\\201C"; color:var(--dim); }
@@ -134,11 +145,13 @@ OVERLAY_HTML = """<!DOCTYPE html>
 </style></head><body>
 <div id="panel">
   <div id="head"><span id="game">–</span><span id="up">–</span></div>
-  <div id="pressed"><span id="rung" class="r4">–</span>pressed
-    <span id="behavior">…</span></div>
   <div class="label">thinking</div>
-  <div id="thinking" class="offline">(thinking channel not available yet)</div>
-  <div id="why"></div>
+  <div id="thinking" class="offline">warming up…</div>
+  <div id="decision" class="pending">
+    <div id="pressed"><span id="rung" class="r4">–</span>pressed
+      <span id="behavior">…</span></div>
+    <div id="why"></div>
+  </div>
   <div class="label">notes</div>
   <div id="notes">–</div>
   <div id="stats">
@@ -154,22 +167,40 @@ const LBL = {1:"GEMMA",2:"SCRIPT",3:"IDLE",4:"FISH"};
 // typewriter for the thinking channel (streams in when the model's
 // chain-of-thought becomes available server-side)
 let twTarget = null, twPos = 0, twTimer = null;
-function setThinking(t) {
+// setThinking types the transcript out, then calls onDone() — which is how the
+// decision reveal waits for the reasoning to finish. Empty thinking (fallback
+// rungs, thinking off) calls onDone immediately so the move still shows.
+function setThinking(t, onDone) {
   const el = document.getElementById("thinking");
   if (!t) {
     if (twTarget !== "") { twTarget = "";
-      el.textContent = "(thinking channel not available yet)";
-      el.className = "offline"; }
+      el.textContent = "warming up…"; el.className = "offline"; el.scrollTop = 0; }
+    if (onDone) onDone();
     return;
   }
-  if (t === twTarget) return;
+  if (t === twTarget) { if (onDone) onDone(); return; }  // already shown -> reveal
   twTarget = t; twPos = 0; el.className = "";
   if (twTimer) clearInterval(twTimer);
+  // adaptive speed: finish the reveal in ~7s regardless of length, so a long
+  // transcript still completes within the decision cadence; auto-scroll keeps
+  // the newest thought in view while older lines slide up under the mask.
+  const step = Math.max(3, Math.ceil(twTarget.length / 240));
   twTimer = setInterval(() => {
-    twPos = Math.min(twPos + 3, twTarget.length);
+    twPos = Math.min(twPos + step, twTarget.length);
     el.textContent = twTarget.slice(0, twPos);
-    if (twPos >= twTarget.length) { clearInterval(twTimer); twTimer = null; }
+    el.scrollTop = el.scrollHeight;
+    if (twPos >= twTarget.length) { clearInterval(twTimer); twTimer = null;
+      if (onDone) onDone(); }
   }, 30);
+}
+let curDecision = -1;
+function revealDecision(s) {
+  const el = id => document.getElementById(id);
+  el("rung").textContent = LBL[s.rung] || "–";
+  el("rung").className = "r" + (s.rung || 4);
+  el("behavior").textContent = s.behavior || "…";
+  el("why").textContent = s.thought || "";
+  el("decision").classList.remove("pending");
 }
 async function tick() {
   try {
@@ -178,11 +209,11 @@ async function tick() {
     el("game").textContent = s.game + "  ·  " + s.policy;
     const h = Math.floor(s.uptime_s/3600), m = Math.floor(s.uptime_s%3600/60);
     el("up").textContent = h + "h " + String(m).padStart(2,"0") + "m";
-    el("rung").textContent = LBL[s.rung] || "–";
-    el("rung").className = "r" + (s.rung || 4);
-    el("behavior").textContent = s.behavior || "…";
-    setThinking(s.thinking || "");
-    el("why").textContent = s.thought || "";
+    if (s.decisions !== curDecision) {   // new decision: reason first, then reveal
+      curDecision = s.decisions;
+      el("decision").classList.add("pending");
+      setThinking(s.thinking || "", () => revealDecision(s));
+    }
     el("notes").textContent = s.memory || "–";
     el("n").textContent = s.decisions;
     el("dph").textContent = s.decisions_per_hour;

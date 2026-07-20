@@ -6,10 +6,9 @@ stall the loop.
 """
 from __future__ import annotations
 
-import random
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 
-from .behaviors import BehaviorLibrary
+from .behaviors import BehaviorLibrary, fish_move
 from .interfaces import Policy
 from .profile import LadderConfig
 from .types import Behavior, Decision, Observation, Rung, Step
@@ -93,10 +92,12 @@ class Watchdog:
                 return Decision(behaviors=[scripted], rung=Rung.SCRIPTED,
                                 reason=f"fallback:{name}")
         if self.cfg.allow_random:
-            button = random.choice(self.library.buttons)
-            fish = Behavior(name=f"fish_{button}", source="builtin",
-                            steps=[Step(button=button, hold_frames=8, wait_frames=8)])
-            return Decision(behaviors=[fish], rung=Rung.RANDOM, reason="fish mode")
+            # rung 4: a randomized macro from the fish repertoire (wander /
+            # mash-dialogue / mash-direction / mash-B / press-any) so a brain
+            # outage still does structured random things, not one-tile twitching.
+            move = fish_move(self.library.buttons)
+            return Decision(behaviors=[move], rung=Rung.RANDOM,
+                            reason=f"fish: {move.name}")
         idle = self.library.get(self.cfg.safe_idle) or Behavior(
             name="wait", steps=[Step(op="wait", wait_frames=60)])
         return Decision(behaviors=[idle], rung=Rung.SAFE_IDLE, reason="safe idle")

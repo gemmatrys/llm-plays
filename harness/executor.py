@@ -21,8 +21,12 @@ class Executor:
 
     def execute(self, behavior: Behavior) -> None:
         held: set[str] = set()
+        # step_factory lets a behavior generate fresh steps each run (e.g. a
+        # randomized dialogue-masher); otherwise its static steps are used.
+        steps = (behavior.step_factory() if behavior.step_factory is not None
+                 else behavior.steps)
         try:
-            for step in behavior.steps:
+            for step in steps:
                 if step.op == "wait":
                     time.sleep(step.wait_frames * FRAME_S)
                 elif step.op == "savestate":

@@ -50,13 +50,16 @@ location or task changes: where you are, what you are doing, what comes next.
 ## Known game state
 {ram}
 
+## Map around you
+{tilemap}
+
 ## Recent actions (oldest first)
 {recent}"""
 
 
 def render_prompt(template: str, behaviors: list[str], goals: str,
                   ram: dict | None, recent: list[str], max_plan: int = 8,
-                  memory: str = "") -> str:
+                  memory: str = "", tilemap: str = "") -> str:
     """Plain string substitution — no logic, no formatting surprises."""
     ram_text = ("\n".join(f"- {k}: {v}" for k, v in ram.items())
                 if ram else "(unknown)")
@@ -67,7 +70,41 @@ def render_prompt(template: str, behaviors: list[str], goals: str,
             .replace("{ram}", ram_text)
             .replace("{recent}", recent_text)
             .replace("{memory}", memory.strip() or "(empty - write some!)")
+            .replace("{tilemap}", tilemap.strip() or "(no map available)")
             .replace("{max_plan}", str(max_plan)))
+
+
+# --- Gemma4 thinking-transcript recovery -------------------------------------
+# Gemma4 wraps its chain-of-thought in `<|channel>thought\n ... <channel|>`
+# before the answer. On the llm-scaler XPU build the detokenizer strips these
+# special tokens from both `content` and `reasoning_content` regardless of
+# skip_special_tokens, so `reasoning_content` comes back empty (vllm#38855).
+# The per-token logprobs stream preserves them verbatim, so we request logprobs
+# and rebuild the transcript ourselves by splitting on the delimiters. The
+# answer JSON still arrives clean in `content`, so plan parsing is unaffected.
+_THINK_START = "<|channel>"
+_THINK_END = "<channel|>"
+_THOUGHT_PREFIX = "thought\n"
+MAX_THINKING_CHARS = 2000  # keep the logged/streamed record bounded
+
+
+def _thinking_from_logprobs(choice: dict) -> str:
+    """Rebuild the thinking transcript from the per-token logprobs stream, which
+    keeps the channel delimiters the detokenized strings drop. Returns "" when
+    logprobs or the delimiters are absent (nothing to recover)."""
+    tokens = (choice.get("logprobs") or {}).get("content") or []
+    if not tokens:
+        return ""
+    stream = "".join(t.get("token", "") for t in tokens)
+    start = stream.find(_THINK_START)
+    if start == -1:
+        return ""
+    start += len(_THINK_START)
+    end = stream.find(_THINK_END, start)
+    thinking = stream[start:end] if end != -1 else stream[start:]
+    if thinking.startswith(_THOUGHT_PREFIX):
+        thinking = thinking[len(_THOUGHT_PREFIX):]
+    return thinking.strip()
 
 
 class LLMPolicy:
@@ -93,7 +130,7 @@ class LLMPolicy:
         # output (vllm#39130) — so keep reasoning on when the server has it on.
         self.reasoning = reasoning
         self.last_reason = ""  # the model's "why" — logged and shown on stream
-        self.last_thinking = ""  # reasoning_content, logged for the record
+        self.last_thinking = ""  # thinking transcript (logprobs-recovered), logged
         self.last_memory = None  # notes rewrite from the last decision, if any
         self.last_prompt_hash = ""  # logged per decision for attribution
         self._last_good = DEFAULT_TEMPLATE
@@ -125,7 +162,7 @@ class LLMPolicy:
         self.last_prompt_hash = hashlib.sha256(template.encode()).hexdigest()[:12]
         text = render_prompt(template, self.library.names(),
                              obs.goals, obs.ram, obs.recent, self.max_plan,
-                             memory=obs.memory)
+                             memory=obs.memory, tilemap=obs.tilemap)
         payload = {
             "model": self.model,
             "messages": [
@@ -137,10 +174,13 @@ class LLMPolicy:
             ],
             # thinking budget: when confused the model thinks LONGEST, and if
             # thinking eats all of max_tokens the answer never comes (content
-            # is None) — exactly when a decision matters most. Budget must be
-            # generous enough that hard situations still yield an answer,
-            # while staying inside the ladder's llm_timeout_s.
-            "max_tokens": 1100 if self.reasoning != "none" else 200,
+            # is None) — exactly when a decision matters most. Sized to the
+            # relaxed 240s enforce window: 4000 tokens is ~160-200s at the 31B's
+            # ~20-25 tok/s, inside the HTTP deadline, so hard cases get real
+            # room while typical decisions stop early (model emits <channel|>
+            # then the short JSON). Truncation still degrades safely via the
+            # ladder (content None -> llm_failed -> fallback).
+            "max_tokens": 4000 if self.reasoning != "none" else 200,
             "temperature": 0.7,
             "response_format": {
                 "type": "json_schema",
@@ -171,18 +211,26 @@ class LLMPolicy:
         }
         if self.reasoning != "none":
             # reasoning_effort is ignored by the current llm-scaler build;
-            # enable_thinking works (and coexists with the JSON schema). The
-            # thinking transcript is lost to vllm#38855 (parser strips the
-            # channel tokens) — last_thinking stays empty until that's fixed,
-            # but the quality benefit is real (~7s of reasoning per decision).
+            # enable_thinking works (and coexists with the JSON schema).
             payload["chat_template_kwargs"] = {"enable_thinking": True}
+            # Request logprobs so we can rebuild the thinking transcript from the
+            # raw token stream — reasoning_content is empty on this build because
+            # the detokenizer strips the channel tokens (see
+            # _thinking_from_logprobs). The answer JSON is unaffected.
+            payload["logprobs"] = True
         # HTTP deadline sits BELOW the watchdog's so a slow request always
         # frees the single policy worker before the next call queues behind it
         r = requests.post(f"{self.endpoint}/v1/chat/completions", json=payload,
                           timeout=max(10.0, self.timeout_s - 10.0))
         r.raise_for_status()
-        message = r.json()["choices"][0]["message"]
-        self.last_thinking = (message.get("reasoning_content") or "")[:500]
+        choice = r.json()["choices"][0]
+        message = choice["message"]
+        # reasoning_content is populated on builds where the parser works;
+        # otherwise reconstruct the transcript from the logprobs token stream.
+        thinking = message.get("reasoning_content") or ""
+        if not thinking and self.reasoning != "none":
+            thinking = _thinking_from_logprobs(choice)
+        self.last_thinking = thinking[:MAX_THINKING_CHARS]
         content = message["content"]
         if content is None:
             raise ValueError("thinking consumed the whole max_tokens budget; "

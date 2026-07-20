@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import random
 
-from ..types import Behavior, Observation, Step
+from ..behaviors import fish_move
+from ..types import Behavior, Observation
 
 
 class FishPolicy:
@@ -19,6 +20,9 @@ class FishPolicy:
         self.last_reason = "blub"  # shown on the stream overlay; fish are laconic
 
     def decide(self, obs: Observation) -> Behavior:
-        button = self._rng.choice(self.buttons)
-        return Behavior(name=f"press_{button}", source="builtin",
-                        steps=[Step(button=button, hold_frames=8, wait_frames=8)])
+        # a randomized macro from the fish repertoire (wander / mash-dialogue /
+        # mash-direction / mash-B / press-any); seeded rng keeps calibration
+        # runs reproducible. The behavior name doubles as the overlay reason.
+        move = fish_move(self.buttons, self._rng)
+        self.last_reason = move.name
+        return move

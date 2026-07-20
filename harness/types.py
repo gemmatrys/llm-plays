@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any
@@ -45,6 +46,7 @@ class Observation:
     goals: str  # current goals.md content
     recent: list[str]  # last few behavior names executed
     memory: str = ""  # the model's OWN notes, carried verbatim between decisions
+    tilemap: str = ""  # ASCII walkability map around the player (may be empty)
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -70,6 +72,9 @@ class Behavior:
     name: str
     steps: list[Step]
     source: str = "builtin"  # builtin | skill | llm | claude
+    # optional: generate fresh steps at execute time (randomized/reflexive
+    # behaviors). When set, the executor calls this instead of using `steps`.
+    step_factory: Callable[[], list[Step]] | None = None
 
 
 @dataclass
