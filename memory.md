@@ -1,1 +1,1 @@
-I am in the opening sequence, advancing through the introductory dialogue before starting the game in Pallet Town.
+I am in my bedroom in Pallet Town, starting the game. I need to go downstairs and leave the house.
