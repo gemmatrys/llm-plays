@@ -1,1 +1,1 @@
-I am in the intro sequence, advancing the dialogue to reach the game start and eventually start a new game.
+I am at the main menu. I am starting a new game to begin the adventure.
