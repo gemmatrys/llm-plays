@@ -1,19 +1,23 @@
 # Goals
 
-Default: when text or menus are on screen, mash A. It advances all dialogue,
-picks the first menu option, and in battle it fights with the first move -
-that is usually right.
+Current objective: get to the tall grass at the TOP of Pallet Town.
 
-Exceptions - the only places A-mashing goes wrong:
-- Main menu: this is a fresh run, choose NEW GAME. After this run has saved
-  once, choose CONTINUE instead.
-- Naming screens: A-mashing opens the letter grid. Press DOWN to a preset
-  name, then A. (Stuck in the grid: START, then A.)
-- Starter: in Oak's lab, face each pokeball and press A to inspect; take
-  BULBASAUR.
+CAUTION - the door trap: you keep re-entering your house. When you exit the
+house you are standing ON the doorstep; pressing UP walks you straight back
+in through the door. After exiting: first press DOWN once, then LEFT or
+RIGHT twice, and only then head UP along a clear path. If the screen suddenly
+shows an indoor room again, you walked into a door - go DOWN to leave.
+
+Default: when text or menus are on screen, mash A. In battle it fights with
+the first move - usually right.
+
+Exceptions - where A-mashing goes wrong:
+- Naming screens: press DOWN to a preset name, then A. Never NEW NAME.
+- Starter choice: in Oak's lab, inspect pokeballs (face + A); take BULBASAUR.
 - Nickname prompt: NO (press B).
 - Never save over anything or delete a save.
 
-Route: leave the bedroom (downstairs, out the door), walk NORTH into the tall
-grass so Oak stops you, follow him to the lab, take the starter, fight the
-rival (win or lose is fine), then NORTH through Route 1 to Viridian City.
+Route: leave the house (and STEP AWAY from the door per the caution above),
+walk NORTH through town into the tall grass so Oak stops you, follow him to
+the lab, take the starter, fight the rival (win or lose is fine), then NORTH
+through Route 1 to Viridian City.
