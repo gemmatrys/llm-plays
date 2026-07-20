@@ -1,1 +1,1 @@
-I am in Professor Oak's lab. I am about to choose Bulbasaur as my starter Pokemon from the table.
+I am in Professor Oak's lab. I am choosing Bulbasaur as my starter Pokemon. Next, I will decline the nickname prompt and fight my rival.
