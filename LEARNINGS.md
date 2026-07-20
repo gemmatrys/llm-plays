@@ -4,6 +4,120 @@ What the first real runs taught us. Most items are already encoded in code,
 prompts, or config; this file is the narrative record so checkpoints and future
 phases don't relearn them. Format: lesson → where it now lives.
 
+## Model & serving — QAT vs base+online-quant (2026-07-20)
+
+- **Every QAT/pre-quantized checkpoint hit an untested XPU kernel path and
+  crashed on first inference** on `intel/llm-scaler-vllm:0.21.0-b1`: the 12B
+  `w4a16-ct` (compressed-tensors) throws `k_descale must be a scalar tensor` in
+  FlashAttention; the 26B-A4B MoE (`q4_0-unquantized`, sym_int4) throws
+  `Expected logits.scalar_type() == torch::kHalf` in the fused-MoE router
+  (`moe_topk`). Neither is fixable from outside the container — no serve flag
+  changes it (`--kv-cache-dtype float16/bfloat16` both rejected at init for the
+  12B too). → serving those models is a dead end on this llm-scaler build.
+- **The fix: serve the BASE `-it` models with ONLINE quantization** — the
+  llm-scaler README's actually-documented, Intel-tested path
+  (`--quantization fp8` or `sym_int4`, plus `--dtype float16
+  --mamba-ssm-cache-dtype float16 --block-size 64`). `google/gemma-4-12B-it`
+  with `fp8` passes full validation (text/vision/JSON) AND thinking — no
+  kernel crash. → `server/serve_gemma.sh` auto-selects fp8 for any `*-it` model.
+- **Online quant does NOT avoid the load-time RAM problem** — it still stages
+  the full bf16 checkpoint before quantizing, so a 26B+ model needs either a
+  big RAM/VRAM box or swap. `VLLM_OFFLOAD_WEIGHTS_BEFORE_QUANT=1` only helps
+  the quantize step, not the initial mmap/load. `vm.overcommit_memory=1` +
+  ~75GB swap on the box's SATA SSD (root fs) fixed the mmap ENOMEM and let the
+  MoE fully load — but it still hit the moe_topk crash on first inference, so
+  swap was necessary-but-not-sufficient for the MoE.
+- **Quant-speed ladder measured** (32GB B70, mem-util 0.9): 12B sym_int4 ~40
+  tok/s thinking but vision garbles text (4-bit degradation, saw "Pok?mone");
+  12B fp8 ~35 tok/s with clean vision (recommended fast pick); 31B w4a16-ct
+  ~20-22 tok/s, best quality (chosen for the actual benchmark run). KV pools:
+  12B fp8=373,243 tok (native 262144 ctx now binds, not VRAM); 31B=38,302 tok.
+- **Context window: MAXLEN is free to raise, up to the KV pool** —
+  `--max-model-len` doesn't reserve extra VRAM (that's `gpu-memory-util`'s
+  job), it only caps tokens/request. Policy: serve ceiling = ~95% of the
+  model's measured KV pool ("GPU KV cache size" in the log); the harness's
+  actual prompt-building stays far under that (a separate, deliberate
+  discipline, not a hard limit) — `serve_gemma.sh`'s `MAXLEN` env, re-derive
+  per model.
+- **Timing relaxed to aim-120/enforce-15 decisions per hour**
+  (`decision_cadence_s=30`, `ladder.llm_timeout_s=240`, thinking
+  `max_tokens=1100→4000`) — the tighter 60s/1100-token config from the first
+  shakeout was too tight for a 31B thinking through a real prompt.
+
+## Thinking transcript — two different fixes for two different code paths
+
+- **Non-streaming replies**: `reasoning_content` is ALWAYS empty on this
+  llm-scaler build — the detokenizer strips `<|channel>…<channel|>` markers
+  regardless of `skip_special_tokens` (vllm#38855; PR #39027's
+  `adjust_request` is present in this build but doesn't fix it here). The
+  markers DO survive in the non-streaming `logprobs` token array, so they can
+  be reconstructed by splitting on the delimiters — this was the first fix,
+  now unused in the live path (see below) but documented as a fallback fact.
+- **Streaming replies sidestep the whole problem**: `stream:true` requests
+  return clean, incremental `delta.reasoning` chunks directly — even under
+  guided JSON — with no stripping at all. `llm.py`'s `decide()` now always
+  streams when reasoning is on; this is strictly simpler and is what actually
+  ships. Verified live: hundreds of growing chunks over ~10-20s ending in a
+  valid plan, non-thinking path unaffected.
+- **Fake "typewriter" reveal was wrong** — animating an already-complete reply
+  meant the button press effectively happened before the reasoning appeared
+  on stream. Real streaming (server chunks pushed into `StreamState` via
+  `policy.on_stream`, DOM updated every 250ms poll) fixes this structurally:
+  the plan is only parsed/acted on after the stream finishes, so "reasoning
+  shown" and "reasoning done" are the same event. → `harness/stream.py`,
+  `harness/policy/llm.py`.
+
+## ASCII map context — ground-truth RAM beats vision AND naive tile dumps
+
+- **Bulk-reading the screen tilemap needs a driver primitive** the emulator
+  didn't have — added `READBLOCK <addr> <len>` to `mgba_bridge.lua`
+  (`emu:readRange`) + `MGBADriver.read_block`. One round-trip vs N `READ8`s.
+  Requires the user to reload the Lua script in mGBA once (Tools→Scripting) —
+  no live-reload API exists.
+- **Walkable tile-ID sets are per-TILESET, not universal** — the seeded
+  overworld set rendered an interior room's floor as blocked and its walls as
+  open (exactly inverted). Not yet fixed: needs the current tileset id +
+  a small per-tileset table. The renderer degrades to a raw hex-id dump when
+  the configured set doesn't apply, which is what you'd use to reverse-engineer
+  the right set for a new tileset.
+- **Warp/portal coordinates are Gen 1's `(y, x, destWarp, destMap)`, NOT
+  `(x, y, ...)`** — got this backwards once and it put the door marker on the
+  bed instead of the stairs. Confirmed by walking the player onto the real
+  stairs and reading its exact warp-table bytes at that instant; ground-truth
+  a coordinate system by producing an actual transition, don't reason about it
+  in the abstract. → `harness/loop.py::_read_tilemap`.
+- **Off-map tiles must render blocked explicitly** — reading `wCurMapHeight`/
+  `wCurMapWidth` and marking anything beyond them `#` stops the model from
+  ever thinking it can walk into the border void.
+- **The portal marker + a relative-direction summary line (not just the grid)
+  is what actually helps** — "You are not on an exit. Exits: 2 left." answers
+  both "am I on a portal" and "which way do I walk" using only reliable RAM
+  (player pos + warp table), independent of the still-imperfect walkability
+  tileset data.
+
+## Behaviors: step_factory for randomization, and the fish should DO things
+
+- **A fixed-sequence "mash" behavior can get wedged** on a specific text
+  speed or a yes/no prompt stuck on YES. Added `Behavior.step_factory`
+  (executor calls it fresh each run instead of using static `.steps`) so
+  `mash_through_dialogue` regenerates a randomized A/B sequence every
+  invocation — this alone let a run escape a state that looked wedged across
+  16 decisions in the previous (fixed-sequence) build.
+- **Fish/rung-4 jittering one random button is nearly useless** — it doesn't
+  explore. Replaced with `fish_move`, a random dispatcher over a REAL
+  repertoire (`wander`, `mash_through_dialogue`, mash-a-direction, mash-B,
+  `get_unstuck`, press-any), shared by `FishPolicy` and the ladder's rung 4.
+  Seeded rng keeps calibration runs reproducible.
+- **`get_unstuck`** (random presses across ALL buttons, 5-9 taps) is the
+  "nothing else worked" escape hatch — Gemma-selectable AND in the fish
+  repertoire. In practice the run escaped its stuck state through NORMAL play
+  once the prompt fix landed (see below), so this stayed an unused backstop —
+  which is fine; it's insurance, not the primary mechanism.
+- **A-mashing should be SHORT and BURSTY, not long-held/widely-spaced** —
+  rapid taps in quick succession clear dialogue and confirm
+  menus/naming-screens fastest. Tightened `mash_a` (16→10 frames/press) and
+  `mash_through_dialogue` (avg ~26→ shorter, tighter bursts).
+
 ## Model & serving
 
 - **Served model name must match the harness `--model`.** A mismatch 404s every
@@ -49,12 +163,20 @@ phases don't relearn them. Format: lesson → where it now lives.
   list made door loops and wall-pushing visible to the model. → profile
   ram_map + loop.py markers.
 - **A-mash is the game's default gravity; goals should list exceptions, not
-  steps.** Battle cursor defaults to FIGHT; naming screens are the trap
-  (fallback-era mashing named the player "AA"). Mitigations (2026-07-20):
-  prompt.md now teaches the control flow explicitly (A = confirm/forward/commit,
-  B = cancel/back/erase) and flags the naming grid as a TRAP where the default is
-  B (never mash A); and the scripted_fallback rotation gained press_B so even a
-  brain outage backs out of menus/naming instead of typing a garbage name.
+  steps.** Battle cursor defaults to FIGHT. The fallback-era "AA" naming
+  incident was NOT actually a problem worth avoiding — mashing A on the
+  naming screen just confirms whatever preset name is highlighted and moves
+  on, and the exact name never matters. An earlier version of this project's
+  own prompt.md over-corrected on this (called the naming screen a "TRAP",
+  told the model never to mash A there) which CONTRADICTED goals.md's
+  original, correct instruction and likely caused indecision rather than
+  helping. Corrected 2026-07-20: prompt.md now says mash_a is fine there; B
+  still backs out of the letter grid if the model lands inside it; the
+  scripted_fallback rotation keeps press_B (generically useful for menus, not
+  naming-specific) so a brain outage still has an escape option. Lesson: when
+  a rare bad outcome is actually harmless (name doesn't matter), don't build
+  prompt rules around avoiding it — check what the goal actually cares about
+  before treating a symptom as a problem.
 
 ## Harness & ops
 
