@@ -1,1 +1,1 @@
-I am in my bedroom in Pallet Town. I am moving toward the stairs to go downstairs and leave the house.
+I am in my house in Pallet Town. I have come downstairs and am now moving toward the exit to leave the house and head North into the tall grass.
