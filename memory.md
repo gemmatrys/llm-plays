@@ -1,1 +1,1 @@
-I am in Pallet Town, at the north exit. I am stepping into the grass of Route 1 to trigger the encounter with Professor Oak.
+I am at the north exit of Pallet Town, entering Route 1. Professor Oak has appeared to stop me. I will listen to him and then follow the route back to the lab.
