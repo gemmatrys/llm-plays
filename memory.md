@@ -1,1 +1,1 @@
-I am in the introduction sequence in Pallet Town. I am currently on the naming screen for the rival; I will select a preset name to advance to the overworld.
+I am in the introduction sequence in Pallet Town. I am on the naming screen for the rival; I will select a preset name to advance to the overworld.
