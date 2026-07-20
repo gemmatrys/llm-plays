@@ -1,13 +1,14 @@
 # Goals
 
-Current objective: reach the Route 1 exit at the top of Pallet Town.
+Current objective: trigger Professor Oak and get your starter.
 
-YOU ARE STUCK at the north-west corner (pos_x=1): the blue tiles to your
-LEFT are WATER and the bumpy row above you is the town boundary - neither
-can be walked through. The exit gap is EAST of you along the north edge:
-press RIGHT repeatedly until pos_x is about 10 (past the houses), THEN press
-UP into the opening. Grass and Professor Oak are through that gap. Do not
-press LEFT or UP again while pos_x is less than 8.
+You are near the north edge of Pallet Town. Walk RIGHT until pos_x is about
+10, then UP into the exit gap. Professor Oak will stop you - mash A through
+his speech and let him lead you to his lab (map 40). In the lab: walk to the
+pokeballs on the table, face one, press A to inspect; take BULBASAUR
+(confirm A). Nickname prompt: NO (press B). Then your rival battles you:
+mash A to FIGHT with the first move until it ends - win or lose is fine.
+(Note: the blue tiles on the town's west side are water - not walkable.)
 
 Default: when text or menus are on screen, mash A. In battle it fights with
 the first move - usually right.
