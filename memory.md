@@ -1,1 +1,1 @@
-I am in Pallet Town. I am walking north to reach the tall grass at the top of town to trigger the encounter with Professor Oak.
+I am in Pallet Town. I am walking into the tall grass to trigger the encounter with Professor Oak.
