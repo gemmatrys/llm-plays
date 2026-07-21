@@ -1,1 +1,1 @@
-In Viridian Pokemon Center. Just healed. Now leaving to buy 3 Poke Balls and 3 Antidotes at the Mart.
+In Viridian City, outside the Pokemon Center. Heading to the Mart to buy 3 Poke Balls and 3 Antidotes.
