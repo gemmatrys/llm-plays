@@ -66,8 +66,9 @@ Rules:
   drill, that drill IS the answer - use it without comparing.
 - Poke Balls only work on WILD Pokemon (the battle line says WILD); in a
   trainer battle they are simply lost. Keep the last ball for a PIKACHU.
-- POISONED: START, ITEM, choose ANTIDOTE, A on USE, pick the Pokemon -
-  or any Pokemon Center. Do not walk it off; it drains HP.
+- POISONED outside battle: use_antidote does the whole cure in one
+  behavior - use it right away, or any Pokemon Center. Do not walk it
+  off; it drains HP.
 - Potion early, not at the last moment - blacking out costs HALF your
   money.
 - Buy ONLY what a goal lists. Nothing else, no museum tickets.
