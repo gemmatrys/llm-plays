@@ -27,15 +27,15 @@
    event is your proof you have it. If someone only chats about school
    or coffee, wrong building - leave.
 
-6. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
-   Pallet Town (retrace the route you came up). This is a LONG walk -
-   chain it: plan several walking moves in ONE reply (e.g. walk south,
-   walk south, walk south). Route 1 southbound is full of v ledges that
-   hop automatically - south chains are fast and safe. In Pallet, enter
-   Oak's lab (the big building at the south of town) and talk to
-   Professor Oak. Press A through his dialogue - he takes the parcel
-   (watch for the "[bag: -1 OAK'S PARCEL]" event - that is the delivery
-   proof) and gives you the POKEDEX.
+6. Deliver the parcel to PROFESSOR OAK. You are INSIDE his lab now - the
+   room with rows of bookshelves and machines along the top, white-coat
+   aides walking around, and OAK HIMSELF standing at the TOP of the room.
+   This building is the LAB, not a Pokemon Center and not a Mart - there
+   is no nurse and no shop counter here, and that is correct. Do NOT
+   leave. Walk north to Oak (follow the oak bearing), face him, talk to
+   him and press A through his dialogue - he takes the parcel (watch for
+   the "[bag: -1 OAK'S PARCEL]" event, that is the delivery proof) and
+   gives you the POKEDEX.
 
 7. Walk north through Route 1 to Viridian City again, then head north out
    of the city. The old man now lets you pass. Continue to Route 2.
