@@ -1,1 +1,1 @@
-I am now in Viridian City. I have left the house and need to find the Poke Mart to get Oak's Parcel.
+I am in Viridian City, having left the house. I am now heading south and east to the Pokemon Mart to collect Oak's Parcel.
