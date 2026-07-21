@@ -1,1 +1,1 @@
-In Pewter City, moving south to bypass the gym wall and reach the doormat (Goal 19). Next: Enter gym (Goal 20).
+In Pewter Pokemon Center, leaving to reach the Gym doormat (Goal 19). Next: walk_to_pewter_center_door.
