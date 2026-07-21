@@ -221,7 +221,7 @@ class LLMPolicy:
             # room while typical decisions stop early (model emits <channel|>
             # then the short JSON). Truncation still degrades safely via the
             # ladder (content None -> llm_failed -> fallback).
-            "max_tokens": 4000 if self.reasoning != "none" else 200,
+            "max_tokens": 6000 if self.reasoning != "none" else 200,
             "temperature": 0.7,
             "response_format": {
                 "type": "json_schema",

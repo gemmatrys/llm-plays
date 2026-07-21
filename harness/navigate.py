@@ -458,13 +458,25 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                 hit_cap = len(stride) >= MAX_STEPS
                 nxt = (cur[0] + dxy[0], cur[1] + dxy[1])
                 off_screen = not (0 <= nxt[0] < cols_b and 0 <= nxt[1] < rows_b)
-                # three honest endings: budget spent (say nothing), the
-                # visible window ran out (the world continues - walking
-                # again shows more), or an actual wall
+                # a door tile reads as a stride-stopper too - but calling it
+                # "a wall" contradicts the can_move line's "through a
+                # doorway" and the model must not have to reconcile that
+                door_ahead = False
+                if player is not None and warps:
+                    wb = {((cfg.player_col + (wx - px) * 2) // 2,
+                           (cfg.player_row + (wy - py) * 2) // 2)
+                          for wx, wy in warps}
+                    door_ahead = nxt in wb
+                # honest endings: budget spent (say nothing), the visible
+                # window ran out (the world continues - walking again shows
+                # more), a doorway (one press steps through), or a wall
                 note = f"[walk_{went}: went {fwd_count}" + \
                        ("" if hit_cap else
                         ", edge of sight - walk again to see further"
-                        if off_screen else ", stopped at a wall")
+                        if off_screen else
+                        ", stopped at a DOORWAY - one single press that "
+                        "way steps through it"
+                        if door_ahead else ", stopped at a wall")
                 if passages:
                     note += "; openings passed: " + ", ".join(
                         f"{side} after {d}" for side, d in passages)
