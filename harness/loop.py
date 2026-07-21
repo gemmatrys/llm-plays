@@ -53,6 +53,7 @@ class GameLoop:
         self._items_cache: tuple[float, dict[int, str]] | None = None
         self._moves_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
+        self._marks: dict[str, tuple[int, int]] = {}  # slug -> map coords
         self._maps_cache: tuple[float, dict[int, str]] | None = None
         self._marts_cache: tuple[float, dict[int, list[str]]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
@@ -390,9 +391,19 @@ class GameLoop:
         mart_names = self._mart_items().get(
             (ram_ctx or {}).get("map_id"), []) if ram_ctx else []
         dyn = items.dynamic_names(bag_names, mart_names)
+        legend = items.legend(bag_names, mart_names)
+        # landmark walks: one intent per same-map waypoint - "walk toward
+        # the named place" (the model was never able to hand-navigate
+        # beside a door it could see; the harness BFS always could)
+        if self._marks and not (ram_ctx or {}).get("in_battle"):
+            dyn += [f"walk_to_{s}" for s in self._marks]
+            legend.append(
+                "walk_to_<landmark> (walk toward that named landmark - it "
+                "gets as close as the ground allows; landmarks here: "
+                + ", ".join(self._marks) + ")")
         if dyn:
             extra["dynamic_behaviors"] = dyn
-            extra["dynamic_legend"] = items.legend(bag_names, mart_names)
+            extra["dynamic_legend"] = legend
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=tilemap, extra=extra)
@@ -400,6 +411,18 @@ class GameLoop:
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
         for i, b in enumerate(decision.behaviors):
+            if b.name.startswith("walk_to_") and b.name[8:] in self._marks:
+                mb = (navigate.resolve("walk_to_mark", **self._nav,
+                                       mark=self._marks[b.name[8:]])
+                      if self._nav is not None else None)
+                if mb is not None:
+                    decision.behaviors[i] = replace(mb, name=b.name)
+                else:
+                    self._recent.append(
+                        f"[{b.name}: no way toward it from here - walk its "
+                        "bearing instead]")
+                    decision.behaviors[i] = replace(b, steps=[])
+                continue
             if items.is_item(b.name):
                 rb = items.resolve(b.name, bag_names, mart_names,
                                    bool((ram_ctx or {}).get("in_battle")))
@@ -577,9 +600,11 @@ class GameLoop:
                 raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
                 self._wp_cache = (mtime, raw.get("waypoints") or {})
             parts = []
+            self._marks = {}
             for name, wp in self._wp_cache[1].items():
                 if wp.get("map") != ram["map_id"]:
                     continue
+                self._marks[items.slug(name)] = (wp["x"], wp["y"])
                 dx, dy = wp["x"] - ram["pos_x"], wp["y"] - ram["pos_y"]
                 if not dx and not dy:
                     parts.append(f"{name}: you are here")

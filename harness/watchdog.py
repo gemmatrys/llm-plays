@@ -62,7 +62,8 @@ class Watchdog:
         resolved = []
         for b in plan:
             known = self.library.get(b.name)
-            if known is None and items.is_item(b.name):
+            if known is None and (items.is_item(b.name)
+                                  or b.name.startswith("walk_to_")):
                 # dynamic item intent (use_<item>/buy_<item>_x<n>): valid by
                 # construction, resolved into real steps by the loop at
                 # execution time when bag/shop context is known

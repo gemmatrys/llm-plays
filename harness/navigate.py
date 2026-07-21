@@ -24,7 +24,10 @@ from .tilemap import _map_coord
 from .types import Behavior, Step
 
 NAV_BEHAVIORS = ("walk_north", "walk_south", "walk_west", "walk_east",
-                 "walk_to_exit", "walk_to_counter", "walk_to_grass")
+                 "walk_to_exit", "walk_to_counter", "walk_to_grass",
+                 "walk_to_mark")  # mark: BFS toward a named waypoint (map
+                                  # coords via the `mark` kwarg); the model
+                                  # utters walk_to_<landmark-slug>
 MAX_STEPS = 12  # re-decide after ~a screen's worth of walking
 
 
@@ -189,7 +192,8 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             ledges: set[int] = frozenset(),
             counters: set[int] = frozenset(),
             grasses: set[int] = frozenset(),
-            grass_hint: tuple[int, int] | None = None) -> Behavior | None:
+            grass_hint: tuple[int, int] | None = None,
+            mark: tuple[int, int] | None = None) -> Behavior | None:
     """Turn a navigation behavior name into a concrete button path, or None
     when no on-screen path exists (caller reports that to the model).
     `counters`/`grasses` are this tileset's counter and wild-grass tile
@@ -338,6 +342,31 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         else:
             # never seen grass on this map — the loop tells the model so
             return None
+    elif name == "walk_to_mark":
+        # BFS toward a named waypoint (the model utters walk_to_<landmark>;
+        # the loop passes the map coords). Stands ON the tile when it can;
+        # a mark that cannot be stood on (a door mat, a sign-side tile) or
+        # sits off screen gets "as close as the world allows" - the next
+        # call converges further. Born from the Pewter gym door: 90 minutes
+        # of prose could not walk a model beside a door it could see.
+        if mark is None or player is None:
+            return None
+        tsc = cfg.player_col + (mark[0] - px) * 2
+        tsr = cfg.player_row + (mark[1] - py) * 2
+        tb = (tsc // 2, tsr // 2)
+        if tb == start:
+            return Behavior(name=orig, source="builtin",
+                            steps=[Step(op="wait", wait_frames=8)],
+                            note=f"[{orig}: you are standing at it]")
+        if (0 <= tb[0] < cfg.cols // 2 and 0 <= tb[1] < cfg.rows // 2
+                and tb in dist):
+            goal = tb
+        else:
+            toward = [b for b in dist if b != start]
+            if not toward:
+                return None
+            goal = min(toward, key=lambda b: (abs(b[0] - tb[0])
+                                              + abs(b[1] - tb[1]), dist[b]))
     elif name == "walk_to_exit":
         reach = {b for b in warp_blocks if b in dist and b != start}
         if reach:
@@ -500,7 +529,7 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                            key=lambda b: (-sign * (b[axis] - start[axis]),
                                           dist[b]))
     if goal is None:
-        if name not in ("walk_to_exit", "walk_to_counter"):
+        if name not in ("walk_to_exit", "walk_to_counter", "walk_to_mark"):
             # BFS sees nothing reachable that way, but the world continues
             # past the map edge (town/route connections live there — they
             # are not warps and render as nothing). Fall back to ONE direct

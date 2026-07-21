@@ -317,6 +317,10 @@ class LLMPolicy:
         plan = []
         for name in action["plan"]:
             behavior = self.library.get(name) or items.stub(name)
+            if behavior is None and name.startswith("walk_to_") \
+                    and name in self._enum_names:
+                # landmark walk minted this decision; loop resolves it
+                behavior = Behavior(name=name, source="builtin", steps=[])
             if behavior is None:
                 raise ValueError(f"model chose unknown behavior {name!r}")
             plan.append(behavior)
