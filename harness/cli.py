@@ -54,7 +54,9 @@ def main() -> None:
     library = BehaviorLibrary(profile.buttons, profile.skills_dirs, base)
 
     runlog = RunLog(base, profile.name, args.run_id,
-                    initial_goals=prompts.initial_goals)
+                    initial_goals=prompts.initial_goals,
+                    alert_cmd=profile.escalation.alert_cmd,
+                    alert_cooldown_s=profile.escalation.alert_cooldown_s)
     # segment marker: a restart (hotfix, recovery) must not smear its downtime
     # into decision-rate metrics — the briefing sums ACTIVE hours between these
     runlog.log_metric("harness_start", resumed=runlog.resumed)

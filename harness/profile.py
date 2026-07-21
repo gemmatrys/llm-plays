@@ -45,6 +45,12 @@ class EscalationConfig:
     rescue_grace_s: float = 300.0  # how long a rescue gets to show progress
     max_wakes_per_window: int = 2  # Claude-budget guard
     window_s: float = 18000.0  # 5 h
+    # Alerting: escalations are otherwise just records — this command is
+    # launched detached on EVERY escalation (any kind, cooldown-guarded),
+    # with context in LLMPLAYS_KIND/DETAIL/SNAPSHOT/RUN env vars. Wire it to
+    # a toast, a webhook, or a headless Claude checkpoint.
+    alert_cmd: list[str] | None = None
+    alert_cooldown_s: float = 300.0
 
 
 @dataclass

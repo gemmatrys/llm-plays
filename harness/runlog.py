@@ -7,6 +7,8 @@ Layout (PLAN §4):
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import threading
 import time
 from pathlib import Path
@@ -23,7 +25,12 @@ checkpoints with specific objectives.)
 
 class RunLog:
     def __init__(self, base: Path, game: str, run_id: str | None = None,
-                 initial_goals: str | None = None):
+                 initial_goals: str | None = None,
+                 alert_cmd: list[str] | None = None,
+                 alert_cooldown_s: float = 300.0):
+        self.alert_cmd = alert_cmd
+        self.alert_cooldown_s = alert_cooldown_s
+        self._last_alert_ts = 0.0
         run_id = run_id or time.strftime("%Y%m%d-%H%M%S")
         self.dir = base / "runs" / game / run_id
         self.snapshots = self.dir / "snapshots"
@@ -90,6 +97,29 @@ class RunLog:
         with self._escalations.open("a", encoding="utf-8") as f:
             self._write(f, {"ts": time.time(), "kind": kind, "detail": detail,
                             "snapshot": snapshot, "resolved": False})
+        self._alert(kind, detail, snapshot)
+
+    def _alert(self, kind: str, detail: str, snapshot: str | None) -> None:
+        """Escalations must ALERT, not just record: launch the configured
+        command detached (a toast, webhook, or Claude wake). Cooldown-guarded
+        so a repeating escalation (e.g. prompt_invalid every tick) can't spam;
+        best-effort — an alert failure must never touch the loop."""
+        if not self.alert_cmd:
+            return
+        now = time.time()
+        if now - self._last_alert_ts < self.alert_cooldown_s:
+            self.log_metric("alert_suppressed", escalation=kind)
+            return
+        self._last_alert_ts = now
+        env = dict(os.environ, LLMPLAYS_KIND=kind, LLMPLAYS_DETAIL=detail,
+                   LLMPLAYS_SNAPSHOT=snapshot or "", LLMPLAYS_RUN=str(self.dir))
+        try:
+            flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+            subprocess.Popen(self.alert_cmd, env=env, creationflags=flags,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.log_metric("alert_fired", escalation=kind)
+        except Exception as e:  # noqa: BLE001 — alerting is best-effort
+            self.log_metric("alert_error", detail=repr(e)[-200:])
 
     def snapshot(self, frame: Frame, tag: str = "") -> str:
         name = f"{time.strftime('%Y%m%d-%H%M%S')}{('-' + tag) if tag else ''}.png"

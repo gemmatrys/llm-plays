@@ -45,6 +45,11 @@ escalation:
   rescue_grace_s: 300         # the rescue gets 5 min to show progress before escalating
   max_wakes_per_window: 2
   window_s: 18000             # 5 h
+  # every escalation (any kind) launches this detached, >=300s apart:
+  # Windows toast + sound; swap for a webhook/Claude wake without code changes
+  alert_cmd: ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
+              "-File", "tools/escalation_alert.ps1"]
+  alert_cooldown_s: 300
 
 # WRAM addresses (Gen 1, US Red/Blue) — verify against a memory map in Phase 0.
 ram_map:
