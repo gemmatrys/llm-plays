@@ -32,8 +32,9 @@
 Rules:
 - Wild grass battles: keep pressing A (FIGHT, first move). CHARMANDER ("A")
   handles it.
-- Ledges (bumpy '#' rows) can only be jumped DOWNWARD - never push up into
-  one. Route 1 southbound is FULL of ledges - hop down them, it is faster.
+- Ledges now show as 'v' on your map. Walking south across a v row hops
+  it automatically - a shortcut. From BELOW, a v is a solid wall - never
+  push up into one. Route 1 southbound is FULL of ledges - hop down them.
 - A yes/no CONFIRMING a choice (take/buy/learn/nickname): ONE press only.
   A=YES, B=NO. Nickname prompts: NO.
 - Talking to someone REPEATEDLY restarts their same speech. If you have
