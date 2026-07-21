@@ -29,7 +29,7 @@
     hunt battles. DONE when your location reads Pewter City: mark it
     done then.
 
-16. Heal at the Pewter Pokemon Center (the "Pewter Center door"
+16. [DONE] Heal at the Pewter Pokemon Center (the "Pewter Center door"
     bearing): inside, walk_to_counter puts you in front of the nurse -
     talk, ONE press A on her yes/no, mash through the rest. She also
     refills EMBER's PP. DONE when the heal finished and your team line
