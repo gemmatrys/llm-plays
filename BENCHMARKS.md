@@ -47,6 +47,10 @@ Clocks — always report all of these, because baselines mix them freely:
 Rules:
 - One continuous run per result; hard resets and loadstates are allowed (logged), but
   human intervention ends the run (restart from scratch or mark the run assisted).
+- Harness restarts (hotfix, recovery) are logged (`harness_start` in metrics.jsonl).
+  Wall-clock keeps counting through the downtime — the headline stays
+  baseline-comparable — but decision-rate/health metrics are computed over **active
+  harness hours** (sum of in-segment spans), so a restart never deflates them.
 - Report the **progress curve** (badges vs hours), not just the total — that's where
   "Claude escaped Mt. Moon in 2 h vs 78 h" stories live. Badge timestamps come from
   RAM-change milestones in `metrics.jsonl`.

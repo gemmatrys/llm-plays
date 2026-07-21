@@ -55,6 +55,9 @@ def main() -> None:
 
     runlog = RunLog(base, profile.name, args.run_id,
                     initial_goals=prompts.initial_goals)
+    # segment marker: a restart (hotfix, recovery) must not smear its downtime
+    # into decision-rate metrics — the briefing sums ACTIVE hours between these
+    runlog.log_metric("harness_start", resumed=runlog.resumed)
 
     if args.policy == "fish":
         policy = FishPolicy(profile.buttons)
@@ -84,7 +87,9 @@ def main() -> None:
     shutil.copyfile(args.profile, runlog.dir / "profile.yaml")
 
     # seeding report — the prompt must exist before the game starts
-    if prompts.initial_goals:
+    if runlog.resumed:
+        print("[harness] resumed run: existing goals.md kept")
+    elif prompts.initial_goals:
         print(f"[harness] goals.md seeded from prompts/{profile.name}/goals.md")
     else:
         print(f"[harness] WARNING: no prompts/{profile.name}/goals.md — "

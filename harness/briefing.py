@@ -51,10 +51,28 @@ def build_briefing(run_dir: Path, now: float | None = None) -> str:
     # -- totals ---------------------------------------------------------------
     lines.append("## Run totals")
     if log:
-        hours = max((log[-1]["ts"] - log[0]["ts"]) / 3600, 1e-9)
+        wall = max((log[-1]["ts"] - log[0]["ts"]) / 3600, 1e-9)
+        # split decisions at harness_start markers: restart downtime stays in
+        # wall-clock (the baseline-comparable headline) but must not deflate
+        # the decision rate, which is computed over ACTIVE in-segment hours
+        starts = sorted(m["ts"] for m in metrics if m.get("kind") == "harness_start")
+        segs: list[list[dict]] = []
+        si = 0
+        for e in log:
+            while si < len(starts) and starts[si] <= e["ts"]:
+                si += 1
+                segs.append([])
+            if not segs:  # pre-marker decisions (runs older than the marker)
+                segs.append([])
+            segs[-1].append(e)
+        segs = [s for s in segs if s]
+        active = max(sum(s[-1]["ts"] - s[0]["ts"] for s in segs) / 3600, 1e-9)
+        seg_note = f" in {len(segs)} segments ({len(starts)} harness starts)" \
+            if len(segs) > 1 else ""
         rungs = Counter(e.get("rung") for e in log)
-        lines.append(f"- Decisions: {len(log)} over {hours:.1f}h "
-                     f"({len(log) / hours:.0f}/h); last {_ago(log[-1]['ts'], now)}")
+        lines.append(f"- Decisions: {len(log)} over {wall:.1f}h wall-clock / "
+                     f"{active:.1f}h active ({len(log) / active:.0f}/h active)"
+                     f"{seg_note}; last {_ago(log[-1]['ts'], now)}")
         lines.append("- Rung distribution: " + ", ".join(
             f"{RUNG_NAMES.get(r, r)} {n} ({100 * n // len(log)}%)"
             for r, n in sorted(rungs.items())))

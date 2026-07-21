@@ -29,7 +29,10 @@ class RunLog:
         self.snapshots = self.dir / "snapshots"
         self.snapshots.mkdir(parents=True, exist_ok=True)
         self.goals_path = self.dir / "goals.md"
-        if not self.goals_path.exists():
+        # run-id reuse (restart/recovery): keep the run's goals — checkpoints
+        # may have rewritten them and a restart must not clobber that
+        self.resumed = self.goals_path.exists()
+        if not self.resumed:
             self.goals_path.write_text(initial_goals or DEFAULT_GOALS,
                                        encoding="utf-8")
         # the model's own notes ("I am upstairs in the Viridian Pokemon Center,
