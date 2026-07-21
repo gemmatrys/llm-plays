@@ -1,1 +1,1 @@
-In Pewter Pokemon Center. Healing Charmander (Goal 16), then buying potions at the Mart (Goal 17).
+In Pewter City. Heading to the Mart to buy 5 potions (Goal 17), then I will head to the Gym (Goal 18).
