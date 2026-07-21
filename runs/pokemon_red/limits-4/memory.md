@@ -1,1 +1,1 @@
-Outside Pewter Mart. Goal 18 done. Now walking to the gym doormat (Goal 19).
+Inside Pewter Poke Mart. Leaving now to walk to the gym doormat (Goal 19).
