@@ -583,3 +583,59 @@ conversations kept with the model — full account in the next section.)
   Session-scoped cron proved unreliable under a busy session (a :07
   hourly never fired in 90 min); watchers + explicit checks carried the
   duty. → harness-machine-ops memory.
+
+## Sentences beat structure, intents beat inputs, data beats prose
+## (2026-07-21 afternoon — limits-4 Pewter arc)
+
+- **No technical jargon anywhere the model reads** (user rule). Profile
+  `state_lines` renders every state field as a sentence ("You are NOT in
+  a battle." / "You are carrying ¥2335."); map_id/party_count hidden as
+  redundant. prompt.md re-anchored from field names to the sentence
+  vocabulary. Then the ASCII map grid was REMOVED entirely (user
+  thesis): bearings + stride opening reports + edge lines + can_move +
+  last_move carry everything the grid did — the model never read the
+  grid well anyway (one-block gaps invisible), and durations dropped
+  when it left. → profiles state_lines, prompt.md, commits 0ece838,
+  5baa6db, dbdba38, d7eff37.
+- **Navigation goals must be micro-goals**: one tangible action, one
+  DONE line in state vocabulary, stamped one at a time (user directive
+  after the maze prose overwhelmed the model). Verifiable DONE lines
+  cut false done_goal stamps but did not END them — three false stamps
+  in one day ("Leave the forest" while in it; BOULDERBADGE at badges=0
+  twice-removed). goals_complete is NOT evidence; the checkpoint
+  verifies RAM before acting on it. done_goal grounding guard is the
+  top harness item for run-2. And PRUNE stamped goals to one-line stubs
+  IMMEDIATELY: 40 lines of dead forest instructions correlated with
+  llm_failure spikes and 190s decisions in Pewter.
+- **The intent vocabulary generalized** (user: hardcoded skills are
+  cheating): use_<item>/buy_<item>_x<n> minted per decision from bag +
+  mart tables (closed enum — the model cannot name what is not there),
+  slots/counts resolved to cursor math at execution; walk_to_<landmark>
+  minted per same-map waypoint (BFS with a local-optimum stop that
+  SAYS "as close as the ground allows"). Skills CHECKPOINT their
+  screen through the judge (user escalation): verify+abort_on_fail at
+  every transition, the judge's seen-text as feedback — the shop focus
+  trap (BUY/SELL/QUIT keeps focus while the item list renders) cost 40
+  blind minutes before checkpoints existed. Quantity boxes need a
+  render wait before counting (x5 asked, x1 bought). Total shopping
+  tuition: ¥2400 → ¥25, 3 stray Poke Balls, one hour.
+- **Probe tiles after two failed prose fixes.** The Pewter gym door ate
+  3 hours of theories (poles east! opens west! enter from the mart
+  street!) — every one wrong. A per-tile walkability dump over a second
+  bridge connection settled it in minutes: the yard pocket is fenced
+  east by a 0x55 tile (the fence id AGAIN), walled south, and opens
+  only from the far west. Screenshots and the block-grid render are
+  ambiguous at 2x2; the ONLY trustworthy view is per-tile ids at
+  explicit map coords (scratchpad probe_area.py pattern). Corollary:
+  outdoor door entry is an intent skill problem (enter_<building>),
+  never prose — doors sit outside the walkable set, so counted walks
+  and strides stop BESIDE them and only a raw press enters.
+- **Ops**: raising max_tokens 4000→6000 traded budget failures for
+  240s timeouts — the timeout ceiling and the thinking cap must move
+  together (rung-0 adaptive cap now has its dataset). Transient NPC
+  blocks need distinct phrasing from walls in can_move (the model
+  reroutes around people instead of waiting). nav_ineffective and the
+  confusion detectors all need a menu/dialog gate (five menu false
+  positives in a day). walk_to_exit outdoors walks INTO the nearest
+  building (five accidental re-entries) — it must exclude the door
+  just exited.
