@@ -12,10 +12,12 @@
 18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
     bearing). ENTERING - two steps, nothing else: (1) walk to "the
     doormat below the Gym entrance" landmark until it reads "you are
-    here" (it is an ordinary street tile - south side of the
-    building); (2) from it, press UP once - that single step is the
-    door. The building wall eats every other press; never walk_to_exit
-    out here - it keeps walking you into the Mart. Inside, a JR TRAINER blocks the way - beat him, then if
+    here" - it is open street south of the building; the sign poles
+    east of the door cannot be walked through, so come along the
+    street BELOW them. (2) From the landmark press UP, then UP again -
+    two single presses; the second step is the door. The building wall
+    eats every other press; never walk_to_exit out here - it keeps
+    walking you into the Mart. Inside, a JR TRAINER blocks the way - beat him, then if
     you are below half HP step out, heal at the Center and come back
     (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
     and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
