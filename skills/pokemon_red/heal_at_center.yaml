@@ -1,0 +1,14 @@
+# The whole nurse conversation as one deterministic sequence. Wired as
+# a skill (user decision 2026-07-21) after the LLM proved unable to
+# handle the yes/no cleanly per-decision: stray plan presses moved the
+# cursor onto NO and silently cancelled heals, live at Viridian.
+# Precondition: standing at the Center counter FACING the nurse.
+# advance_text is the RAM-grounded op: presses A only while a text box
+# is open, stops at a choice cursor - so the middle A press below lands
+# exactly on the YES/NO (cursor defaults to YES).
+name: heal_at_center
+description: Facing the nurse, talk, answer YES, and clear the dialogue until healed.
+steps:
+  - {op: advance_text}                            # talk + advance to the yes/no
+  - {button: A, hold_frames: 6, wait_frames: 90}  # YES
+  - {op: advance_text}                            # heal jingle + closing text
