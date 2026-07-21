@@ -14,16 +14,16 @@
     Mart door" bearing reads 2 tiles or less. Do NOT go inside. DONE
     when that bearing reads 2 or less: mark it done then.
 
-19. Walk to the gym's doormat: use
-    walk_to_the_doormat_below_the_gym_entrance, repeating until "the
-    doormat below the Gym entrance" reads "you are here". It walks the
-    open row west from the Mart's street. A CITIZEN strolls this
-    street: when a walk stops early because someone stands in the way,
-    do NOT reroute - people wander off; simply call
-    walk_to_the_doormat_below_the_gym_entrance again, as many times as
-    it takes. Never walk NORTH around the gym (dead end), and do not
-    use walk_to_pewter_mart_door again - goal 18 is finished. The
-    bushes SOUTH cannot be crossed. DONE when the doormat bearing
+19. Walk to the gym's doormat. The gym's yard is FENCED on its east
+    and south sides - it can only be entered from the WEST, off the
+    Pokemon Center's block. In order: (a) use
+    walk_to_pewter_center_door until the "Pewter Center door" bearing
+    reads 3 tiles or less (yes - walk BACK toward the Center first; do
+    not enter it); (b) then use
+    walk_to_the_doormat_below_the_gym_entrance again and again - it
+    climbs the column north of the Center and turns east into the
+    yard. When a walk stops for a person in the way, call it again -
+    people wander off. DONE when "the doormat below the Gym entrance"
     reads "you are here": mark it done then.
 
 20. Enter the gym: use enter_door_above - one behavior, it steps
