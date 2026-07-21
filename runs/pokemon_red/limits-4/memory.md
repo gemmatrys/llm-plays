@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14 (L11). Picking up item 3 north, then item 1 north 11 west, then grinding.
+In Viridian Forest, grinding Charmander to L14 (currently L12). Next: grind, get the item 7 west, then exit to Pewter City.
