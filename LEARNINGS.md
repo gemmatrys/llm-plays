@@ -205,6 +205,31 @@ phases don't relearn them. Format: lesson → where it now lives.
   prompt rules around avoiding it — check what the goal actually cares about
   before treating a symptom as a problem.
 
+## Context & prompting economics (2026-07-20, from thinking transcripts)
+
+- **Latency scales with what the model must INFER or reconcile, not with
+  context volume.** KV cache sat at 13% while decisions took 124s: the tokens
+  went into re-litigating ambiguity (goals-vs-prompt contradictions, geometry
+  it couldn't resolve). Clear goals dropped the same model to 20-38s
+  instantly. Feed CONCLUSIONS, not raw material: in_battle flag, N markers
+  for NPCs, [move blocked] feedback — each replaced an inference class.
+  → context_ram_map, sprite overlay, wall feedback (harness/loop.py).
+- **Stale guidance is worse than no guidance.** Three separate slow-downs
+  traced to finished or obsolete instructions still in goals/memory (lab
+  directions on Route 1, pocket-escape advice after escaping). Fixes:
+  `done_goal` (the model stamps finished goals [DONE] itself), goals under
+  the 200-word budget, checkpoints prune at rewrite, and a >90s
+  slow-decision watcher because long thinking IS the confusion alarm.
+- **Prompt philosophy: encourage trial and error.** The game is
+  fish-beatable and the ratchet makes mistakes cheap — so the prompt now
+  says EXPERIMENT, don't deliberate; break loops on purpose. Prescriptive
+  rule-lists made the model reason ABOUT rules instead of probing the world.
+  The one guarded class stays guarded: confirmation yes/no prompts.
+- **The checkpoint layer may use the web** (walkthroughs, wikis) when
+  authoring goals/skills — declared in BENCHMARKS; knowledge lands in
+  git-tracked files; Gemma itself never browses (per-decision latency is
+  the whole game).
+
 ## The Charmander incident (2026-07-20) — irreversible choices vs mashing
 
 - **A dialogue mash committed an irreversible choice**: the model pressed A on

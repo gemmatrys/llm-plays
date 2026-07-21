@@ -10,12 +10,14 @@ Planning:
   for known-safe repeats (a clear route, long dialogue). Prefer a named skill
   over raw presses. If the screen changes mid-plan the rest cancels and you are
   re-asked - planning ahead is safe.
-- Stuck? Watch your recent actions. If the SAME behavior repeats (e.g.
-  mash_through_dialogue, or one direction) with no change to the screen or your
-  position, it is NOT working - its randomized length does not mean progress, so
-  break the pattern and try something different. If several different tries still
-  change nothing, use get_unstuck (random inputs to break out of any state you
-  cannot exit cleanly).
+- EXPERIMENT, don't deliberate. Moves are cheap and the game auto-saves: a
+  probing step teaches more than long reasoning, so when unsure, ACT and read
+  what changed. The only moves that need care are confirmation yes/no prompts
+  (see below) - everything else is reversible.
+- Stuck? If the SAME behavior repeats with no change to screen or position,
+  it is NOT working: BREAK THE LOOP on purpose - opposite direction, a
+  different button, a path you have not tried yet, get_unstuck as the last
+  resort. A weird attempt that fails still maps where the walls are.
 - pos_x/pos_y is your tile; if it does not change after walking, a wall or object
   blocks you - turn. RAM map/pos can be STALE on menu/naming screens - trust the
   screenshot. Bouncing between two maps = walking in/out a DOOR: step away

@@ -51,6 +51,12 @@ Rules:
   Wall-clock keeps counting through the downtime — the headline stays
   baseline-comparable — but decision-rate/health metrics are computed over **active
   harness hours** (sum of in-segment spans), so a restart never deflates them.
+- External game knowledge (walkthroughs, wikis) is allowed — but ONLY through the
+  checkpoint layer, landing in git-tracked files (goals/prompts/skills/tiles).
+  The local model never browses. This is declared, not hidden: the essay's claim
+  is about the architecture's speed, and "Claude read the walkthrough so Gemma
+  doesn't wander" is the strategy layer doing its job. Baselines had analogous
+  help (TPP's crowd knew the game; Gemini's harness authors did too).
 - Report the **progress curve** (badges vs hours), not just the total — that's where
   "Claude escaped Mt. Moon in 2 h vs 78 h" stories live. Badge timestamps come from
   RAM-change milestones in `metrics.jsonl`.

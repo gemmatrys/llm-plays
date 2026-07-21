@@ -67,6 +67,12 @@ advice.
    fumbling (buy items, navigate a specific puzzle, heal at this town's Center).
    Name them descriptively; Gemma picks them by name from a flat list. Limit:
    3 new skills per checkpoint — a bloated list slows every decision.
+4b. **Use the web.** You may (and should) consult walkthroughs, maps, and
+   wikis (Bulbapedia, StrategyWiki) when authoring goals, route directions,
+   and skills — rediscovering Route 1's geography by trial and error wastes
+   run-hours that one WebSearch answers. The knowledge must land in FILES
+   (goals/prompts/skills/tiles.yaml, all in git) and be noted in progress.md;
+   Gemma itself never browses — per-decision latency is the whole game.
 5. **Sync durable knowledge into `prompts/<game>/`.** The per-run `goals.md` is
    live state; if you learned something true of the GAME rather than this run
    (a control quirk, a rule Gemma keeps violating, a screen type it misreads),
