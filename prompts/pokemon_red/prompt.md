@@ -21,9 +21,13 @@ Planning:
   screenshot. Bouncing between two maps = walking in/out a DOOR: step away
   (usually DOWN), go around.
 - "Map around you": P=you, D=door/exit (stairs/hole - walk onto it to leave),
-  .=open, #=blocked, north is up. Off-map edges are #. Step toward open tiles; #
-  will not move you. The line under the grid lists exits and whether you are
+  N=a person (blocks you; they wander, so wait or step around), .=open,
+  #=blocked, north is up. Off-map edges are #. Step toward open tiles; # will
+  not move you. The line under the grid lists exits and whether you are
   standing on one. Ignore the map during menus/battles/transitions.
+- Known game state: in_battle tells you the truth over the screenshot -
+  0 = NOT in a battle (any menu you see is a normal menu), 1 = wild battle,
+  2 = trainer battle.
 - Your notes are yours alone - the screenshot will not say which town/building/
   floor you are in. When your location or task changes, add a "memory" field that
   REWRITES the notes (<=60 words: where you are, what you are doing, what is

@@ -80,6 +80,10 @@ class TilemapConfig:
     # block bottom-left convention) — see harness/tilemap.py TerrainTable.
     # Checkpoints edit it live; walkable_by_tileset above is the fallback.
     tiles_file: str | None = None
+    # sprite table (Gen 1 wSpriteStateData1): people/NPCs rendered as N on the
+    # map — they block movement but are invisible in the tile data
+    sprites_addr: int = 0xC100
+    sprites_count: int = 16
     # map dimensions (blocks; x2 = tiles) so off-map tiles render blocked
     height_addr: int = 0xD368      # wCurMapHeight
     width_addr: int = 0xD369       # wCurMapWidth
@@ -100,6 +104,9 @@ class GameProfile:
     ratchet: RatchetConfig = field(default_factory=RatchetConfig)
     escalation: EscalationConfig = field(default_factory=EscalationConfig)
     ram_map: dict[str, int] = field(default_factory=dict)
+    # extra RAM shown to the MODEL only (merged into its {ram} view) but NOT
+    # milestone-tracked — e.g. in_battle, whose flapping must not spam metrics
+    context_ram_map: dict[str, int] = field(default_factory=dict)
     tilemap: TilemapConfig | None = None
     driver_opts: dict = field(default_factory=dict)
     # Gemma-facing prompts are NOT part of the profile — see harness/prompts.py.
@@ -117,6 +124,8 @@ class GameProfile:
         # RAM addresses in YAML may be hex strings
         raw["ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
                           for k, v in raw.get("ram_map", {}).items()}
+        raw["context_ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
+                                  for k, v in raw.get("context_ram_map", {}).items()}
         if raw.get("tilemap"):
             tm = dict(raw["tilemap"])
             _hex = lambda v: int(v, 0) if isinstance(v, str) else v  # noqa: E731

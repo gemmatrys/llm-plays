@@ -38,6 +38,7 @@ class GameLoop:
         self._tiles_err: str | None = None
         self._recent: list[str] = []
         self._last_ram: dict[str, int] = {}
+        self._last_moved = False  # last decision tried to walk somewhere
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
 
@@ -93,6 +94,12 @@ class GameLoop:
                 ram = self.extras.read_ram(self.profile.ram_map)
             except Unsupported:
                 pass
+        if ram is not None and self._last_ram and self._last_moved and all(
+                ram.get(k) == self._last_ram.get(k)
+                for k in ("map_id", "pos_x", "pos_y")):
+            # explicit wall feedback: the model shouldn't have to infer a
+            # failed move from the position numbers
+            self._recent.append("[move blocked - position unchanged]")
         if ram is not None and ram != self._last_ram:
             changed = {k: v for k, v in ram.items() if self._last_ram.get(k) != v}
             if "map_id" in changed and self._last_ram:
@@ -109,7 +116,17 @@ class GameLoop:
                 self.stuckness.note_milestone()
             self._last_ram = ram
 
-        obs = Observation(frame=frame, ram=ram, goals=self.runlog.goals(),
+        # context-only RAM (e.g. in_battle): shown to the model and logged,
+        # never milestone-tracked — its flapping must not spam metrics
+        ram_ctx = ram
+        if ram is not None and self.profile.context_ram_map:
+            try:
+                ram_ctx = {**ram,
+                           **self.extras.read_ram(self.profile.context_ram_map)}
+            except Exception:  # noqa: BLE001 — context extras are optional
+                pass
+
+        obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=self._read_tilemap())
         decision = self.watchdog.decide(obs)
@@ -134,11 +151,15 @@ class GameLoop:
 
         self._recent.extend(b.name for b in decision.behaviors[:executed])
         del self._recent[:-20]
-        self.runlog.log_decision(decision, fhash, ram, time.time() - started, executed)
+        move_tokens = ("UP", "DOWN", "LEFT", "RIGHT", "wander")
+        self._last_moved = any(any(t in b.name for t in move_tokens)
+                               for b in decision.behaviors[:executed])
+        self.runlog.log_decision(decision, fhash, ram_ctx, time.time() - started,
+                                 executed)
         if self.stream is not None:
             display = " → ".join(b.name for b in decision.behaviors[:executed])
             self.stream.push_decision(display, int(decision.rung),
-                                      decision.reason, ram, obs.goals,
+                                      decision.reason, ram_ctx, obs.goals,
                                       memory=self.runlog.memory(),
                                       thinking=decision.thinking)
 
@@ -195,8 +216,25 @@ class GameLoop:
             if n:
                 wb = self.extras.read_block(tm.warp_entry_addr, 4 * min(n, 32))
                 warps = [(wb[4 * i + 1], wb[4 * i]) for i in range(min(n, 32))]
+            # NPCs from the sprite table: they block movement but are invisible
+            # in the tile data. Slot 0 is the player; img 0xFF = hidden.
+            # Verified live: pixel (x//8, (y+4)//8) is the sprite's top-left
+            # screen tile and lands on the block grid (player reads (8,8)).
+            npcs = []
+            try:
+                sd = self.extras.read_block(tm.sprites_addr,
+                                            16 * tm.sprites_count)
+                for i in range(1, tm.sprites_count):
+                    s = sd[16 * i:16 * i + 16]
+                    if s[0] == 0 or s[2] == 0xFF:
+                        continue
+                    col, row = s[6] // 8, (s[4] + 4) // 8
+                    if 0 <= col < tm.cols and 0 <= row < tm.rows:
+                        npcs.append((col, row))
+            except Exception:  # noqa: BLE001 — NPC overlay is a nice-to-have
+                npcs = []
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
-                                tileset=tileset, portal_ids=portals)
+                                tileset=tileset, portal_ids=portals, npcs=npcs)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             return ""
 

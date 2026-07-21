@@ -96,7 +96,8 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                  map_wh: tuple[int, int] | None = None,
                  warps: list[tuple[int, int]] | None = None,
                  tileset: int | None = None,
-                 portal_ids: "set[int] | None" = None) -> str:
+                 portal_ids: "set[int] | None" = None,
+                 npcs: "list[tuple[int, int]] | None" = None) -> str:
     """Format `tiles` as an ASCII map windowed around the player. `player` is the
     map (x,y); `map_wh` the map (width,height) in tiles; `warps` a list of map
     (x,y) portal tiles; `tileset` the current tileset id, shown in the raw-dump
@@ -112,6 +113,9 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
     walkable = set(cfg.walkable)
     portal_ids = portal_ids or set()
     warpset = set(warps or [])
+    # each NPC sprite covers a 2x2-tile block from its top-left screen tile
+    npcset = {(c + dc, r + dr) for c, r in (npcs or [])
+              for dc in (0, 1) for dr in (0, 1)}
     have_map = player is not None
     px, py = player if have_map else (0, 0)
     mw, mh = map_wh if map_wh else (None, None)
@@ -135,13 +139,16 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                 cells.append("#")                       # off-map border: blocked
             elif not walkable:
                 cells.append(f"{tiles[r * cols + c]:02x}")
+            elif (c, r) in npcset:
+                cells.append("N")
             elif block_bl(c, r) in portal_ids:
                 cells.append("D")
             else:
                 cells.append("." if block_bl(c, r) in walkable else "#")
         lines.append(("" if walkable else " ").join(cells))
 
-    head = ("Map around you - P=you, D=door/exit, .=open, #=blocked (north up):"
+    head = ("Map around you - P=you, D=door/exit, N=person, .=open, #=blocked"
+            " (north up):"
             if walkable else
             "On-screen tile ids (no walkable set"
             + (f" for tileset {tileset}" if tileset is not None else " configured")

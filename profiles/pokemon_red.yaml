@@ -59,6 +59,10 @@ ram_map:
   pos_x: "0xD362"
   party_count: "0xD163"
 
+# shown to the MODEL (its {ram} view + logs) but never milestone-tracked:
+context_ram_map:
+  in_battle: "0xD057"   # 0=none, 1=wild, 2=trainer - kills battle-vs-menu misreads
+
 # On-screen tile grid -> ASCII walkability map (harness/tilemap.py). addr/cols/
 # rows are SOLID (Gen 1 wTileMap = 20x18 WRAM buffer). player_col/row verified
 # live 2026-07-20 (screen/map alignment confirmed against a screenshot).
