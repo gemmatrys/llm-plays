@@ -19,8 +19,11 @@
     leg's bearing and walk the direction with the BIGGER number of
     tiles left ("12 north, 5 west" = walk_north). Your walk goes
     straight and stops when trees block it - that stop is the maze
-    talking. After a stop, walk ONCE the bearing's OTHER direction,
-    then go back to the bigger one. If a walk ends on a tile you have
+    talking. When the walk's report lists an opening toward your
+    bearing's OTHER direction, that gap IS the path: walk the counted
+    steps back to it (went 9, opening after 3 = 6 back), then turn
+    into it. With no useful opening reported: after a stop, walk ONCE
+    the bearing's OTHER direction, then go back to the bigger one. If a walk ends on a tile you have
     already stopped on, that way is sealed: work the other direction
     2-3 walks before trying it again. A leg counts as REACHED when its
     bearing reads 2 tiles or less - switch to the next leg then, do
