@@ -90,6 +90,11 @@ waypoints:
   # (four accidental Center re-entries: walk_to_exit outdoors + door on
   # the walking column).
   east of the Center: {map: 2, x: 19, y: 26}
+  # GUESS 2026-07-21 evening: front-street tile west of the Center -
+  # door-free staging for the gym approach (the Center door swallowed
+  # the model 3x when the door itself was the staging target); the gym
+  # yard's only entrance is somewhere x<=11, y18-24 (probes).
+  the street west of the Center: {map: 2, x: 10, y: 26}
   # Pewter City doors — VERIFIED (pokered PewterCity warp table)
   Pewter Center door: {map: 2, x: 13, y: 25}
   Pewter Mart door: {map: 2, x: 23, y: 17}
