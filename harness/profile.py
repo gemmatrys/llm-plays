@@ -135,6 +135,9 @@ class PartyConfig:
     maxhp_off: int = 34            # 2 bytes big-endian
     nicks_addr: int = 0xD2B5       # wPartyMonNicks: 11 bytes each
     nick_size: int = 11
+    moves_off: int = 8             # 4 move ids (0 = empty slot)
+    pp_off: int = 29               # 4 PP bytes; top 2 bits are PP-Up count
+    moves_file: str | None = None  # id -> display name (data/<game>/moves.yaml)
     names_file: str | None = None  # data/<game>/species.yaml
 
 

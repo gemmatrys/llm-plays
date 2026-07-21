@@ -15,13 +15,14 @@ dozen tiles, and an unreachable direction degrades to explicit feedback
 """
 from __future__ import annotations
 
+import random
 from collections import deque
 
 from .tilemap import _map_coord
 from .types import Behavior, Step
 
 NAV_BEHAVIORS = ("walk_north", "walk_south", "walk_west", "walk_east",
-                 "walk_to_exit")
+                 "walk_to_exit", "walk_to_counter", "walk_to_grass")
 MAX_STEPS = 12  # re-decide after ~a screen's worth of walking
 
 
@@ -106,6 +107,58 @@ def _route(parents, goal) -> list[str]:
     return list(reversed(seq))
 
 
+def _dist_to_set(grid: list[list[bool]],
+                 goals: set[tuple[int, int]]) -> dict[tuple[int, int], int]:
+    """Multi-source BFS: distance from every walkable block to the NEAREST
+    goal block. Membership in the result == reachable."""
+    dist: dict[tuple[int, int], int] = {}
+    q: deque = deque()
+    for g in goals:
+        if 0 <= g[1] < len(grid) and 0 <= g[0] < len(grid[0]):
+            dist[g] = 0
+            q.append(g)
+    while q:
+        c, r = q.popleft()
+        for _, dx, dy in _DIRS:
+            n = (c + dx, r + dy)
+            if (0 <= n[0] < len(grid[0]) and 0 <= n[1] < len(grid)
+                    and grid[n[1]][n[0]] and n not in dist):
+                dist[n] = dist[(c, r)] + 1
+                q.append(n)
+    return dist
+
+
+def _stochastic_route(start: tuple[int, int],
+                      field: dict[tuple[int, int], int],
+                      max_steps: int) -> tuple[list[str], tuple[int, int]]:
+    """Random descent over a BFS distance field: each step picks randomly
+    among neighbors that are closer OR level (never the block just left).
+    The grid can lie about single tiles — warp mats are force-opened but a
+    gate doorway proved game-blocked from below (the (4,1) wedge) — and a
+    deterministic shortest path replays the same bump forever; a re-rolled
+    random descent slides around the liar within a retry or two.
+    Returns (button sequence, expected end block)."""
+    seq: list[str] = []
+    cur, prev = start, None
+    for _ in range(max_steps):
+        d = field.get(cur)
+        if d is None or d == 0:
+            break
+        opts = []
+        for name, dx, dy in _DIRS:
+            n = (cur[0] + dx, cur[1] + dy)
+            nd = field.get(n)
+            if nd is None or n == prev or nd > d:
+                continue
+            opts.append((n, name))
+        if not opts:
+            break
+        nxt, button = random.choice(opts)
+        seq.append(button)
+        prev, cur = cur, nxt
+    return seq, cur
+
+
 def _edge_press(wx: int, wy: int, map_wh: tuple[int, int] | None) -> str | None:
     """The outward button for a warp sitting on a map edge, or None for an
     interior warp. Edge doormats (e.g. the Poke Center's) don't fire on
@@ -131,13 +184,23 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             map_wh: tuple[int, int] | None,
             player: tuple[int, int] | None,
             warps: list[tuple[int, int]],
-            ledges: set[int] = frozenset()) -> Behavior | None:
+            ledges: set[int] = frozenset(),
+            counters: set[int] = frozenset(),
+            grasses: set[int] = frozenset(),
+            grass_hint: tuple[int, int] | None = None) -> Behavior | None:
     """Turn a navigation behavior name into a concrete button path, or None
-    when no on-screen path exists (caller reports that to the model)."""
+    when no on-screen path exists (caller reports that to the model).
+    `counters`/`grasses` are this tileset's counter and wild-grass tile
+    ids (the game's own tileset-header lists) — consumed by
+    walk_to_counter and walk_to_grass."""
     orig = name
     name, count = parse(name)
     if name not in NAV_BEHAVIORS or not walkable:
         return None
+    if name == "walk_to_counter" and not counters:
+        return None  # this tileset has no counters (game's own header list)
+    if name == "walk_to_grass" and not grasses:
+        return None  # this tileset has no wild grass
     start = (cfg.player_col // 2, cfg.player_row // 2)
     warp_blocks: set[tuple[int, int]] = set()
     warp_at: dict[tuple[int, int], tuple[int, int]] = {}
@@ -171,11 +234,127 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     dist, parents = _bfs(grid, start, ledge_blocks)
 
     goal: tuple[int, int] | None = None
-    if name == "walk_to_exit":
-        cands = [(dist[b], b) for b in warp_blocks if b in dist and b != start]
-        if cands:
-            goal = min(cands)[1]
-        elif warps and player is not None:
+    counter_face: str | None = None
+    if name == "walk_to_counter":
+        # [person][counter tile][open space] in a straight line — the Gen 1
+        # talk-across-the-counter geometry, using the game's own counter
+        # tile ids from the tileset headers. Walk to the space, face the
+        # person, stop. Matches the nurse and the mart clerk and nothing
+        # else in the room (shoppers have no counter beside them).
+        _btn = {(0, -1): "UP", (0, 1): "DOWN", (-1, 0): "LEFT", (1, 0): "RIGHT"}
+        cols_b, rows_b = cfg.cols // 2, cfg.rows // 2
+        spaces: dict[tuple[int, int], str] = {}  # standing block -> face btn
+        for nc, nr in {(c // 2, r // 2) for c, r in npcs}:
+            for _, dx, dy in _DIRS:
+                b1 = (nc + dx, nr + dy)          # would-be counter block
+                b2 = (nc + 2 * dx, nr + 2 * dy)  # would-be standing space
+                if not (0 <= b1[0] < cols_b and 0 <= b1[1] < rows_b
+                        and 0 <= b2[0] < cols_b and 0 <= b2[1] < rows_b):
+                    continue
+                if tiles[(b1[1] * 2 + 1) * cfg.cols + b1[0] * 2] not in counters:
+                    continue
+                if b2 == start or b2 in dist:
+                    spaces.setdefault(b2, _btn[(-dx, -dy)])
+        if not spaces:
+            # person not on screen yet (the window is 10x9 blocks — right
+            # at the door the nurse can sit past it): walk a few blocks
+            # NORTH, where every Gen 1 interior keeps its counter, and the
+            # next walk_to_counter call re-searches with more room visible
+            north = [b for b in dist
+                     if b != start and 0 < (start[1] - b[1]) <= 3]
+            if north:
+                goal = min(north, key=lambda b: (-(start[1] - b[1]), dist[b]))
+            else:
+                # wall ahead or nothing reachable: one direct press still
+                # turns/steps north; the model re-reads the world after
+                return Behavior(name=orig, source="builtin",
+                                steps=[Step(button="UP", hold_frames=16,
+                                            wait_frames=8)])
+        else:
+            if start in spaces:
+                # already on the spot: a short tap turns in place to face
+                # the counter (a long hold would step)
+                return Behavior(name=orig, source="builtin",
+                                steps=[Step(button=spaces[start],
+                                            hold_frames=4, wait_frames=8)])
+            field = _dist_to_set(grid, set(spaces))
+            seq, end = _stochastic_route(start, field, MAX_STEPS)
+            if not seq:
+                return None
+            steps = [Step(button=b, hold_frames=8, wait_frames=8)
+                     for b in seq]
+            if end in spaces:
+                steps.append(Step(button=spaces[end], hold_frames=4,
+                                  wait_frames=8))
+            return Behavior(name=orig, source="builtin", steps=steps)
+    elif name == "walk_to_grass":
+        # nearest reachable wild-grass block. Standing in grass already?
+        # start is excluded, so it walks to the NEXT patch — calling it
+        # repeatedly paces through the grass, which is what starts wild
+        # battles.
+        gset = {b for b in dist
+                if b != start
+                and tiles[(b[1] * 2 + 1) * cfg.cols + b[0] * 2] in grasses}
+        if gset:
+            field = _dist_to_set(grid, gset)
+            seq, end = _stochastic_route(start, field, MAX_STEPS)
+            # don't stop at the edge: keep pacing INSIDE the patch with a
+            # random grass-only walk for the remaining budget — walking
+            # through grass is what rolls wild encounters; arriving at the
+            # border tile rolls one check at most
+            cur, prev = end, None
+            for _ in range(MAX_STEPS - len(seq)):
+                opts = []
+                for bname, dx, dy in _DIRS:
+                    n = (cur[0] + dx, cur[1] + dy)
+                    if n == prev or n not in field:
+                        continue
+                    if tiles[(n[1] * 2 + 1) * cfg.cols + n[0] * 2] in grasses:
+                        opts.append((n, bname))
+                if not opts:
+                    break
+                nxt, button = random.choice(opts)
+                seq.append(button)
+                prev, cur = cur, nxt
+            if not seq:
+                return None
+            return Behavior(name=orig, source="builtin",
+                            steps=[Step(button=b, hold_frames=8,
+                                        wait_frames=8) for b in seq])
+        elif grass_hint is not None and player is not None:
+            # no grass on screen, but we HAVE seen some on this map: head
+            # toward the remembered patch by map coords — the next call
+            # sees it on screen and finishes the job
+            hx, hy = grass_hint
+            tb = ((cfg.player_col + (hx - px) * 2) // 2,
+                  (cfg.player_row + (hy - py) * 2) // 2)
+            toward = [b for b in dist if b != start]
+            if not toward:
+                return None
+            goal = min(toward, key=lambda b: (abs(b[0] - tb[0])
+                                              + abs(b[1] - tb[1]), dist[b]))
+        else:
+            # never seen grass on this map — the loop tells the model so
+            return None
+    elif name == "walk_to_exit":
+        reach = {b for b in warp_blocks if b in dist and b != start}
+        if reach:
+            # target the SET of exits, not one chosen warp: a doorway pair
+            # like the forest gate's (4,0)/(5,0) has one mat game-blocked
+            # from below — the random descent over the set finds whichever
+            # side actually lets you through
+            field = _dist_to_set(grid, reach)
+            seq, end = _stochastic_route(start, field, MAX_STEPS)
+            if seq:
+                steps = [Step(button=b, hold_frames=8, wait_frames=8)
+                         for b in seq]
+                if end in warp_at:
+                    press = _edge_press(*warp_at[end], map_wh)
+                    if press is not None:
+                        steps.append(Step(button=press, hold_frames=16,
+                                          wait_frames=8))
+                return Behavior(name=orig, source="builtin", steps=steps)
+        if warps and player is not None:
             # no warp on screen (a small room's far corner puts its own
             # doormat one row past the 20x18 window): head TOWARD the
             # nearest warp by map coords — the next call sees it on screen
@@ -200,7 +379,7 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             goal = min(cands, key=lambda b: (-sign * (b[axis] - start[axis]),
                                              dist[b]))
     if goal is None:
-        if name != "walk_to_exit":
+        if name not in ("walk_to_exit", "walk_to_counter"):
             # BFS sees nothing reachable that way, but the world continues
             # past the map edge (town/route connections live there — they
             # are not warps and render as nothing). Fall back to ONE direct
@@ -228,4 +407,9 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         press = _edge_press(*warp_at[goal], map_wh)
         if press is not None:
             steps.append(Step(button=press, hold_frames=16, wait_frames=8))
+    # finish the job: on arriving at the counter spot, a short tap turns to
+    # face across the counter — only when the route actually got there
+    if (name == "walk_to_counter" and len(full) <= MAX_STEPS
+            and counter_face is not None):
+        steps.append(Step(button=counter_face, hold_frames=4, wait_frames=8))
     return Behavior(name=orig, source="builtin", steps=steps)

@@ -94,6 +94,7 @@ bag:
 # party= view: nick/species/level/HP/status per mon (offsets live-verified)
 party:
   names_file: data/pokemon_red/species.yaml
+  moves_file: data/pokemon_red/moves.yaml
 
 # battle_hint= view: enemy identity + Gen 1 type-chart math, computed
 battle:

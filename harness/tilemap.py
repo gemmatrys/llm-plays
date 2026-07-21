@@ -46,15 +46,22 @@ class TerrainTable:
         self._walkable: dict[int, set[int]] = {}
         self._portal: dict[int, set[int]] = {}
         self._ledge: dict[int, set[int]] = {}
+        self._counter: dict[int, set[int]] = {}
+        self._grass: dict[int, set[int]] = {}
 
-    def lookup(self, tileset: int) -> tuple[set[int], set[int], set[int]]:
-        """(walkable, portal, ledge_down ids) for a tileset — block
-        bottom-left ids. Ledges are one-way: hoppable DOWN from above,
-        solid from below."""
+    def lookup(self, tileset: int) -> tuple[set[int], set[int], set[int],
+                                            set[int], set[int]]:
+        """(walkable, portal, ledge_down, counter, grass ids) for a tileset —
+        block bottom-left ids. Ledges are one-way: hoppable DOWN from
+        above, solid from below. Counter and grass ids are the game's own
+        tileset-header lists — consumed by walk_to_counter/walk_to_grass
+        and the map renderer."""
         self._refresh()
         return (self._walkable.get(tileset, set()),
                 self._portal.get(tileset, set()),
-                self._ledge.get(tileset, set()))
+                self._ledge.get(tileset, set()),
+                self._counter.get(tileset, set()),
+                self._grass.get(tileset, set()))
 
     def _refresh(self) -> None:
         if self.path is None or not self.path.is_file():
@@ -64,13 +71,16 @@ class TerrainTable:
             return
         try:
             raw = yaml.safe_load(self.path.read_text(encoding="utf-8"))
-            walkable, portal, ledge = {}, {}, {}
+            walkable, portal, ledge, counter, grass = {}, {}, {}, {}, {}
             for key, entry in (raw.get("tilesets") or {}).items():
                 ts = _hex(key)
                 walkable[ts] = {_hex(v) for v in entry.get("walkable", [])}
                 portal[ts] = {_hex(v) for v in entry.get("portal", [])}
                 ledge[ts] = {_hex(v) for v in entry.get("ledge_down", [])}
+                counter[ts] = {_hex(v) for v in entry.get("counter", [])}
+                grass[ts] = {_hex(v) for v in entry.get("grass", [])}
             self._walkable, self._portal, self._ledge = walkable, portal, ledge
+            self._counter, self._grass = counter, grass
             self._mtime = mtime
             self.error = None
         except Exception as e:  # noqa: BLE001 — keep last good table
@@ -103,7 +113,8 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                  tileset: int | None = None,
                  portal_ids: "set[int] | None" = None,
                  npcs: "list[tuple[int, int]] | None" = None,
-                 ledge_ids: "set[int] | None" = None) -> str:
+                 ledge_ids: "set[int] | None" = None,
+                 grass_ids: "set[int] | None" = None) -> str:
     """Format `tiles` as an ASCII map windowed around the player. `player` is the
     map (x,y); `map_wh` the map (width,height) in tiles; `warps` a list of map
     (x,y) portal tiles; `tileset` the current tileset id, shown in the raw-dump
@@ -119,6 +130,7 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
     walkable = set(cfg.walkable)
     portal_ids = portal_ids or set()
     ledge_ids = ledge_ids or set()
+    grass_ids = grass_ids or set()
     warpset = set(warps or [])
     # each NPC sprite covers a 2x2-tile block from its top-left screen tile
     npcset = {(c + dc, r + dr) for c, r in (npcs or [])
@@ -152,12 +164,15 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                 cells.append("D")
             elif block_bl(c, r) in ledge_ids:
                 cells.append("v")
+            elif block_bl(c, r) in grass_ids:
+                cells.append('"')
             else:
                 cells.append("." if block_bl(c, r) in walkable else "#")
         lines.append(("" if walkable else " ").join(cells))
 
     head = ("Map around you - P=you, D=door/exit, N=person, .=open, "
-            "#=blocked, v=ledge (walking DOWN from above hops it - a "
+            "#=blocked, \"=tall grass (wild battles happen there), "
+            "v=ledge (walking DOWN from above hops it - a "
             "shortcut south; from below it is a solid wall) (north up):"
             if walkable else
             "On-screen tile ids (no walkable set"

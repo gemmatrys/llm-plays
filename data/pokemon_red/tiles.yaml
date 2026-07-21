@@ -23,6 +23,11 @@ tilesets:
     walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
                "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
     portal: []
+    # `grass` = the tileset's wild-encounter grass tile, from the pokered
+    # tileset headers (authoritative, one per tileset). Renders " on the
+    # map; walk_to_grass BFS-walks to the nearest patch. When the FOREST
+    # tileset (0x03) gets harvested, its grass id is 0x20 (same source).
+    grass: ["0x52"]
     # one-way: hop DOWN across from above (renders v; BFS jumps them), solid
     # from below. LIVE-VERIFIED ONLY — 0x55 was added from recalled pokered
     # data and turned out to be a FENCE (hard obstacle, user-confirmed
@@ -47,6 +52,10 @@ tilesets:
     # 0x54/0x55/0x10) blocked. 0x1e unverified — add if a wedge shows it open.
     walkable: ["0x11", "0x1a", "0x1c"]
     portal: ["0x1c"]
+    # `counter` = the game's own talk-across-the-counter tile ids, from the
+    # pokered tileset headers (authoritative) — consumed by walk_to_counter's
+    # [person][counter][space] pattern search.
+    counter: ["0x18", "0x19", "0x1e"]
   "0x06":
     name: pokecenter
     # (marts turned out to use tileset 0x02, not this one)
@@ -57,6 +66,27 @@ tilesets:
     # shows open.
     walkable: ["0x11", "0x1c"]
     portal: ["0x1c"]
+    # game's talk-across counter ids (pokered tileset headers; same trio as
+    # the mart) — consumed by walk_to_counter
+    counter: ["0x18", "0x19", "0x1e"]
+  "0x09":
+    name: forest_gate
+    # pokered Gate_Coll (ForestGate/Museum/Gate share it) — ingested
+    # 2026-07-21 while the model stood WEDGED in the south gate (map 50,
+    # unharvested tileset = walk macros dead). Counter ids from the
+    # tileset headers (the gate guard's desk).
+    walkable: ["0x01","0x12","0x14","0x1a","0x1c","0x37","0x38","0x3b","0x3c","0x5e"]
+    portal: []
+    counter: ["0x17", "0x32"]
+  "0x03":
+    name: forest
+    # pokered Forest_Coll, ingested 2026-07-21 ahead of goal 11 (the
+    # forest grind needs walk macros + grass from the first step).
+    # Grass id 0x20 from the tileset headers.
+    walkable: ["0x1e","0x20","0x2e","0x30","0x34","0x37","0x39","0x3a","0x40",
+               "0x51","0x52","0x5a","0x5c","0x5e","0x5f"]
+    portal: []
+    grass: ["0x20"]
   "0x08":
     name: house
     # generic house interior — harvested live 2026-07-20 in a Viridian home

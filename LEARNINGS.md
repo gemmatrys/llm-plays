@@ -423,3 +423,87 @@ discipline), `heal_at_center` (enter, talk, wait for jingle, leave).
 Grass tile ids are already in tiles.yaml (0x52 overworld); in_battle is
 already read every tick — the primitives exist, the skills just need
 writing and testing on the live run before Brock demands grinding.
+
+## The skills thesis, tested live — wire POSITIONING, not conversations
+## (2026-07-21 overnight, Viridian→Forest stretch)
+
+- **The nurse yes/no exposed the real bug: plans don't stop at choices.**
+  advance_text correctly stopped at the YES/NO cursor ("answer it with ONE
+  deliberate press") — and then the plan runner executed the REST of the
+  plan anyway; a queued walk's arrow presses moved the cursor onto NO and
+  the next A silently CANCELLED the heal, repeatedly (HP pinned at 10/24
+  across four attempts). The 0xED choice-cursor detection itself is now
+  live-verified — it stopped exactly where it should; the wiring after the
+  stop was the hole. → loop.py: a choice-stop aborts the remaining plan
+  UNLESS the very next step is press_A/press_B — that one press runs and is
+  shielded from the phash abort (the menu popping IS the expected change).
+- **Full conversation skills work but were retired BY DESIGN**: scripted
+  heal_at_center and buy_N_X skills each succeeded live (heal verified,
+  bag +3 POKE BALL verified) — and were then deleted per user direction:
+  wire positioning only, keep conversations as deliberate model presses
+  under the choice-stop guard. Rationale: scripted menu walks are brittle
+  world-state assumptions (exact stock order, exact prompt sequence) that
+  fail opaquely; positioning is geometry the harness provably owns. The
+  model handled the Antidote purchase manually right after — the guard +
+  numbered UI drills in goals were enough.
+- **walk_to_counter needs no per-map data at all**: the game's own tileset
+  headers define counter tiles (talk-across mechanic), so the macro
+  pattern-searches [person][counter tile][open space] in a straight line,
+  walks to the space, face-taps the person. Works for every Center/Mart/
+  gym desk in the game. Fallbacks: person off-screen → walk a few blocks
+  north (Gen 1 interiors keep counters at the top) and re-search next call.
+- **The warp table LIES about enterability** — the forest south gate lists
+  exit mats at (4,0) AND (5,0), but (4,0)'s tile is wall 0x4a (door only
+  at x=5). Force-opening warp blocks for BFS made the deterministic
+  shortest path press UP into that wall forever (second gate wedge of the
+  night). → navigate.py routes walk_to_* against a goal SET via
+  multi-source BFS distance field + STOCHASTIC DESCENT (random pick among
+  closer-or-level neighbors, never the block just left): a grid lie costs
+  a couple of re-rolled decisions, not a wedge. Sim from the wedge tile:
+  52% old route, 48% the working east-then-north.
+- **Movement heuristics must be battle-gated.** The new walk-effectiveness
+  watchdog (3 consecutive walks with zero position change → nav_ineffective
+  escalation carrying N/S/E/W neighbor block ids) first fired mid-Kakuna
+  fight: battle-menu DOWN presses look like movement attempts and position
+  is frozen by design; the 0x7f-everywhere neighbor dump was the tell
+  (battle screen over the tilemap). → gated on in_battle==0. The evidence
+  payload is the point: neighbor ids diagnosed the gate wedge by hand
+  before the watchdog existed; now they arrive in the escalation.
+- **Read state SETTLED, not mid-warp**: map_id and pos are read at
+  different instants during warp animations — logged torn pairs ("Pokemon
+  Center" with street coords). → _tick re-reads every 0.5s until map/pos
+  agree across two reads, THEN captures the frame, so place=, bearings and
+  the screenshot describe one settled world (user: "0.5s delay for
+  looping" — cadence stays 30s).
+- **Authoritative ingest beats harvest for TABLES; harvest stays for
+  BEHAVIOR.** Convention amended across the night (user-driven): map names
+  (226), item names (95 + TM/HM), move names (165), per-tileset collision
+  walkable lists, counter tiles, grass tiles — all pre-ingested from
+  pret/pokered, because an unnamed/unmapped id is a wedge waiting to
+  happen (the gate tileset proved it: unharvested = every walk macro dead;
+  now also mitigated by a one-direct-press fallback + "[area not mapped]"
+  feedback). Live verification is reserved for BEHAVIORAL claims — ledges
+  (the 0x55 "ledge" that was a fence), anything one-way or conditional.
+  Unused/placeholder ids are omitted on purpose: an ITEM_0xXX or
+  "map N (unknown)" tag now signals a REAL gap, not missing homework.
+- **party= carries the move list + PP in MENU ORDER** ("1 SCRATCH (31 PP),
+  2 GROWL (38 PP), 3 EMBER (23 PP)") — the slot number IS the DOWN-press
+  count, and PP exhaustion is visible instead of remembered ("UNUSABLE!"
+  at 0). Battle move selection stopped being a memory task. → PartyConfig
+  moves_off/pp_off (PP byte masked 0x3F, top bits are PP-Ups), HOT
+  data/pokemon_red/moves.yaml.
+- **walk_to_grass walks INTO the grass and paces**: encounters roll per
+  step THROUGH grass, so stopping at the border was worth one roll; the
+  route extends with a random grass-only stroll to the step cap, and the
+  harness remembers where grass was last seen per map (heads toward it
+  when none is on screen; honest "[no grass in sight on this map]" when
+  never seen). Grass renders as `"` on the map from the tileset-header
+  grass ids.
+- **Ops**: current-goal viewer (tools/goals_server.py, :8702) serves the
+  first un-[DONE] goal for OBS/browser — standalone so harness restarts
+  don't kill it. done_goal is now confirmed BOTH too eager (false Center
+  heal) and too lazy (skipped the obvious forest-entry stamp) — the
+  checkpoint stamps/prunes on evidence either way. And the launch-cwd
+  gotcha bit again mid-incident: a backgrounded harness relaunch from the
+  wrong cwd failed with "path not found"; the verify-every-step drill
+  (harness_start + pids or it didn't happen) caught it in one cycle.

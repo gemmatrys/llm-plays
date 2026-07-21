@@ -1,11 +1,158 @@
 # Item id -> display name for the model's game-verified `bag=` view.
-# HOT FILE: reloaded on change, no harness restart. Checkpoints append
-# entries as items appear (an unknown id renders as ITEM_0xXX in the bag
-# view and in "[bag: +1 ITEM_0xXX]" events — name it here once identified
-# from the screenshot/shop context). Only LIVE-OBSERVED or high-confidence
-# Gen 1 ids; do not bulk-import unverified tables.
+# HOT FILE: reloaded on change, no harness restart. FULL authoritative
+# table ingested from pret/pokered data/items/names.asm (the game's own
+# display names, id order) per user instruction 2026-07-21 - bag events
+# must always carry a human-readable name. "?????" placeholder ids are
+# omitted (unused slots; an ITEM_0xXX in the bag now signals a REAL
+# gap). TM/HM names (0xC4-0xFA) are constructed like the game does.
 items:
+  "0x01": MASTER BALL
+  "0x02": ULTRA BALL
+  "0x03": GREAT BALL
   "0x04": POKE BALL
   "0x05": TOWN MAP
+  "0x06": BICYCLE
+  "0x08": SAFARI BALL
+  "0x09": POKEDEX
+  "0x0a": MOON STONE
+  "0x0b": ANTIDOTE
+  "0x0c": BURN HEAL
+  "0x0d": ICE HEAL
+  "0x0e": AWAKENING
+  "0x0f": PARLYZ HEAL
+  "0x10": FULL RESTORE
+  "0x11": MAX POTION
+  "0x12": HYPER POTION
+  "0x13": SUPER POTION
   "0x14": POTION
-  "0x46": OAK'S PARCEL
+  "0x15": BOULDERBADGE
+  "0x16": CASCADEBADGE
+  "0x17": THUNDERBADGE
+  "0x18": RAINBOWBADGE
+  "0x19": SOULBADGE
+  "0x1a": MARSHBADGE
+  "0x1b": VOLCANOBADGE
+  "0x1c": EARTHBADGE
+  "0x1d": ESCAPE ROPE
+  "0x1e": REPEL
+  "0x1f": OLD AMBER
+  "0x20": FIRE STONE
+  "0x21": THUNDERSTONE
+  "0x22": WATER STONE
+  "0x23": HP UP
+  "0x24": PROTEIN
+  "0x25": IRON
+  "0x26": CARBOS
+  "0x27": CALCIUM
+  "0x28": RARE CANDY
+  "0x29": DOME FOSSIL
+  "0x2a": HELIX FOSSIL
+  "0x2b": SECRET KEY
+  "0x2d": BIKE VOUCHER
+  "0x2e": X ACCURACY
+  "0x2f": LEAF STONE
+  "0x30": CARD KEY
+  "0x31": NUGGET
+  "0x32": PP UP
+  "0x33": POKE DOLL
+  "0x34": FULL HEAL
+  "0x35": REVIVE
+  "0x36": MAX REVIVE
+  "0x37": GUARD SPEC.
+  "0x38": SUPER REPEL
+  "0x39": MAX REPEL
+  "0x3a": DIRE HIT
+  "0x3b": COIN
+  "0x3c": FRESH WATER
+  "0x3d": SODA POP
+  "0x3e": LEMONADE
+  "0x3f": S.S.TICKET
+  "0x40": GOLD TEETH
+  "0x41": X ATTACK
+  "0x42": X DEFEND
+  "0x43": X SPEED
+  "0x44": X SPECIAL
+  "0x45": COIN CASE
+  "0x46": "OAK's PARCEL"
+  "0x47": ITEMFINDER
+  "0x48": SILPH SCOPE
+  "0x49": POKE FLUTE
+  "0x4a": LIFT KEY
+  "0x4b": EXP.ALL
+  "0x4c": OLD ROD
+  "0x4d": GOOD ROD
+  "0x4e": SUPER ROD
+  "0x4f": PP UP
+  "0x50": ETHER
+  "0x51": MAX ETHER
+  "0x52": ELIXER
+  "0x53": MAX ELIXER
+  "0x54": B2F
+  "0x55": B1F
+  "0x56": 1F
+  "0x57": 2F
+  "0x58": 3F
+  "0x59": 4F
+  "0x5a": 5F
+  "0x5b": 6F
+  "0x5c": 7F
+  "0x5d": 8F
+  "0x5e": 9F
+  "0x5f": 10F
+  "0x60": 11F
+  "0x61": B4F
+  "0xc4": HM01
+  "0xc5": HM02
+  "0xc6": HM03
+  "0xc7": HM04
+  "0xc8": HM05
+  "0xc9": TM01
+  "0xca": TM02
+  "0xcb": TM03
+  "0xcc": TM04
+  "0xcd": TM05
+  "0xce": TM06
+  "0xcf": TM07
+  "0xd0": TM08
+  "0xd1": TM09
+  "0xd2": TM10
+  "0xd3": TM11
+  "0xd4": TM12
+  "0xd5": TM13
+  "0xd6": TM14
+  "0xd7": TM15
+  "0xd8": TM16
+  "0xd9": TM17
+  "0xda": TM18
+  "0xdb": TM19
+  "0xdc": TM20
+  "0xdd": TM21
+  "0xde": TM22
+  "0xdf": TM23
+  "0xe0": TM24
+  "0xe1": TM25
+  "0xe2": TM26
+  "0xe3": TM27
+  "0xe4": TM28
+  "0xe5": TM29
+  "0xe6": TM30
+  "0xe7": TM31
+  "0xe8": TM32
+  "0xe9": TM33
+  "0xea": TM34
+  "0xeb": TM35
+  "0xec": TM36
+  "0xed": TM37
+  "0xee": TM38
+  "0xef": TM39
+  "0xf0": TM40
+  "0xf1": TM41
+  "0xf2": TM42
+  "0xf3": TM43
+  "0xf4": TM44
+  "0xf5": TM45
+  "0xf6": TM46
+  "0xf7": TM47
+  "0xf8": TM48
+  "0xf9": TM49
+  "0xfa": TM50

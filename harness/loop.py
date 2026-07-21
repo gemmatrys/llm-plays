@@ -17,8 +17,8 @@ from .profile import GameProfile
 from .runlog import RunLog
 from .stream import StreamState
 from .stuckness import StucknessMonitor
-from .tilemap import TerrainTable, render_ascii
-from .types import Behavior, Observation, phash_diff
+from .tilemap import TerrainTable, _map_coord, render_ascii
+from .types import Behavior, Observation, Step, phash_diff
 
 
 class GameLoop:
@@ -50,10 +50,13 @@ class GameLoop:
         self._last_bag: dict[int, int] | None = None
         self._map_visits: dict[int, int] = {}
         self._items_cache: tuple[float, dict[int, str]] | None = None
+        self._moves_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
         self._maps_cache: tuple[float, dict[int, str]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
         self._nav: dict | None = None  # this tick's pathfinding inputs
+        self._grass_seen: dict[int, tuple[int, int]] = {}  # map_id -> map (x,y)
+        self._nav_blocked = 0  # consecutive walk-attempts with zero movement
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
 
@@ -100,21 +103,29 @@ class GameLoop:
                     self.runlog.escalate(
                         "skills_invalid",
                         f"skill files rejected and skipped: {'; '.join(errs)}")
-        frame = self.eyes.get_frame()
-        fhash = frame.phash()
-
+        # settle before snapshotting: a warp/edge crossing caught
+        # mid-animation yields a torn map/pos pair (map 41 with street
+        # coords was logged live) and a fade frame. Re-read every 0.5s
+        # until two consecutive reads agree on map/pos, then grab the
+        # frame - so bearings, place= and the screenshot all describe
+        # the same settled state. Capped; the cadence floor absorbs it.
         ram = None
         if self.extras is not None and self.profile.ram_map:
             try:
                 ram = self.extras.read_ram(self.profile.ram_map)
+                for _ in range(6):
+                    time.sleep(0.5)
+                    again = self.extras.read_ram(self.profile.ram_map)
+                    settled = all(again.get(k) == ram.get(k)
+                                  for k in ("map_id", "pos_x", "pos_y"))
+                    ram = again
+                    if settled:
+                        break
             except Unsupported:
                 pass
-        if ram is not None and self._last_ram and self._last_moved and all(
-                ram.get(k) == self._last_ram.get(k)
-                for k in ("map_id", "pos_x", "pos_y")):
-            # explicit wall feedback: the model shouldn't have to infer a
-            # failed move from the position numbers
-            self._recent.append("[move blocked - position unchanged]")
+        frame = self.eyes.get_frame()
+        fhash = frame.phash()
+        prev_ram = self._last_ram  # pre-update snapshot for the move checks
         if ram is not None and ram != self._last_ram:
             changed = {k: v for k, v in ram.items() if self._last_ram.get(k) != v}
             if "map_id" in changed and self._last_ram:
@@ -149,6 +160,46 @@ class GameLoop:
                            **self.extras.read_ram(self.profile.context_ram_map)}
             except Exception:  # noqa: BLE001 — context extras are optional
                 pass
+
+        # wall feedback + walk-effectiveness watchdog — AFTER the battle
+        # flag is known: in battle the position is frozen by design and
+        # menu presses (DOWN to EMBER) look like movement attempts, which
+        # false-fired nav_ineffective mid-Kakuna-fight on 2026-07-21
+        in_battle_now = bool((ram_ctx or {}).get("in_battle"))
+        if in_battle_now:
+            self._nav_blocked = 0
+        elif ram is not None and prev_ram and self._last_moved and all(
+                ram.get(k) == prev_ram.get(k)
+                for k in ("map_id", "pos_x", "pos_y")):
+            # explicit wall feedback: the model shouldn't have to infer a
+            # failed move from the position numbers
+            self._recent.append("[move blocked - position unchanged]")
+            # walks that repeatedly move the player ZERO tiles mean the
+            # walkability data lies about this spot (the gate-doorway
+            # wedge) — escalate WITH the raw block ids so the checkpoint
+            # can fix tiles.yaml without spelunking
+            self._nav_blocked += 1
+            if self._nav_blocked == 3:
+                detail = (f"walks not moving the player: map "
+                          f"{ram.get('map_id')} pos "
+                          f"({ram.get('pos_x')},{ram.get('pos_y')})")
+                if self._nav is not None:
+                    t, cfg = self._nav["tiles"], self._nav["cfg"]
+                    pc, pr = cfg.player_col // 2, cfg.player_row // 2
+                    ids = {}
+                    for lbl, dc, dr in (("N", 0, -1), ("S", 0, 1),
+                                        ("W", -1, 0), ("E", 1, 0),
+                                        ("here", 0, 0)):
+                        bc, br = pc + dc, pr + dr
+                        if 0 <= bc < cfg.cols // 2 and 0 <= br < cfg.rows // 2:
+                            ids[lbl] = f"0x{t[(br * 2 + 1) * cfg.cols + bc * 2]:02x}"
+                    detail += f"; neighbor block ids {ids}"
+                self.runlog.log_metric("nav_ineffective")
+                self.runlog.escalate("nav_ineffective", detail)
+        elif ram is not None and prev_ram and any(
+                ram.get(k) != prev_ram.get(k)
+                for k in ("map_id", "pos_x", "pos_y")):
+            self._nav_blocked = 0
 
         # bag = game-VERIFIED inventory in the model's {ram} view, plus delta
         # events. Beliefs like "I should have the parcel now" die against a
@@ -249,6 +300,27 @@ class GameLoop:
                     if self._nav is not None else None
                 if nb is not None:
                     decision.behaviors[i] = nb
+                    continue
+                base, _n = navigate.parse(b.name)
+                btn = {"walk_north": "UP", "walk_south": "DOWN",
+                       "walk_west": "LEFT", "walk_east": "RIGHT"}.get(base)
+                if btn is not None:
+                    # directional walks NEVER dead-end silently: with no
+                    # walkable map this tick (unharvested tileset, tilemap
+                    # read failure) fall back to ONE direct press — it
+                    # still turns/steps, and "[move blocked]" reports a
+                    # real wall (the gate-building wedge of 2026-07-21)
+                    decision.behaviors[i] = Behavior(
+                        name=b.name, source="builtin",
+                        steps=[Step(button=btn, hold_frames=16,
+                                    wait_frames=8)])
+                    self._recent.append(
+                        f"[{b.name}: area not mapped - pressed {btn} once]")
+                elif b.name == "walk_to_grass":
+                    # distinct from a routing failure: nothing to route TO
+                    self._recent.append(
+                        "[walk_to_grass: no grass in sight on this map - "
+                        "it may have none; move on]")
                 else:
                     self._recent.append(f"[{b.name}: no path visible]")
         if decision.memory_update is not None:
@@ -289,18 +361,40 @@ class GameLoop:
         # expected between steps (wild encounter, dialogue popup, scene change).
         executed = 0
         prev_hash = fhash
+        expect_choice = False
         for i, behavior in enumerate(decision.behaviors):
             if i > 0:
                 cur_hash = self.eyes.get_frame().phash()
-                if phash_diff(prev_hash, cur_hash) > self.profile.ladder.plan_abort_pct:
+                if (not expect_choice and phash_diff(prev_hash, cur_hash)
+                        > self.profile.ladder.plan_abort_pct):
                     self.runlog.log_metric("plan_abort", step=i,
                                            total=len(decision.behaviors))
                     break
                 prev_hash = cur_hash
+            expect_choice = False
             feedback = self.executor.execute(behavior)
             if feedback:
                 self._recent.append(feedback)
             executed += 1
+            if feedback and "choice/menu" in feedback:
+                # advance_text stopped at a live choice cursor. The ONE
+                # deliberate press answering it may be the very next planned
+                # step (press_A/press_B) - let that run, and shield it from
+                # the phash abort (the menu popping IS the expected screen
+                # change). ANY other follow-up is presses written for a world
+                # without this menu (a walk's arrows move the cursor onto
+                # NO - this silently cancelled a nurse heal): abort and hand
+                # the choice back to a fresh decision, cursor untouched.
+                nxt = (decision.behaviors[i + 1].name
+                       if i + 1 < len(decision.behaviors) else None)
+                if nxt in ("press_A", "press_B"):
+                    expect_choice = True
+                else:
+                    if nxt is not None:
+                        self.runlog.log_metric("plan_abort", step=i + 1,
+                                               total=len(decision.behaviors),
+                                               why="choice_cursor")
+                    break
 
         self._recent.extend(b.name for b in decision.behaviors[:executed])
         del self._recent[:-20]
@@ -397,6 +491,24 @@ class GameLoop:
                 out.append("?")
         return "".join(out)
 
+    def _move_names(self) -> dict[int, str]:
+        """HOT move-name table (data/<game>/moves.yaml), cached on mtime."""
+        pc = self.profile.party
+        if pc is None or not pc.moves_file:
+            return {}
+        path = self.base / pc.moves_file
+        try:
+            mtime = path.stat().st_mtime
+            if self._moves_cache is not None and self._moves_cache[0] == mtime:
+                return self._moves_cache[1]
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            names = {(int(k, 0) if isinstance(k, str) else int(k)): str(v)
+                     for k, v in (raw.get("moves") or {}).items()}
+            self._moves_cache = (mtime, names)
+            return names
+        except Exception:  # noqa: BLE001 — names are cosmetic, never fatal
+            return self._moves_cache[1] if self._moves_cache else {}
+
     def _species(self) -> dict[int, tuple[str, list[str]]]:
         """HOT species table: internal id -> (name, [types])."""
         pc = self.profile.party
@@ -480,6 +592,21 @@ class GameLoop:
                     s += f" {word}"
             if mon[pc.status_off] & 0x07:
                 s += " ASLEEP"
+            # move slots IN MENU ORDER with live PP — battle move selection
+            # (slot number = DOWN presses) and PP exhaustion must be
+            # visible, not remembered
+            mnames = self._move_names()
+            slots = []
+            for j in range(4):
+                mid = mon[pc.moves_off + j]
+                if not mid:
+                    continue
+                pp = mon[pc.pp_off + j] & 0x3F  # top bits = PP-Up count
+                nm = mnames.get(mid, f"MOVE_0x{mid:02x}")
+                slots.append(f"{j + 1} {nm} ({pp} PP"
+                             + (" - UNUSABLE!)" if pp == 0 else ")"))
+            if slots:
+                s += " - moves: " + ", ".join(slots)
             if mx and hp * 4 <= mx:
                 s += " (LOW!)"
             out.append(s)
@@ -540,13 +667,16 @@ class GameLoop:
             tileset = None
             portals: set[int] = set()
             ledges: set[int] = set()
+            counters: set[int] = set()
+            grass: set[int] = set()
             if self._terrain is not None or tm.walkable_by_tileset:
                 # walkability is per-tileset: pick the set for the CURRENT
                 # tileset; an unconfigured one degrades to the raw-id dump
                 tileset = self.extras.read_block(tm.tileset_addr, 1)[0]
                 walk: set[int] = set()
                 if self._terrain is not None:
-                    walk, portals, ledges = self._terrain.lookup(tileset)
+                    walk, portals, ledges, counters, grass = \
+                        self._terrain.lookup(tileset)
                     if self._terrain.error and self._terrain.error != self._tiles_err:
                         # a bad checkpoint edit to tiles.yaml must self-report;
                         # the last good table keeps rendering meanwhile
@@ -595,12 +725,32 @@ class GameLoop:
                 npcs = []
             # this tick's pathfinding inputs, consumed if the model picks a
             # navigation macro (walk_north etc.)
+            # last-seen grass per map: whenever grass is on screen, remember
+            # the nearest patch's MAP coords — walk_to_grass heads toward it
+            # later when the model stands somewhere with none visible
+            map_id = self._last_ram.get("map_id")
+            if player is not None and grass and map_id is not None:
+                best = None
+                for br in range(tm.rows // 2):
+                    for bc in range(tm.cols // 2):
+                        if raw[(br * 2 + 1) * tm.cols + bc * 2] in grass:
+                            d = (abs(bc - tm.player_col // 2)
+                                 + abs(br - tm.player_row // 2))
+                            if best is None or d < best[0]:
+                                best = (d, bc, br)
+                if best is not None:
+                    self._grass_seen[map_id] = _map_coord(
+                        best[1] * 2, best[2] * 2, tm, px, py)
+            hint = (self._grass_seen.get(map_id)
+                    if player is not None and map_id is not None else None)
             self._nav = {"tiles": raw, "cfg": tm, "walkable": set(tm.walkable),
                          "npcs": npcs, "map_wh": map_wh, "player": player,
-                         "warps": warps, "ledges": ledges} if tm.walkable else None
+                         "warps": warps, "ledges": ledges, "counters": counters,
+                         "grasses": grass,
+                         "grass_hint": hint} if tm.walkable else None
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
                                 tileset=tileset, portal_ids=portals, npcs=npcs,
-                                ledge_ids=ledges)
+                                ledge_ids=ledges, grass_ids=grass)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             self._nav = None
             return ""
