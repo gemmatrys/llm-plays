@@ -131,8 +131,5 @@ lowest unstamped goal.
 ## Known game state
 {ram}
 
-## Map around you
-{tilemap}
-
 ## Recent actions (oldest first)
 {recent}
