@@ -7,7 +7,7 @@
 2. [DONE] Heal at the Viridian Pokemon Center.
 
 3. STOP talking to the old man - he will NOT let you pass north no matter
-   what you say. The road to Route 2 is closed until you finish goals 4-6.
+   what you say. The road to Route 2 is closed until you finish goals 4-7.
    Step away from him and stop pressing A at him.
 
 4. YOU ARE IN THE WRONG BUILDING. This room - the one with the lady, the
