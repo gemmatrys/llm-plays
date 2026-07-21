@@ -1,14 +1,23 @@
-# The whole nurse conversation as one deterministic sequence. Wired as
+# The whole Pokemon Center heal as one deterministic sequence. Wired as
 # a skill (user decision 2026-07-21) after the LLM proved unable to
-# handle the yes/no cleanly per-decision: stray plan presses moved the
-# cursor onto NO and silently cancelled heals, live at Viridian.
-# Precondition: standing at the Center counter FACING the nurse.
+# handle the nurse yes/no cleanly per-decision: stray plan presses moved
+# the cursor onto NO and silently cancelled heals, live at Viridian.
+# Precondition: just walked in (standing on/near the doormat). Every
+# Gen 1 Center shares the layout - door at the bottom of the counter
+# column, nurse a few tiles north (Viridian live: door (3,7), talk spot
+# (3,3)). The UP presses walk to the counter and leave the player
+# FACING the nurse; extra presses bump the counter harmlessly.
 # advance_text is the RAM-grounded op: presses A only while a text box
-# is open, stops at a choice cursor - so the middle A press below lands
+# is open, stops at a choice cursor - so the lone A press below lands
 # exactly on the YES/NO (cursor defaults to YES).
 name: heal_at_center
-description: Facing the nurse, talk, answer YES, and clear the dialogue until healed.
+description: From the Center door, walk to the nurse, answer YES, heal.
 steps:
-  - {op: advance_text}                            # talk + advance to the yes/no
-  - {button: A, hold_frames: 6, wait_frames: 90}  # YES
-  - {op: advance_text}                            # heal jingle + closing text
+  - {button: UP, hold_frames: 8, wait_frames: 24}
+  - {button: UP, hold_frames: 8, wait_frames: 24}
+  - {button: UP, hold_frames: 8, wait_frames: 24}
+  - {button: UP, hold_frames: 8, wait_frames: 24}
+  - {button: UP, hold_frames: 8, wait_frames: 24}   # margin; bumps are safe
+  - {op: advance_text}                              # talk + advance to yes/no
+  - {button: A, hold_frames: 6, wait_frames: 90}    # YES
+  - {op: advance_text}                              # heal jingle + closing text
