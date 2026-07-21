@@ -18,7 +18,7 @@ Planning:
 - Rules are not weighed against each other: the current goal's own text
   outranks the Rules list, and the FIRST rule that fits the screen wins -
   run its drill and stop thinking. A rule you cannot follow right now (item
-  not in bag=, move at 0 PP) does not apply - skip it without discussion.
+  not in your bag, a move at 0 PP) does not apply - skip it without discussion.
 - Same behavior + no change on screen/position = NOT working. Break the loop:
   another direction, another button, a path not tried; get_unstuck last.
 
