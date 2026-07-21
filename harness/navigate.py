@@ -367,6 +367,18 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                 return None
             goal = min(toward, key=lambda b: (abs(b[0] - tb[0])
                                               + abs(b[1] - tb[1]), dist[b]))
+            here_d = abs(start[0] - tb[0]) + abs(start[1] - tb[1])
+            best_d = abs(goal[0] - tb[0]) + abs(goal[1] - tb[1])
+            if best_d >= here_d:
+                # walking would not bring us closer: standing at the local
+                # optimum. Say so instead of ping-ponging between equally
+                # close pockets (the Pewter gym-yard oscillation)
+                return Behavior(
+                    name=orig, source="builtin",
+                    steps=[Step(op="wait", wait_frames=8)],
+                    note=f"[{orig}: this is as close as the ground allows "
+                         "from here - the way in lies on another side; "
+                         "walk around the building]")
     elif name == "walk_to_exit":
         reach = {b for b in warp_blocks if b in dist and b != start}
         if reach:
