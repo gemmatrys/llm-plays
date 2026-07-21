@@ -1,1 +1,1 @@
-I am in the Pallet Town Pokemon Center with Oak's Parcel. I need to leave and deliver it to Professor Oak at his lab.
+I am in Pallet Town with Oak's Parcel. I am heading east to Professor Oak's lab to deliver it and get the Pokedex.
