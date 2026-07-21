@@ -1,1 +1,1 @@
-In Viridian Forest, heading to the top-left exit to reach Pewter City (Goal 12). Next: Route 2, then Pewter City Pokemon Center to heal.
+In Viridian Forest, heading to the top-left exit to reach Pewter City. CHARMANDER is lv14 but EMBER is out of PP; must avoid battles. Next: Exit forest, cross Route 2, and heal at Pewter Pokemon Center.
