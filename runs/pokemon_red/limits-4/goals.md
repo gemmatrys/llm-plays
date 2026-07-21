@@ -1,65 +1,69 @@
 # Goals
 
-8. Go back south into VIRIDIAN CITY (follow the viridian_return_gap
-   bearing; the edge crossing is a single step south at the gap). Heal
-   at the Pokemon Center (pokecenter_door bearing). Then at the MART
-   (mart_door bearing) buy 3 POKE BALLs and 3 ANTIDOTEs: talk to the
-   clerk, choose BUY, pick the item, press UP twice so the count reads
-   x3, press A, then ONE press A on the price question. The
-   "[bag: +3 POKE BALL]" and "[bag: +3 ANTIDOTE]" events are the proof.
+8. Go back south into VIRIDIAN CITY - follow the "south gap back to
+   Viridian" bearing; the edge crossing is a single step south at the
+   gap. Heal at the Pokemon Center (the "Pokemon Center door" bearing
+   points at it). Then at the MART (the "Mart door" bearing) buy 3
+   POKE BALLs and 3 ANTIDOTEs: talk to the clerk, choose BUY, pick the
+   item, press UP twice so the count reads x3, press A, then ONE press
+   A on the price question. The "[bag: +3 POKE BALL]" and
+   "[bag: +3 ANTIDOTE]" events are the proof.
 
-9. Leave Viridian through the north edge (route2_gap bearing - the old
-   man lets you pass now) onto ROUTE 2. Battle in the grass until
-   CHARMANDER reaches level 9 and learns EMBER - the game announces it;
-   that announcement is the stamp. While you are here, spend up to TWO
-   Poke Balls catching one backup Pokemon (PIDGEY or RATTATA): throw
-   the ball FIRST, do not attack - press DOWN then A for ITEM, choose
-   POKE BALL, A. Nickname: NO. Keep the last ball.
+9. Leave Viridian through the north edge - follow the "gap to Route 2"
+   bearing; the old man lets you pass now - onto ROUTE 2. Battle in
+   the grass until CHARMANDER reaches level 9 and learns EMBER - the
+   game announces it; that announcement is the stamp. While you are
+   here, spend up to TWO Poke Balls catching one backup Pokemon
+   (PIDGEY or RATTATA): throw the ball FIRST, do not attack - press
+   DOWN then A for ITEM, choose POKE BALL, A. Nickname: NO. Keep the
+   last ball.
 
-10. Follow the forest_gate_door bearing up the WEST side of Route 2 and
-    enter the gate building (a D). Inside, walk north to the far
-    doorway (gate_forest_door bearing) and out into VIRIDIAN FOREST.
-    Stamp when place= says Viridian Forest.
+10. Follow the "forest gate door" bearing up the WEST side of Route 2
+    and enter the gate building (a D). Inside, walk north across the
+    room and out the far doorway (the "doorway into the forest"
+    bearing) into VIRIDIAN FOREST. Stamp when place= says Viridian
+    Forest.
 
 11. Grind until CHARMANDER is LEVEL 14 or higher - party= is the proof.
     Pace back and forth in the dark grass to start battles; EMBER
-    roasts the bugs here in 1-2 hits. Grab the free POTION and POKE
-    BALL where the forest_potion and forest_ball bearings point - a
-    lone ball on the ground is an item: face it, press A, watch for the
-    bag event. Three BUG CATCHERs stand on the paths; if one stops you,
-    beat him - trainer battles cannot be fled. If a rare PIKACHU
+    roasts the bugs here in 1-2 hits. Grab the two free items where
+    the "free Potion" and "free Poke Ball" bearings point - a lone
+    ball on the ground is an item: face it, press A, watch for the
+    bag event. Three BUG CATCHERs stand on the paths; if one stops
+    you, beat him - trainer battles cannot be fled. If a rare PIKACHU
     appears and you still carry a ball, catch it - it wins the SECOND
     gym for you later. POISONED after a battle: cure it right away
     (Rules).
 
-12. Leave the forest at its far top-left corner (forest_exit bearing),
-    walk north through the gate building (gate_route2_door bearing),
-    and continue north on Route 2 into PEWTER CITY (pewter_gap
-    bearing). Do NOT enter the cave door east of the path - its Pokemon
-    are ten levels above you. In Pewter, heal at the Center
-    (pewter_center_door bearing). Stamp when the nurse heals you and
-    place= says Pewter Pokemon Center.
+12. Leave the forest at its far top-left corner (the "forest exit
+    corner" bearing), walk north through the gate building (the
+    "doorway out to Route 2" bearing), and continue north on Route 2
+    into PEWTER CITY (the "gap to Pewter" bearing). Do NOT enter the
+    cave door east of the path - its Pokemon are ten levels above
+    you. In Pewter, heal at the Center (the "Pewter Center door"
+    bearing). Stamp when the nurse heals you and place= says Pewter
+    Pokemon Center.
 
-13. Buy 5 POTIONs at the Pewter MART (pewter_mart_door bearing; 300
-    each - if money is short, buy what you can afford). Same BUY drill
-    as goal 8. A "[bag: +N POTION]" event is the stamp. Skip the
-    MUSEUM - it only costs money.
+13. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing;
+    300 each - if money is short, buy what you can afford). Same BUY
+    drill as goal 8. A "[bag: +N POTION]" event is the stamp. Skip
+    the MUSEUM - it only costs money.
 
-14. Win the BOULDERBADGE at the Pewter GYM (pewter_gym_door bearing).
-    Inside, a JR TRAINER blocks the way - beat him, then if you are
-    below half HP step out, heal at the Center and come back (beaten
-    trainers stay beaten). Walk to BROCK (brock bearing) and talk to
-    him. His GEODUDE (L12) and ONIX (L14) resist EMBER - battle_hint
-    will say so - use EMBER anyway: their special defense is terrible,
-    it still wins, and everything else you have is worse. When ONIX is
-    "storing energy" that is BIDE - it returns DOUBLE the damage it
-    just took; that turn is the perfect time to use a POTION (DOWN to
-    ITEM in battle) instead of attacking. Potion whenever you fall
-    below half HP. If you black out you wake at the Center with half
-    your money gone - heal and march back; after TWO losses, grind the
-    forest to level 16 first (CHARMANDER evolves) and try again. The
-    badge announcement and the TM he hands over ("[bag: +1 ...]") are
-    the proof.
+14. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
+    bearing). Inside, a JR TRAINER blocks the way - beat him, then if
+    you are below half HP step out, heal at the Center and come back
+    (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
+    and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
+    battle_hint will say so - use EMBER anyway: their special defense
+    is terrible, it still wins, and everything else you have is worse.
+    When ONIX is "storing energy" that is BIDE - it returns DOUBLE the
+    damage it just took; that turn is the perfect time to use a POTION
+    (DOWN to ITEM in battle) instead of attacking. Potion whenever you
+    fall below half HP. If you black out you wake at the Center with
+    half your money gone - heal and march back; after TWO losses,
+    grind the forest to level 16 first (CHARMANDER evolves) and try
+    again. The badge announcement and the TM he hands over
+    ("[bag: +1 ...]") are the proof.
 
 Rules:
 - Battles, once CHARMANDER knows EMBER: pick it every fight - press A
