@@ -77,6 +77,9 @@ tilemap:
     # 1 = REDS_HOUSE (both floors): floor 0x01 only; walls/windows/furniture
     # (0x00, 0x24/25/34/35, TV, PC, plant ids) all observed blocked
     "0x01": ["0x01"]
+    # 5 = DOJO/GYM/LAB (Oak's lab): floor 0x11 only; verified live 2026-07-20
+    # (pokeball table, machines, shelves, walls all observed blocked)
+    "0x05": ["0x11"]
 
 driver_opts:
   host: 127.0.0.1
