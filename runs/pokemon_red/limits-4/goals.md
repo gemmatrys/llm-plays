@@ -1,67 +1,95 @@
 # Goals
 
-0. [DONE] Leave Oak's lab, beat the rival, exit Pallet Town to Route 1.
+8. Go back south into VIRIDIAN CITY (follow the viridian_return_gap
+   bearing; the edge crossing is a single step south at the gap). Heal
+   at the Pokemon Center (pokecenter_door bearing). Then at the MART
+   (mart_door bearing) buy 3 POKE BALLs and 3 ANTIDOTEs: talk to the
+   clerk, choose BUY, pick the item, press UP twice so the count reads
+   x3, press A, then ONE press A on the price question. The
+   "[bag: +3 POKE BALL]" and "[bag: +3 ANTIDOTE]" events are the proof.
 
-1. [DONE] Go north through Route 1 to Viridian City.
+9. Leave Viridian through the north edge (route2_gap bearing - the old
+   man lets you pass now) onto ROUTE 2. Battle in the grass until
+   CHARMANDER reaches level 9 and learns EMBER - the game announces it;
+   that announcement is the stamp. While you are here, spend up to TWO
+   Poke Balls catching one backup Pokemon (PIDGEY or RATTATA): throw
+   the ball FIRST, do not attack - press DOWN then A for ITEM, choose
+   POKE BALL, A. Nickname: NO. Keep the last ball.
 
-2. [DONE] Heal at the Viridian Pokemon Center.
+10. Follow the forest_gate_door bearing up the WEST side of Route 2 and
+    enter the gate building (a D). Inside, walk north to the far
+    doorway (gate_forest_door bearing) and out into VIRIDIAN FOREST.
+    Stamp when place= says Viridian Forest.
 
-3. STOP talking to the old man - he will NOT let you pass north no matter
-   what you say. The road to Route 2 is closed until you finish goals 4-7.
-   Step away from him and stop pressing A at him.
+11. Grind until CHARMANDER is LEVEL 14 or higher - party= is the proof.
+    Pace back and forth in the dark grass to start battles; EMBER
+    roasts the bugs here in 1-2 hits. Grab the free POTION and POKE
+    BALL where the forest_potion and forest_ball bearings point - a
+    lone ball on the ground is an item: face it, press A, watch for the
+    bag event. Three BUG CATCHERs stand on the paths; if one stops you,
+    beat him - trainer battles cannot be fled. If a rare PIKACHU
+    appears and you still carry a ball, catch it - it wins the SECOND
+    gym for you later. POISONED after a battle: cure it right away
+    (Rules).
 
-4. [DONE] YOU ARE IN THE WRONG BUILDING. This room - the one with the lady, the
-   TV and the potted plants - is a private HOUSE, not the Mart. The lady
-   is not a clerk and has NO parcel. You have been here before. Walk to
-   the exit (the doormats are at the BOTTOM-LEFT of this room) and leave.
+12. Leave the forest at its far top-left corner (forest_exit bearing),
+    walk north through the gate building (gate_route2_door bearing),
+    and continue north on Route 2 into PEWTER CITY (pewter_gap
+    bearing). Do NOT enter the cave door east of the path - its Pokemon
+    are ten levels above you. In Pewter, heal at the Center
+    (pewter_center_door bearing). Stamp when the nurse heals you and
+    place= says Pewter Pokemon Center.
 
-5. [DONE] Get OAK'S PARCEL from the real POKeMON MART - the BLUE-ROOF shop with
-   a MART sign. Your game state now shows a LIVE COMPASS, e.g.
-   "mart_door: 5 east, 7 south" - it recomputes from your true position
-   every decision. TRUST IT over any direction you remember; remembered
-   directions go stale as you move. Walk the bearing (south and east legs
-   in whatever order the terrain allows; v ledges hop automatically going
-   south). At the door (a D on your map), walk to the exit to enter.
-   Inside, the clerk behind the shop counter hands you a PARCEL for
-   Professor Oak when you talk to him. The "[bag: +1 OAK'S PARCEL]"
-   event is your proof you have it. If someone only chats about school
-   or coffee, wrong building - leave.
+13. Buy 5 POTIONs at the Pewter MART (pewter_mart_door bearing; 300
+    each - if money is short, buy what you can afford). Same BUY drill
+    as goal 8. A "[bag: +N POTION]" event is the stamp. Skip the
+    MUSEUM - it only costs money.
 
-6. [DONE] Deliver the parcel to PROFESSOR OAK. You are INSIDE his lab now - the
-   room with rows of bookshelves and machines along the top, white-coat
-   aides walking around, and OAK HIMSELF standing at the TOP of the room.
-   This building is the LAB, not a Pokemon Center and not a Mart - there
-   is no nurse and no shop counter here, and that is correct. Do NOT
-   leave. Walk north to Oak (follow the oak bearing), face him, talk to
-   him and press A through his dialogue - he takes the parcel (watch for
-   the "[bag: -1 OAK'S PARCEL]" event, that is the delivery proof) and
-   gives you the POKEDEX.
-
-7. [DONE] Walk north through Route 1 to Viridian City again, then head north out
-   of the city. The old man now lets you pass. Continue to Route 2.
+14. Win the BOULDERBADGE at the Pewter GYM (pewter_gym_door bearing).
+    Inside, a JR TRAINER blocks the way - beat him, then if you are
+    below half HP step out, heal at the Center and come back (beaten
+    trainers stay beaten). Walk to BROCK (brock bearing) and talk to
+    him. His GEODUDE (L12) and ONIX (L14) resist EMBER - battle_hint
+    will say so - use EMBER anyway: their special defense is terrible,
+    it still wins, and everything else you have is worse. When ONIX is
+    "storing energy" that is BIDE - it returns DOUBLE the damage it
+    just took; that turn is the perfect time to use a POTION (DOWN to
+    ITEM in battle) instead of attacking. Potion whenever you fall
+    below half HP. If you black out you wake at the Center with half
+    your money gone - heal and march back; after TWO losses, grind the
+    forest to level 16 first (CHARMANDER evolves) and try again. The
+    badge announcement and the TM he hands over ("[bag: +1 ...]") are
+    the proof.
 
 Rules:
-- Wild grass battles: keep pressing A (FIGHT, first move). CHARMANDER ("A")
-  handles it.
-- Ledges now show as 'v' on your map. Walking south across a v row hops
-  it automatically - a shortcut. From BELOW, a v is a solid wall - never
-  push up into one. Route 1 southbound is FULL of ledges - hop down them.
-- A yes/no CONFIRMING a choice (take/buy/learn/nickname): ONE press only.
-  A=YES, B=NO. Nickname prompts: NO.
-- Talking to someone REPEATEDLY restarts their same speech. If you have
-  heard it before, the answer is not in the dialogue - step away and act.
+- Battles, once CHARMANDER knows EMBER: pick it every fight - press A
+  (the move list opens), DOWN until the arrow sits on EMBER, A. Until
+  EMBER is learned, mashing A (SCRATCH) is fine.
+- Wild battles only start IN grass - pace back and forth inside it.
+  Poke Balls only work on WILD Pokemon; thrown in a trainer battle
+  they are simply lost.
+- POISONED drains HP as you walk. Cure it: START, ITEM, choose
+  ANTIDOTE, A on USE, pick the Pokemon - or any Pokemon Center.
+- If ALL your Pokemon faint you black out and LOSE HALF YOUR MONEY.
+  Potion early, not at the last moment.
+- Buy ONLY what a goal lists. Nothing else, no museum tickets.
+- A yes/no CONFIRMING a choice (take/buy/learn/nickname): ONE press
+  only. A=YES, B=NO. Nickname prompts: NO.
+- Talking to someone REPEATEDLY restarts their same speech. Heard it
+  before? The answer is not in the dialogue - step away and act.
 - Leaving a building: you exit standing ON the doorstep; stepping up
   re-enters. Step away first.
-- Doors show as D on your map. To go through the nearest door - entering OR
-  leaving a building - walk to the exit; long walks in the door's direction
-  carry you PAST it.
-- Inside a building, if walking finds no path out, stand on the doormat and
-  press a SINGLE step toward the wall the door is in (usually press down).
+- Doors show as D on your map. To go through the nearest door - in or
+  out - walk to the exit; long walks in the door's direction carry you
+  PAST it. In the little gate buildings the door you WANT is the far
+  one: cross the room first, then use the doorway ahead of you.
+- Inside a building, if walking finds no path out, stand on the doormat
+  and press a SINGLE step toward the wall the door is in.
 - Town and route connections sit at MAP EDGES (no D shown). When a gap
-  bearing says you are there (or 1 tile away) and walking goes nowhere:
-  line up on the gap, then take a SINGLE step toward the edge - walking
-  moves stop at edges, a single press crosses.
-- Do NOT mark a goal done unless the game showed it happen. "I think I did
-  it" is not evidence.
-- Accidental menu: B closes it. Never save over or delete anything. Do not
-  buy anything yet - you need your money.
+  bearing says you are there (or 1 tile away) and walking goes
+  nowhere: line up on the gap, then take a SINGLE step toward the edge.
+- Ledges show as v. Walking south across a v row hops it automatically;
+  from below it is a solid wall - never push up into one.
+- Do NOT mark a goal done unless the game showed it happen. "I think I
+  did it" is not evidence.
+- Accidental menu: B closes it. Never save over or delete anything.
