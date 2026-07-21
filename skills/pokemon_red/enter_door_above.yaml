@@ -1,0 +1,11 @@
+# One-press door entry with a judge confirmation (goals kept teaching
+# "press UP once" in prose; a skill is error-resistant: the hold is long
+# enough to turn AND step, the transition text clears itself, and the
+# judge says whether you actually ended up indoors).
+name: enter_door_above
+description: Step through the door directly above you and confirm you are inside.
+steps:
+  - {button: UP, hold_frames: 16, wait_frames: 40}
+  - {op: advance_text}
+  - {op: verify, wait_frames: 30,
+     expect: "the inside of a building room, not an outdoor street"}
