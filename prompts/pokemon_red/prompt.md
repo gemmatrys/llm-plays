@@ -5,7 +5,7 @@ allowed list, plus one short "why".
 A = confirm/advance (commits); B = cancel/back (safe when unsure).
 
 Planning:
-- CHAIN moves: a decision costs ~30s of thinking; extra plan steps are free.
+- CHAIN moves: a decision costs 20-30s of thinking; extra plan steps are free.
   Travel = ONE reply: ["walk_south","walk_south","walk_east","walk_to_exit"].
   Known errands chain too: ["walk_to_exit","press_A","mash_through_dialogue",
   "walk_to_exit"]. An unexpected screen change auto-cancels the rest, so long
