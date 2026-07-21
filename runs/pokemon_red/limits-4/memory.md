@@ -1,1 +1,1 @@
-In Viridian City. Bought supplies. Now heading north to Route 2.
+On Route 2. Battling in the grass to get Charmander to level 9 (learn Ember) and catch a backup Pokemon.
