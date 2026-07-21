@@ -85,6 +85,11 @@ waypoints:
   # VERIFIED 2026-07-21 live: model stood exactly on (8,0), bearing read
   # "you are here", walked north across the edge into Pewter.
   gap to Pewter: {map: 13, x: 8, y: 0}
+  # GUESS 2026-07-21: street tile east of the Center - a pull target so
+  # the Mart approach clears the Center door column before turning north
+  # (four accidental Center re-entries: walk_to_exit outdoors + door on
+  # the walking column).
+  east of the Center: {map: 2, x: 19, y: 26}
   # Pewter City doors — VERIFIED (pokered PewterCity warp table)
   Pewter Center door: {map: 2, x: 13, y: 25}
   Pewter Mart door: {map: 2, x: 23, y: 17}
