@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14. Currently L10, HP low. Heading to collect dropped items to find potions before continuing.
+In Viridian Forest, grinding Charmander to L14 (currently L11, HP 15/30). Collecting dropped items before continuing. Next: item 3 west, then item 2 north 8 east.
