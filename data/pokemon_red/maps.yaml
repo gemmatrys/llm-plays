@@ -1,0 +1,12 @@
+# Map id -> place name, rendered as `place=` in the model's {ram} view.
+# HOT: reloaded on change. Checkpoint-curated, LIVE-VERIFIED ids only —
+# every entry here was confirmed by watching the run stand in it. An
+# unlisted id renders as "map 57 (unknown)" which is itself a harvest tag.
+maps:
+  0: Pallet Town
+  1: Viridian City
+  12: Route 1
+  40: "Professor Oak's lab (NOT a Center or Mart)"
+  41: Viridian Pokemon Center
+  42: Viridian Poke Mart
+  44: a private house in Viridian
