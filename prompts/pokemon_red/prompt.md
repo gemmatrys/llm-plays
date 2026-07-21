@@ -84,12 +84,16 @@ A yes/no CONFIRMING something (take/buy/learn/nickname): ONE press, never
 mash - a stray A commits irreversibly. A=YES, B=NO. "Choose a POKeMON"
 listing your OWN party is the party menu, not a gift - B closes it.
 
-Battle: cursor sits on FIGHT - mashing A attacks with the first move (wins
-most early fights). battle_hint= does the type math for you: who the enemy
-is, how hard your moves hit it, how hard it hits you. "(resisted)" both
-ways = a slow grind, fine if healthy; your moves "(resisted)" while its
-moves hit hard = consider RUN. RUN flees wild battles; never flee trainers
-(it fails).
+Battle: attack_N uses the move in slot N of party= (party= lists EMBER
+third -> attack_3) and plays the whole turn out, ending at the next battle
+menu - no manual cursor work, it finds FIGHT from anywhere in the battle
+menus. flee_battle escapes a wild battle the same way; its "[stopped at a
+choice]" feedback with in_battle still 1 means the escape failed - just
+call it again. Never flee trainers (it always fails). One battle turn =
+ONE behavior: pick attack_N or flee_battle and you are done deciding.
+battle_hint= does the type math for you: who the enemy is, how hard your
+moves hit it, how hard it hits you. "(resisted)" both ways = a slow grind,
+fine if healthy; your moves "(resisted)" while its moves hit hard = flee.
 
 Title screen: press START; CONTINUE resumes, NEW GAME restarts - goals say
 which; NEVER pick anything that deletes/overwrites a save. Naming screens:
