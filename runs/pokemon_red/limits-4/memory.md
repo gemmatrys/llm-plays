@@ -1,1 +1,1 @@
-In Viridian City, outside the Pokemon Center. Heading to the Mart to buy 3 Poke Balls and 3 Antidotes.
+In Viridian Poke Mart. Buying 3 Poke Balls and 3 Antidotes. Next: Talk to clerk and purchase items.
