@@ -1,1 +1,1 @@
-In Viridian Forest. Following the exit path: heading east to reach 'the path north (east side)' before moving to the top corridor and out to Pewter City.
+In Viridian Forest. Heading to 'the path north (east side)' (3N, 4E), then to 'the top corridor'.
