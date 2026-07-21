@@ -1,1 +1,1 @@
-I am in the Pokemon Mart in Viridian City. I have the parcel. I am leaving the Mart and heading south through Route 1 to Pallet Town to deliver it to Professor Oak.
+I am at the entrance of Professor Oak's lab in Pallet Town. I have the parcel and am entering the building to deliver it to him.
