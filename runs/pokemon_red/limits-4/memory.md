@@ -1,1 +1,1 @@
-In Pallet Town. Heading north to Route 1, then through Viridian City to Route 2.
+On Route 1. Heading north to Viridian City, then north out of the city to Route 2.
