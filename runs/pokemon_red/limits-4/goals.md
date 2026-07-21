@@ -24,7 +24,9 @@
     already stopped on, that way is sealed: work the other direction
     2-3 walks before trying it again. A leg counts as REACHED when its
     bearing reads 2 tiles or less - switch to the next leg then, do
-    not hunt the exact tile. If a leg gets no closer after trying both
+    not hunt the exact tile. A leg also counts as reached the moment the
+    NEXT leg's bearing is closer than it - never walk backward to touch
+    a stop you already passed. If a leg gets no closer after trying both
     directions several times, skip to the NEXT leg's bearing and write
     what blocked you into your notes. The dropped-item Potion sits
     behind a tree wall you CANNOT cross from the south - grab it only
