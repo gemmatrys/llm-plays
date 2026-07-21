@@ -1,1 +1,1 @@
-In Viridian Forest, heading north to the top-left exit. EMBER is out of PP, so I will flee any wild battles on the way to the Pewter Pokemon Center.
+In Viridian Forest, moving to the top-left exit to reach Pewter City. EMBER is unusable, so I will flee any wild battles.
