@@ -1,1 +1,1 @@
-In Pewter City, inside the Poke Mart. Finished buying potions, now leaving to challenge Brock at the Pewter Gym for the BOULDERBADGE.
+In Pewter City, outside the Poke Mart. Heading to the Pewter Gym to challenge Brock for the BOULDERBADGE.
