@@ -1,1 +1,1 @@
-In Pewter City, standing east of the Gym. Goal: Enter the Gym and defeat Brock for the BOULDERBADGE. Next: Walk to the doormat and enter.
+In Pewter Poke Mart. Goal: Exit the Mart and stand beside the door (Goal 18), then proceed to the Gym.
