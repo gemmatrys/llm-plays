@@ -23,6 +23,9 @@ tilesets:
     walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
                "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
     portal: []
+    # one-way: hop DOWN across from above (renders v; BFS jumps them), solid
+    # from below — pokered's ledge table is all D_DOWN in the overworld
+    ledge_down: ["0x36", "0x37"]
   "0x01":
     name: reds_house
     # both floors; floor blocks are uniform 0x01 — verified live 2026-07-20

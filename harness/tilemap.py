@@ -45,12 +45,16 @@ class TerrainTable:
         self._mtime: float | None = None
         self._walkable: dict[int, set[int]] = {}
         self._portal: dict[int, set[int]] = {}
+        self._ledge: dict[int, set[int]] = {}
 
-    def lookup(self, tileset: int) -> tuple[set[int], set[int]]:
-        """(walkable ids, portal ids) for a tileset — block bottom-left ids."""
+    def lookup(self, tileset: int) -> tuple[set[int], set[int], set[int]]:
+        """(walkable, portal, ledge_down ids) for a tileset — block
+        bottom-left ids. Ledges are one-way: hoppable DOWN from above,
+        solid from below."""
         self._refresh()
         return (self._walkable.get(tileset, set()),
-                self._portal.get(tileset, set()))
+                self._portal.get(tileset, set()),
+                self._ledge.get(tileset, set()))
 
     def _refresh(self) -> None:
         if self.path is None or not self.path.is_file():
@@ -60,12 +64,13 @@ class TerrainTable:
             return
         try:
             raw = yaml.safe_load(self.path.read_text(encoding="utf-8"))
-            walkable, portal = {}, {}
+            walkable, portal, ledge = {}, {}, {}
             for key, entry in (raw.get("tilesets") or {}).items():
                 ts = _hex(key)
                 walkable[ts] = {_hex(v) for v in entry.get("walkable", [])}
                 portal[ts] = {_hex(v) for v in entry.get("portal", [])}
-            self._walkable, self._portal = walkable, portal
+                ledge[ts] = {_hex(v) for v in entry.get("ledge_down", [])}
+            self._walkable, self._portal, self._ledge = walkable, portal, ledge
             self._mtime = mtime
             self.error = None
         except Exception as e:  # noqa: BLE001 — keep last good table
@@ -97,7 +102,8 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                  warps: list[tuple[int, int]] | None = None,
                  tileset: int | None = None,
                  portal_ids: "set[int] | None" = None,
-                 npcs: "list[tuple[int, int]] | None" = None) -> str:
+                 npcs: "list[tuple[int, int]] | None" = None,
+                 ledge_ids: "set[int] | None" = None) -> str:
     """Format `tiles` as an ASCII map windowed around the player. `player` is the
     map (x,y); `map_wh` the map (width,height) in tiles; `warps` a list of map
     (x,y) portal tiles; `tileset` the current tileset id, shown in the raw-dump
@@ -112,6 +118,7 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
     r0, r1 = (0, rows) if win <= 0 else (max(0, pr - win), min(rows, pr + win + 1))
     walkable = set(cfg.walkable)
     portal_ids = portal_ids or set()
+    ledge_ids = ledge_ids or set()
     warpset = set(warps or [])
     # each NPC sprite covers a 2x2-tile block from its top-left screen tile
     npcset = {(c + dc, r + dr) for c, r in (npcs or [])
@@ -143,12 +150,15 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                 cells.append("N")
             elif block_bl(c, r) in portal_ids:
                 cells.append("D")
+            elif block_bl(c, r) in ledge_ids:
+                cells.append("v")
             else:
                 cells.append("." if block_bl(c, r) in walkable else "#")
         lines.append(("" if walkable else " ").join(cells))
 
-    head = ("Map around you - P=you, D=door/exit, N=person, .=open, #=blocked"
-            " (north up):"
+    head = ("Map around you - P=you, D=door/exit, N=person, .=open, "
+            "#=blocked, v=ledge (walking DOWN from above hops it - a "
+            "shortcut south; from below it is a solid wall) (north up):"
             if walkable else
             "On-screen tile ids (no walkable set"
             + (f" for tileset {tileset}" if tileset is not None else " configured")

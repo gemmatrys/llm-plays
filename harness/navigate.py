@@ -52,7 +52,12 @@ def _block_grid(tiles: bytes, cfg, walkable: set[int],
     return grid
 
 
-def _bfs(grid: list[list[bool]], start: tuple[int, int]):
+def _bfs(grid: list[list[bool]], start: tuple[int, int],
+         ledge_blocks: set[tuple[int, int]] = frozenset()):
+    """BFS over walkable blocks. Ledges are one-way edges: pressing DOWN
+    while standing above one hops the player over it (landing two blocks
+    down) — recorded as direction "DOWN*" so the route can give the hop
+    animation extra settle time. From below, a ledge is just a wall."""
     dist = {start: 0}
     parents: dict[tuple[int, int], tuple[tuple[int, int], str] | None] = \
         {start: None}
@@ -61,11 +66,19 @@ def _bfs(grid: list[list[bool]], start: tuple[int, int]):
         c, r = q.popleft()
         for name, dx, dy in _DIRS:
             n = (c + dx, r + dy)
-            if (0 <= n[0] < len(grid[0]) and 0 <= n[1] < len(grid)
-                    and grid[n[1]][n[0]] and n not in dist):
+            if not (0 <= n[0] < len(grid[0]) and 0 <= n[1] < len(grid)):
+                continue
+            if grid[n[1]][n[0]] and n not in dist:
                 dist[n] = dist[(c, r)] + 1
                 parents[n] = ((c, r), name)
                 q.append(n)
+            elif name == "DOWN" and n in ledge_blocks:
+                n2 = (c, r + 2)
+                if (n2[1] < len(grid) and grid[n2[1]][n2[0]]
+                        and n2 not in dist):
+                    dist[n2] = dist[(c, r)] + 1
+                    parents[n2] = ((c, r), "DOWN*")
+                    q.append(n2)
     return dist, parents
 
 
@@ -102,7 +115,8 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             npcs: list[tuple[int, int]],
             map_wh: tuple[int, int] | None,
             player: tuple[int, int] | None,
-            warps: list[tuple[int, int]]) -> Behavior | None:
+            warps: list[tuple[int, int]],
+            ledges: set[int] = frozenset()) -> Behavior | None:
     """Turn a navigation behavior name into a concrete button path, or None
     when no on-screen path exists (caller reports that to the model)."""
     if name not in NAV_BEHAVIORS or not walkable:
@@ -131,7 +145,13 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
 
     grid = _block_grid(tiles, cfg, walkable, npcs, map_wh, player, warp_blocks)
     grid[start[1]][start[0]] = True  # you can always stand where you stand
-    dist, parents = _bfs(grid, start)
+    ledge_blocks: set[tuple[int, int]] = set()
+    if ledges:
+        for br in range(cfg.rows // 2):
+            for bc in range(cfg.cols // 2):
+                if tiles[(br * 2 + 1) * cfg.cols + bc * 2] in ledges:
+                    ledge_blocks.add((bc, br))
+    dist, parents = _bfs(grid, start, ledge_blocks)
 
     goal: tuple[int, int] | None = None
     if name == "walk_to_exit":
@@ -165,7 +185,10 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     seq = full[:MAX_STEPS]
     if not seq:
         return None
-    steps = [Step(button=d, hold_frames=8, wait_frames=8) for d in seq]
+    # "DOWN*" = ledge hop: one press, but the jump animation needs settle
+    # time before the next input or the rest of the path desyncs
+    steps = [Step(button=d.rstrip("*"), hold_frames=8,
+                  wait_frames=30 if d.endswith("*") else 8) for d in seq]
     # finish the job: after stepping onto an edge warp, walk off the edge —
     # only when the route actually reaches the warp (not truncated)
     if (name == "walk_to_exit" and len(full) <= MAX_STEPS

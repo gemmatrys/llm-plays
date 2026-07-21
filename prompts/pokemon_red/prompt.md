@@ -24,7 +24,9 @@ Planning:
   (usually DOWN), go around.
 - "Map around you": P=you, D=door/exit (stairs/hole - walk onto it to leave),
   N=a person (blocks you; they wander, so wait or step around), .=open,
-  #=blocked, north is up. Off-map edges are #. Step toward open tiles; # will
+  #=blocked, v=ledge (one-way: walking DOWN from above hops it - walks
+  route through them automatically; from BELOW it is a solid wall, never
+  push up into one), north is up. Off-map edges are #. Step toward open tiles; # will
   not move you. The line under the grid lists exits and whether you are
   standing on one. Ignore the map during menus/battles/transitions.
 - Known game state: in_battle tells you the truth over the screenshot -

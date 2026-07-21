@@ -294,13 +294,14 @@ class GameLoop:
         try:
             tileset = None
             portals: set[int] = set()
+            ledges: set[int] = set()
             if self._terrain is not None or tm.walkable_by_tileset:
                 # walkability is per-tileset: pick the set for the CURRENT
                 # tileset; an unconfigured one degrades to the raw-id dump
                 tileset = self.extras.read_block(tm.tileset_addr, 1)[0]
                 walk: set[int] = set()
                 if self._terrain is not None:
-                    walk, portals = self._terrain.lookup(tileset)
+                    walk, portals, ledges = self._terrain.lookup(tileset)
                     if self._terrain.error and self._terrain.error != self._tiles_err:
                         # a bad checkpoint edit to tiles.yaml must self-report;
                         # the last good table keeps rendering meanwhile
@@ -351,9 +352,10 @@ class GameLoop:
             # navigation macro (walk_north etc.)
             self._nav = {"tiles": raw, "cfg": tm, "walkable": set(tm.walkable),
                          "npcs": npcs, "map_wh": map_wh, "player": player,
-                         "warps": warps} if tm.walkable else None
+                         "warps": warps, "ledges": ledges} if tm.walkable else None
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
-                                tileset=tileset, portal_ids=portals, npcs=npcs)
+                                tileset=tileset, portal_ids=portals, npcs=npcs,
+                                ledge_ids=ledges)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             self._nav = None
             return ""
