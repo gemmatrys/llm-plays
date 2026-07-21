@@ -4,7 +4,9 @@
    Viridian" bearing; the edge crossing is a single step south at the
    gap. Heal at the Pokemon Center (the "Pokemon Center door" bearing
    points at it): inside, use the walk-to-counter action - it walks
-   you to the right spot in front of the nurse and faces her. Then
+   you to the right spot in front of the nurse and faces her (if she
+   was not on screen yet it only walks a few steps - just use it
+   again). Then
    talk: press A, and answer her yes/no with ONE press of A (YES),
    then mash through the rest of the dialogue. Full HP in party= is
    the proof. Then at the MART (the "Mart door" bearing): inside, use
