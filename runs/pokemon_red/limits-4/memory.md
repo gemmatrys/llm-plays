@@ -1,1 +1,1 @@
-In Viridian Forest, heading north to the exit to reach Pewter City. EMBER is out of PP, so avoiding battles. Next: Exit forest, cross Route 2, and heal at Pewter Pokemon Center.
+In Viridian Forest, heading north to the top-left exit. EMBER is out of PP, so I will flee any wild battles on the way to the Pewter Pokemon Center.
