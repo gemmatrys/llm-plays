@@ -1,1 +1,1 @@
-In Pewter City, heading to the Pewter Gym to win the BOULDERBADGE (Goal 18).
+In Pewter City, exiting the Poke Mart to head to the Pewter Gym for the BOULDERBADGE (Goal 18).
