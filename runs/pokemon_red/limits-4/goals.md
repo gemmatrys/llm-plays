@@ -7,7 +7,7 @@
 15. [DONE] Walk Route 2 north into Pewter City.
 16. [DONE] Heal at the Pewter Center - EMBER's PP is refilled.
 
-17. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing).
+17. [DONE] Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing).
     Getting there, from outside the Center: NEVER use walk_to_exit
     while you are outdoors - outdoors it walks INTO the nearest
     building door, which is how you have re-entered the Center four
