@@ -127,11 +127,16 @@ only for genuinely one-press answers (a yes/no the model must read) and
 novel screens. Evidence: curing one poison via raw presses cost 8
 decisions and a Pokedex detour; the same intent is one `use_antidote`
 call. Conversations stay with the model (knowledge boundary) but a skill
-may CARRY one (`buy_potion_x5` holds the clerk dialogue) when every answer
-is fixed by the intent itself. This-run item skills pin bag slots
-statically (append-order assumption, documented per skill); run-2 makes
-them parameterized — an executor op that resolves an item's bag slot from
-RAM at execution time, so one `use_item` survives bag churn.
+may CARRY one (a buy holds the clerk dialogue) when every answer is fixed
+by the intent itself. Generalized same day (user: hardcoding the answer
+in a skill name is cheating — the checkpoint pre-deciding what to buy):
+`use_<item>` / `buy_<item>_x<n>` are name-encoded arguments (the
+counted-walk pattern) resolved by harness/items.py at execution — names
+are MINTED per decision from the bag and the current map's shop table
+(data/<game>/marts.yaml, pret-sourced), so the grammar enum stays closed
+and the model can never name an item that is not actually there; slots
+and counts become cursor math at runtime. The model supplies item, count,
+and moment; the harness supplies fingers.
 
 ## 3. Interfaces (the seams that make platform/game swaps config, not rewrites)
 

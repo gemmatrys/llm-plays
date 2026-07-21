@@ -23,6 +23,8 @@ from pathlib import Path
 
 import requests
 
+from .. import items
+
 from ..behaviors import BehaviorLibrary
 from ..types import Behavior, Observation
 
@@ -151,6 +153,7 @@ class LLMPolicy:
         self.last_prompt_hash = ""  # logged per decision for attribution
         self._last_good = DEFAULT_TEMPLATE
         self._last_bad: str | None = None
+        self._enum_names: list[str] = library.names()
 
     def _template(self) -> str:
         """Read the prompt file; on an invalid edit keep playing on the last
@@ -177,7 +180,13 @@ class LLMPolicy:
         self.last_done_goal = None
         template = self._template()
         self.last_prompt_hash = hashlib.sha256(template.encode()).hexdigest()[:12]
-        text = render_prompt(template, self.library.names(),
+        # per-decision dynamic intents (item use/buy): full names go into the
+        # grammar enum; the DISPLAYED list gets the collapsed legend lines
+        dyn_names = obs.extra.get("dynamic_behaviors", [])
+        dyn_legend = obs.extra.get("dynamic_legend", [])
+        shown = self.library.names() + dyn_legend
+        self._enum_names = self.library.names() + dyn_names
+        text = render_prompt(template, shown,
                              obs.goals, obs.ram, obs.recent, self.max_plan,
                              memory=obs.memory, tilemap=obs.tilemap,
                              state_lines=self.state_lines)
@@ -224,7 +233,7 @@ class LLMPolicy:
                             "plan": {
                                 "type": "array",
                                 "items": {"type": "string",
-                                          "enum": self.library.names()},
+                                          "enum": self._enum_names},
                                 "minItems": 1,
                                 "maxItems": self.max_plan,
                             },
@@ -307,7 +316,7 @@ class LLMPolicy:
             action = json.loads(content[i:j + 1])
         plan = []
         for name in action["plan"]:
-            behavior = self.library.get(name)
+            behavior = self.library.get(name) or items.stub(name)
             if behavior is None:
                 raise ValueError(f"model chose unknown behavior {name!r}")
             plan.append(behavior)

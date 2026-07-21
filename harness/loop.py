@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from . import navigate
+from . import items, navigate
 from .behaviors import random_mash_steps
 from .executor import Executor
 from .interfaces import Extras, Eyes, Unsupported
@@ -54,6 +54,7 @@ class GameLoop:
         self._moves_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
         self._maps_cache: tuple[float, dict[int, str]] | None = None
+        self._marts_cache: tuple[float, dict[int, list[str]]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._grass_seen: dict[int, tuple[int, int]] = {}  # map_id -> map (x,y)
@@ -377,6 +378,21 @@ class GameLoop:
                         ram_ctx["last_move"] = (
                             f"walking {m.group(1)} you went "
                             f"{m.group(2)} tile(s){m.group(3)}")
+        # generalized item intents (user 2026-07-21): names minted from what
+        # is actually possible right now — the bag makes use_<item>, the
+        # current map's shop table makes buy_<item>_x<n>. The model supplies
+        # item and count in the name; the harness owns the menu geometry.
+        bag_names = []
+        if self._last_bag:
+            inames = self._item_names()
+            bag_names = [inames.get(i, f"ITEM_0x{i:02x}")
+                         for i in self._last_bag]
+        mart_names = self._mart_items().get(
+            (ram_ctx or {}).get("map_id"), []) if ram_ctx else []
+        dyn = items.dynamic_names(bag_names, mart_names)
+        if dyn:
+            extra["dynamic_behaviors"] = dyn
+            extra["dynamic_legend"] = items.legend(bag_names, mart_names)
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=tilemap, extra=extra)
@@ -384,6 +400,16 @@ class GameLoop:
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
         for i, b in enumerate(decision.behaviors):
+            if items.is_item(b.name):
+                rb = items.resolve(b.name, bag_names, mart_names,
+                                   bool((ram_ctx or {}).get("in_battle")))
+                if rb is not None:
+                    decision.behaviors[i] = rb
+                else:
+                    self._recent.append(
+                        f"[{b.name}: that item is not there right now - "
+                        "check your bag line / the shop]")
+                continue
             if navigate.is_nav(b.name):
                 nb = navigate.resolve(b.name, **self._nav) \
                     if self._nav is not None else None
@@ -749,6 +775,21 @@ class GameLoop:
             return names
         except Exception:  # noqa: BLE001 — names are context, never fatal
             return self._maps_cache[1] if self._maps_cache else {}
+
+    def _mart_items(self) -> dict[int, list[str]]:
+        """HOT mart-map-id -> inventory table (data/<game>/marts.yaml)."""
+        path = self.base / "data" / self.profile.name / "marts.yaml"
+        try:
+            mtime = path.stat().st_mtime
+            if self._marts_cache is not None and self._marts_cache[0] == mtime:
+                return self._marts_cache[1]
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            marts = {int(k): [str(v) for v in vs]
+                     for k, vs in (raw.get("marts") or {}).items()}
+            self._marts_cache = (mtime, marts)
+            return marts
+        except Exception:  # noqa: BLE001 — shop tables are context, never fatal
+            return self._marts_cache[1] if self._marts_cache else {}
 
     def _can_move_line(self) -> str | None:
         """One sentence on the four adjacent tiles, from this tick's nav

@@ -1,0 +1,18 @@
+# Shop inventories by MART MAP id -> items in menu order (slot = index).
+# Pre-ingested from pret/pokered data/items/marts.asm (data-table
+# convention: full authoritative table, LIVE-verified reserved for
+# behavioral claims). Grow as the run approaches new towns.
+marts:
+  42:  # Viridian Poke Mart
+    - POKE BALL
+    - ANTIDOTE
+    - PARLYZ HEAL
+    - BURN HEAL
+  56:  # Pewter Poke Mart
+    - POKE BALL
+    - POTION
+    - ESCAPE ROPE
+    - ANTIDOTE
+    - BURN HEAL
+    - AWAKENING
+    - PARLYZ HEAL
