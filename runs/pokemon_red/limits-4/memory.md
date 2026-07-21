@@ -1,3 +1,1 @@
-CORRECTION: the building I visited was a private HOUSE, not the Pokemon
-Center — I have NOT healed yet. I am back outside in Viridian City now.
-Next: find the red-roof Pokemon Center and heal there.
+I am outside the Pokemon Center in Viridian City. Goal 2 and 3 are effectively complete, so I am now heading north to exit the city toward Route 2.
