@@ -1,1 +1,1 @@
-Inside Viridian Pokemon Center. Healing Charmander, then heading to the Mart for 3 Poke Balls and 3 Antidotes.
+In Viridian City, outside the Pokemon Center. Healing Charmander, then heading to the Mart for 3 Poke Balls and 3 Antidotes.
