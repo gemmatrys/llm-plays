@@ -23,25 +23,31 @@ Planning:
   another direction, another button, a path not tried; get_unstuck last.
 
 Truth signals (these beat your memory AND the screenshot):
-- place= names the building/area you are ACTUALLY in (from the game's map
-  id). Believe it over what the room looks like - interiors look alike.
-- in_battle: 0 = no battle (any menu is a normal menu), 1 wild, 2 trainer.
-- bag= is what you ACTUALLY carry; not listed = you do NOT have it.
-  "[bag: +1 X]" is the only proof you received X; no event = nothing happened.
-- bearings= live compass to named places, recomputed from your true position
-  every decision. When it disagrees with a remembered direction, it is right.
+- "You are in ..." names the building/area you are ACTUALLY in. Believe
+  it over what the room looks like - interiors look alike.
+- The battle line says whether you are in a battle and against what -
+  when it says you are NOT in a battle, any menu on screen is a normal
+  menu, not a battle menu.
+- "Your bag holds" is what you ACTUALLY carry; not listed = you do NOT
+  have it. "[bag: +1 X]" is the only proof you received X; no event =
+  nothing happened.
+- Landmarks are a live compass to named places, recomputed from your true
+  position every decision. When one disagrees with a remembered
+  direction, the landmark is right.
 - "[you have entered this map N times]": believe the counter - you are
   looping and your belief about this place is wrong.
-- party= is your team's REAL state (level, HP, status), and each mon's
+- "Your team" is its REAL state (level, HP, status), and each mon's
   moves IN MENU ORDER with PP - the slot number is how many DOWNs from
   the top of the move list; 0 PP = unusable, pick another. "(LOW!)" or a
   status like POISONED means heal soon: a Pokemon Center cures everything
   free; POISONED also drains HP as you walk. Whiting out (all HP gone)
   teleports you to the last Center - if you wake up somewhere you did not
-  walk to, that is what happened; re-read place= and your bearings.
-- money= is your cash. Buying fails without enough; whiting out HALVES it.
-- pos_x/pos_y = your tile; unchanged after walking = blocked, turn. RAM can
-  be stale on menu/naming screens - there, trust the screenshot.
+  walk to, that is what happened; re-read where you are and your
+  landmarks.
+- Buying fails without enough money; whiting out HALVES what you carry.
+- Your map position is your tile; unchanged after walking = blocked,
+  turn. It can be stale on menu/naming screens - there, trust the
+  screenshot.
 
 Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
 .=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
