@@ -1,1 +1,1 @@
-I am outside the Pokemon Center in Viridian City. Goal 2 and 3 are effectively complete, so I am now heading north to exit the city toward Route 2.
+I am inside the Poke Mart in Viridian City. I need to talk to the clerk to get Oak's Parcel, then leave the shop.
