@@ -30,12 +30,11 @@ waypoints:
   # PEWTER_CITY=2, PEWTER_GYM=54). "VERIFIED (pokered)" = from the
   # game's own tables but not yet confirmed in this run's log — eyeball
   # at first crossing.
-  # Viridian north edge -> Route 2 (map connection, no D). GUESS: road
-  # column from the trainer-tips sign flanking the exit; verify at
-  # first crossing.
+  # Viridian north edge -> Route 2 (map connection, no D). VERIFIED:
+  # live 23:45 crossing landed at exactly (18,0).
   gap to Route 2: {map: 1, x: 18, y: 0}
-  # Route 2 south edge -> back into Viridian. GUESS: mirror of the
-  # north gap via the connection x-offset (-10); bottom row y=71.
+  # Route 2 south edge -> back into Viridian. VERIFIED: live 23:45
+  # crossing left from exactly (8,71).
   south gap back to Viridian: {map: 13, x: 8, y: 71}
   # South gate of Viridian Forest, door on Route 2 — VERIFIED (pokered
   # Route2 warp table -> VIRIDIAN_FOREST_SOUTH_GATE)
