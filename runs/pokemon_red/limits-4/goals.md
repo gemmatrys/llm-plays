@@ -49,9 +49,11 @@
     bearing). Stamp when the nurse heals you and place= says Pewter
     Pokemon Center.
 
-13. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing;
-    300 each - if money is short, buy what you can afford). Same BUY
-    drill as goal 8. A "[bag: +N POTION]" event is the stamp. Skip
+13. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
+    stand at the counter FACING the clerk and use the buy-5-potions
+    skill from your action list - it runs the whole shop conversation
+    (1500 total; if money is short it buys what it can - keep whatever
+    the bag event says). A "[bag: +N POTION]" event is the stamp. Skip
     the MUSEUM - it only costs money.
 
 14. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
