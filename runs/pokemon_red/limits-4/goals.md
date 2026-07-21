@@ -54,8 +54,8 @@
     ("[bag: +1 ...]") are the proof.
 
 Rules:
-- Every fight: pick EMBER - press A (move list opens), DOWN to its
-  slot number shown in party=, A. If EMBER hits 0 PP, SCRATCH.
+- Every fight: attack_3 (EMBER). When party= shows EMBER at 0 PP,
+  attack_1 (SCRATCH) instead - same one call, nothing else to work out.
 - Poke Balls only work on WILD Pokemon (in_battle: 1); in a trainer
   battle they are simply lost. Keep the last ball for a PIKACHU.
 - POISONED: START, ITEM, choose ANTIDOTE, A on USE, pick the Pokemon -
