@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14 (currently L13).
+In Viridian Forest, grinding Charmander to L14 (currently L13). Next: continue battling in grass.
