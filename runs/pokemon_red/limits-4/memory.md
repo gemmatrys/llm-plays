@@ -1,1 +1,1 @@
-I have delivered the parcel and received the POKEDEX. Now I need to leave the lab and head north to Route 2.
+In Pallet Town. Heading north to Route 1, then through Viridian City to Route 2.
