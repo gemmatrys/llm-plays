@@ -1,1 +1,1 @@
-In Viridian Pokemon Center. Goal: Heal Charmander, then go to the Mart and buy 3 Poke Balls and 3 Antidotes.
+In Viridian City. Goal: Buy 3 Poke Balls and 3 Antidotes at the Mart, then head to Route 2.
