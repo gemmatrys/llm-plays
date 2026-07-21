@@ -39,6 +39,9 @@ class RunLog:
         # here to heal"). Written by the model, carried verbatim, survives
         # restarts; checkpoints may correct false beliefs in it.
         self.memory_path = self.dir / "memory.md"
+        # run-scoped lessons a checkpoint records for THIS run (published to
+        # the live branch under the run id); global truths go to LEARNINGS.md
+        self.learnings_path = self.dir / "learnings.md"
         self._log = (self.dir / "log.jsonl").open("a", encoding="utf-8")
         self._metrics = (self.dir / "metrics.jsonl").open("a", encoding="utf-8")
         self._escalations = self.dir / "escalations.jsonl"
@@ -55,6 +58,11 @@ class RunLog:
 
     def set_memory(self, text: str) -> None:
         self.memory_path.write_text(text, encoding="utf-8")
+
+    def learnings(self) -> str:
+        if self.learnings_path.is_file():
+            return self.learnings_path.read_text(encoding="utf-8")
+        return ""
 
     def log_decision(self, d: Decision, frame_hash: str, ram: dict | None,
                      duration_s: float, executed: int | None = None) -> None:

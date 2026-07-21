@@ -1,10 +1,12 @@
-"""Async live-publisher: mirrors Gemma's goals and memory to a `live` branch.
+"""Async live-publisher: mirrors a run's goals/memory/learnings to a `live` branch.
 
 A watcher thread — deliberately separate from the decision loop, so git
-latency can never delay a decision — polls the run's goals.md and memory.md.
-Every change becomes a commit on the `live` branch (goals.md and memory.md at
-the branch root), pushed to the remote: the branch always shows the current
-state, and its history records every update, while `main` stays purely code.
+latency can never delay a decision — polls the run's goals.md, memory.md, and
+learnings.md. Every change becomes a commit on the `live` branch, filed under
+`<run-id>/` (previous runs' directories stay in the tree untouched): the
+branch is the progression record across runs — each run's directory shows its
+final state, the commit history shows every goal/notes change within it —
+while `main` stays purely code.
 
 Commits are built with git plumbing (hash-object -> mktree -> commit-tree ->
 update-ref) and never touch the working tree, the index, or the checked-out
@@ -32,8 +34,10 @@ class LivePublisher:
     def __init__(self, base: Path, runlog, poll_s: float = 1.0):
         self.base = Path(base)
         self.runlog = runlog
+        self.run_id = runlog.dir.name
         self.poll_s = poll_s
-        self._sources = {"goals.md": runlog.goals, "memory.md": runlog.memory}
+        self._sources = {"goals.md": runlog.goals, "memory.md": runlog.memory,
+                         "learnings.md": runlog.learnings}
         self._published: dict[str, str | None] = {n: None for n in self._sources}
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -59,14 +63,18 @@ class LivePublisher:
     # -- one pass -------------------------------------------------------------
     def step(self) -> None:
         targets = {name: read() for name, read in self._sources.items()}
+        # a file that is empty AND was never published isn't a change — keeps
+        # "learnings.md" out of commit messages before the first checkpoint
         changed = [n for n, content in targets.items()
-                   if content != self._published[n]]
+                   if content != self._published[n]
+                   and (content or self._published[n])]
         if not changed:
             return  # push failures retry via changed-detection: a failed pass
                     # never marks content as published, so it re-runs entirely
         if self._build_and_push(targets, changed):
             self._published = dict(targets)
-            self.runlog.log_metric("publish", files=changed, branch=BRANCH)
+            self.runlog.log_metric("publish", files=changed, branch=BRANCH,
+                                   run=self.run_id)
 
     # -- git plumbing ---------------------------------------------------------
     def _git(self, *args: str, input_text: str | None = None
@@ -89,20 +97,39 @@ class LivePublisher:
     def _build_and_push(self, targets: dict[str, str], changed: list[str]) -> bool:
         blobs = {}
         for name, content in targets.items():
+            if not content:
+                continue  # absent files (learnings before the first checkpoint)
             r = self._git("hash-object", "-w", "--stdin", input_text=content)
             if r.returncode != 0:
                 return self._fail("hash-object", r)
             blobs[name] = r.stdout.strip()
 
-        tree_listing = "".join(f"100644 blob {sha}\t{name}\n"
-                               for name, sha in sorted(blobs.items()))
-        r = self._git("mktree", input_text=tree_listing)
+        sub_listing = "".join(f"100644 blob {sha}\t{name}\n"
+                              for name, sha in sorted(blobs.items()))
+        r = self._git("mktree", input_text=sub_listing)
         if r.returncode != 0:
             return self._fail("mktree", r)
+        subtree = r.stdout.strip()
+
+        # root tree = current live tree with THIS run's directory swapped in;
+        # other runs' directories ride along untouched, so the branch
+        # accumulates a per-run progression record instead of overwriting
+        parent = self._git("rev-parse", "--verify", "--quiet", REF)
+        entries: list[str] = []
+        if parent.returncode == 0:
+            r = self._git("ls-tree", REF)
+            if r.returncode != 0:
+                return self._fail("ls-tree", r)
+            entries = [ln for ln in r.stdout.splitlines()
+                       if ln and not ln.endswith(f"\t{self.run_id}")]
+        entries.append(f"040000 tree {subtree}\t{self.run_id}")
+        r = self._git("mktree", input_text="\n".join(entries) + "\n")
+        if r.returncode != 0:
+            return self._fail("mktree-root", r)
         tree = r.stdout.strip()
 
-        parent = self._git("rev-parse", "--verify", "--quiet", REF)
-        commit_args = ["commit-tree", tree, "-m", "live: " + ", ".join(changed)]
+        commit_args = ["commit-tree", tree, "-m",
+                       f"live: {self.run_id}: " + ", ".join(changed)]
         if parent.returncode == 0:
             commit_args += ["-p", parent.stdout.strip()]
         r = self._git(*commit_args)

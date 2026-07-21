@@ -21,6 +21,9 @@ advice.
   escalations
 - `snapshots/` — periodic and stuck/milestone screenshots
 - `progress.md` — your own running summary from previous checkpoints
+- `learnings.md` — run-scoped lessons you record for THIS run (what this run
+  taught, incidents, notable moments). Published to the `live` branch under
+  `<run-id>/` when publishing is on — part of the public progression record
 - `goals.md` — the strategy file Gemma reads on EVERY decision
 - `memory.md` — Gemma's SELF-maintained notes (where it thinks it is, what it
   thinks it is doing). A false belief here is a classic stuckness cause:
@@ -41,6 +44,10 @@ advice.
 2. **Update `progress.md`.** Compress what happened since last checkpoint: where
    the run is, what was accomplished (use milestones), what failed repeatedly,
    hours and decision counts. This file is for you-next-time; be specific.
+   Also append run-scoped lessons to the run's `learnings.md` — incidents,
+   surprises, what this run taught. Only truths about the GAME or the system
+   graduate to the global LEARNINGS.md / prompts (duty 5); run stories stay
+   per-run, where the live branch publishes them.
 3. **Rewrite `goals.md`.** This is your main lever. Rules:
    - **Hard budget: 200 words.** It is injected into every Gemma prompt; every
      word you write costs inference latency forever.
