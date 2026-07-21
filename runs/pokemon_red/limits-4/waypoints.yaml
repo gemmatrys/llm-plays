@@ -67,10 +67,12 @@ waypoints:
   # top corridor VERIFIED 2026-07-21 live: model crossed at (25,12) with
   # the bearing reading 1 north - (25,11) is satisfiable, no correction.
   the top corridor: {map: 51, x: 25, y: 11}
-  # top-west corner + west lane REMOVED 2026-07-21 live: the real top
-  # passage is y~1 (model crossed (11,3)->(6,1)) - both guesses pointed
-  # 10-17 tiles SOUTH of it and lured the model away from the exit
-  # (ghost-bearing class). From the top row the exit corner is direct.
+  # Route history (live, 2026-07-21): top-west corner (2,11) was a bad
+  # guess (removed); the top row dead-ends at x=6 with north+west walls
+  # (verified at (6,1)) - the exit is approached UP THE WEST COLUMN.
+  # (2,18) is a pokered object coord (something stands ON the path) -
+  # restored as the descent anchor after a premature deletion.
+  the west side path: {map: 51, x: 2, y: 18}
   # Forest north exit doormats, top-left corner — VERIFIED (forest warp
   # table: (1,0)/(2,0) -> north gate)
   forest exit corner: {map: 51, x: 1, y: 0}
