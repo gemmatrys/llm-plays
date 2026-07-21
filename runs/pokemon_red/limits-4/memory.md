@@ -1,1 +1,1 @@
-On Route 2. Battling in the grass to get Charmander to level 9 (learn Ember) and catch a backup Pokemon.
+In the Viridian Forest south gate building. Entering the forest to begin grinding Charmander to level 14.
