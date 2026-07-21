@@ -84,6 +84,16 @@ phases don't relearn them. Format: lesson → where it now lives.
   so a logged dump is attributable — the harvesting workflow for each new
   tileset is: stand in the room, read the dump, mark open tiles against the
   screenshot, add the entry.
+- **Walkability is per-BLOCK, judged by the block's BOTTOM-LEFT subtile** —
+  Gen 1's own collision convention. Classifying each 8x8 subtile against the
+  collision list renders mixed blocks wrong: overworld flower ground (2c/03
+  mixed, bottom-left 2c) drew a checkerboard of phantom walls on Route 1.
+  Fixed 2026-07-20: the renderer classifies each 2x2 block by its bottom-left
+  id, which makes pokered's per-tileset collision lists correct verbatim.
+  Terrain now lives in `data/<game>/tiles.yaml` (walkable + portal ids per
+  tileset) — a HOT file checkpoints extend live (no restart), validated with
+  last-good fallback + tiles_invalid escalation. Harvest drill: read the
+  BOTTOM-LEFT corner of each block in the tagged raw dump.
 - **Warp/portal coordinates are Gen 1's `(y, x, destWarp, destMap)`, NOT
   `(x, y, ...)`** — got this backwards once and it put the door marker on the
   bed instead of the stairs. Confirmed by walking the player onto the real

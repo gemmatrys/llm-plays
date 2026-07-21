@@ -1,0 +1,35 @@
+# Terrain map: per-tileset passability + portals for the ASCII map renderer.
+#
+# CONVENTION (matches the game's own collision check): ids are the BOTTOM-LEFT
+# 8x8 subtile of each 2x2-tile block. When harvesting from a raw-id dump, read
+# the bottom-left corner of each block (odd row, even col), not every subtile —
+# mixed blocks like overworld flower ground (2c/03) are classified by that one
+# corner, exactly as Gen 1 does it.
+#
+# HOT FILE: reloaded on change, no harness restart. Checkpoints append entries
+# as the run reaches new tilesets (unknown tileset -> the model sees a raw-id
+# dump tagged with the tileset id = the harvesting view). A parse error keeps
+# the last good table and raises a tiles_invalid escalation.
+#
+# `portal` ids render as D (doors/stairs/cave mouths) in ADDITION to the
+# always-on warp-table overlay; leave empty until verified live.
+tilesets:
+  "0x00":
+    name: overworld
+    # pokered's overworld collision list (bottom-left ids) — live-validated on
+    # Route 1 2026-07-20: speckled ground 0x39, tall grass 0x52, flower ground
+    # (bl 0x2c) all open; bush blocks (bl 0x50), ledges (0x36/0x37), sign,
+    # water all blocked.
+    walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
+               "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
+    portal: []
+  "0x01":
+    name: reds_house
+    # both floors; floor blocks are uniform 0x01 — verified live 2026-07-20
+    walkable: ["0x01"]
+    portal: []
+  "0x05":
+    name: dojo_gym_lab
+    # Oak's lab; floor blocks uniform 0x11 — verified live 2026-07-20
+    walkable: ["0x11"]
+    portal: []

@@ -104,8 +104,11 @@ files itself (its memory.md is written FOR it by the harness from its replies).
 
 ## Guardrails
 
-- Edit ONLY: the run's `goals.md` / `progress.md` / `memory.md`, `skills/**`,
-  `prompts/<game>/**`, and escalation resolutions.
+- Edit ONLY: the run's `goals.md` / `progress.md` / `memory.md` /
+  `learnings.md`, `skills/**`, `prompts/<game>/**`,
+  `data/<game>/tiles.yaml` (the HOT per-tileset terrain map — harvest new
+  tilesets from the tagged raw-id dumps; ids are block BOTTOM-LEFT subtiles),
+  and escalation resolutions.
 - Do NOT edit `profiles/*.yaml` (harness configuration — ladder, ratchet,
   buttons, escalation thresholds), harness code, or logs. Profiles are cold
   config: changing one means tearing down the harness and starting a new run

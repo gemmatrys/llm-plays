@@ -76,6 +76,10 @@ class TilemapConfig:
     tileset_addr: int = 0xD367     # wCurMapTileset
     # tileset id -> passable tile ids; missing tileset = raw-id dump
     walkable_by_tileset: dict[int, list[int]] = field(default_factory=dict)
+    # preferred: HOT-loaded per-tileset terrain map (walkable + portal ids,
+    # block bottom-left convention) — see harness/tilemap.py TerrainTable.
+    # Checkpoints edit it live; walkable_by_tileset above is the fallback.
+    tiles_file: str | None = None
     # map dimensions (blocks; x2 = tiles) so off-map tiles render blocked
     height_addr: int = 0xD368      # wCurMapHeight
     width_addr: int = 0xD369       # wCurMapWidth

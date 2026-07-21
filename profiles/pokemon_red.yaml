@@ -75,16 +75,9 @@ tilemap:
   player_row: 8
   window: 4           # 9x9 box around the player
   tileset_addr: "0xD367"
-  walkable_by_tileset:
-    # 0 = OVERWORLD (seeded set, in live use since the shakeout runs)
-    "0x00": ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
-             "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
-    # 1 = REDS_HOUSE (both floors): floor 0x01 only; walls/windows/furniture
-    # (0x00, 0x24/25/34/35, TV, PC, plant ids) all observed blocked
-    "0x01": ["0x01"]
-    # 5 = DOJO/GYM/LAB (Oak's lab): floor 0x11 only; verified live 2026-07-20
-    # (pokeball table, machines, shelves, walls all observed blocked)
-    "0x05": ["0x11"]
+  # per-tileset terrain (walkable + portal, block bottom-left ids) lives in
+  # this HOT file — checkpoints extend it live, no restart needed:
+  tiles_file: data/pokemon_red/tiles.yaml
 
 driver_opts:
   host: 127.0.0.1

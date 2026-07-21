@@ -14,7 +14,7 @@ from .profile import GameProfile
 from .runlog import RunLog
 from .stream import StreamState
 from .stuckness import StucknessMonitor
-from .tilemap import render_ascii
+from .tilemap import TerrainTable, render_ascii
 from .types import Behavior, Observation, phash_diff
 
 
@@ -32,6 +32,10 @@ class GameLoop:
         self.stream = stream
         self.sync = sync
         self.stuckness = StucknessMonitor(profile.escalation)
+        tm = profile.tilemap
+        self._terrain = TerrainTable(base / tm.tiles_file) \
+            if tm is not None and tm.tiles_file else None
+        self._tiles_err: str | None = None
         self._recent: list[str] = []
         self._last_ram: dict[str, int] = {}
         self._last_save_ts = 0.0
@@ -154,11 +158,29 @@ class GameLoop:
             return ""
         try:
             tileset = None
-            if tm.walkable_by_tileset:
+            portals: set[int] = set()
+            if self._terrain is not None or tm.walkable_by_tileset:
                 # walkability is per-tileset: pick the set for the CURRENT
                 # tileset; an unconfigured one degrades to the raw-id dump
                 tileset = self.extras.read_block(tm.tileset_addr, 1)[0]
-                tm = replace(tm, walkable=tm.walkable_by_tileset.get(tileset, []))
+                walk: set[int] = set()
+                if self._terrain is not None:
+                    walk, portals = self._terrain.lookup(tileset)
+                    if self._terrain.error and self._terrain.error != self._tiles_err:
+                        # a bad checkpoint edit to tiles.yaml must self-report;
+                        # the last good table keeps rendering meanwhile
+                        self._tiles_err = self._terrain.error
+                        self.runlog.log_metric(
+                            "tiles_invalid", detail=self._terrain.error[:200])
+                        self.runlog.escalate(
+                            "tiles_invalid",
+                            f"tiles file rejected, last good kept: "
+                            f"{self._terrain.error[:200]}")
+                    elif not self._terrain.error:
+                        self._tiles_err = None
+                if not walk and tm.walkable_by_tileset:
+                    walk = set(tm.walkable_by_tileset.get(tileset, []))
+                tm = replace(tm, walkable=sorted(walk))
             raw = self.extras.read_block(tm.addr, tm.cols * tm.rows)
             px, py = self._last_ram.get("pos_x"), self._last_ram.get("pos_y")
             player = (px, py) if px is not None and py is not None else None
@@ -174,7 +196,7 @@ class GameLoop:
                 wb = self.extras.read_block(tm.warp_entry_addr, 4 * min(n, 32))
                 warps = [(wb[4 * i + 1], wb[4 * i]) for i in range(min(n, 32))]
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
-                                tileset=tileset)
+                                tileset=tileset, portal_ids=portals)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             return ""
 

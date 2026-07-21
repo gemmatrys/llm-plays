@@ -54,6 +54,7 @@ class LivePublisher:
         self._watch: list[tuple[str, str]] = []
         if profile is not None:
             self._watch.append((f"prompts/{profile.name}", "*.md"))
+            self._watch.append((f"data/{profile.name}", "*.yaml"))
             self._watch += [(d, "*.yaml") for d in profile.skills_dirs]
         self._published: dict[str, str] = {}
         self._stop = threading.Event()
