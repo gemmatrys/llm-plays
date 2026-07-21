@@ -5,9 +5,10 @@ driver: mgba
 rom: null  # informational; the ROM is loaded in mGBA manually for now
 
 buttons: [A, B, START, SELECT, UP, DOWN, LEFT, RIGHT]
-decision_cadence_s: 30.0  # AIM 120 decisions/hr (one per 30s); the loop paces
-                          # fast decisions up to this floor. Slow thinking runs
-                          # at its natural pace, capped by ladder.llm_timeout_s.
+decision_cadence_s: 20.0  # user 2026-07-21 after the audit found the old 30s
+                          # floor binding ~half of decisions (median LLM time
+                          # 28s). Slow thinking still runs at its natural
+                          # pace, capped by ladder.llm_timeout_s.
 
 ladder:
   # rotated one per fallback: advances dialogue (A), backs out of menus/naming
