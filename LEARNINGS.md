@@ -195,6 +195,29 @@ phases don't relearn them. Format: lesson → where it now lives.
   prompt rules around avoiding it — check what the goal actually cares about
   before treating a symptom as a problem.
 
+## The Charmander incident (2026-07-20) — irreversible choices vs mashing
+
+- **A dialogue mash committed an irreversible choice**: the model pressed A on
+  Charmander's pokeball (correctly, to inspect), then chose
+  mash_through_dialogue on Oak's confirmation — a mid-burst A answered YES
+  before the trailing B could decline. Party: CHARMANDER, nickname "A",
+  permanent. The trailing-B design only guarantees the burst's END state;
+  nothing inside the burst is safe on a confirmation prompt. → prompt.md +
+  goals now forbid mashing on any yes/no confirming a specific choice
+  (take/buy/learn/nickname): ONE press, A or B, per goals.
+- **The single-slot ratchet cannot undo anything**: the pre-choice savestate
+  (17:45:21) was 30 s older than the acceptance (17:45:51) and had been
+  overwritten three times before anyone looked. Pending improvement: keep a
+  second slot pinned at the last milestone so "just before something
+  irreversible happened" survives longer than one ratchet interval.
+- **The model then wedged on a FALSE BELIEF, and I3 worked end-to-end**: it
+  opened party/stats menus convinced it still had to pick Bulbasaur ("Choose
+  a POKeMON" = party menu, misread as the gift choice — prompt.md now says
+  so). The behavior-loop detector self-rescued at +12 min, the position
+  detector escalated at +17 min, and a checkpoint rewrite of the run's
+  goals.md + memory.md redirected it within ONE decision (again the
+  highest-leverage unstick tool). Escalation resolved in escalations.jsonl.
+
 ## Harness & ops
 
 - **One universal scripted fallback is wrong** — mash_a in the overworld

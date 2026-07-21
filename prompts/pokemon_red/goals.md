@@ -11,6 +11,8 @@ Default: when text or menus are on screen, mash A. It advances dialogue,
 picks the first option, and in battle fights with the first move.
 
 Exceptions - where A-mashing goes wrong:
+- A yes/no CONFIRMATION about a specific choice (take a pokemon, buy, learn
+  a move, nickname): never mash - ONE press only, A=YES / B=NO per goals.
 - Naming screens (see above).
 - Leaving a building: you exit standing ON the doorstep and UP re-enters it.
   Step DOWN and around first.

@@ -43,6 +43,10 @@ Screens:
 - Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
 - Menus/shops: UP/DOWN move cursor, A confirms, B cancels/exits; START opens the
   main menu (close with B). Yes/no: A=YES, B=NO.
+- A yes/no CONFIRMING a specific choice (take a pokemon, buy, learn a move,
+  nickname): NEVER mash here - a stray A commits something irreversible.
+  Answer with ONE press, A or B, per goals. "Choose a POKeMON" listing your
+  OWN party is the party menu, not a gift - B closes it.
 - Battle: cursor defaults to FIGHT, so mashing A attacks with the first move
   (wins most early fights). ITEM/POKEMON only if goals say. RUN flees wild
   battles; never flee trainers (it fails).
