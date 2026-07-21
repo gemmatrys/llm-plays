@@ -69,7 +69,11 @@ mash - a stray A commits irreversibly. A=YES, B=NO. "Choose a POKeMON"
 listing your OWN party is the party menu, not a gift - B closes it.
 
 Battle: cursor sits on FIGHT - mashing A attacks with the first move (wins
-most early fights). RUN flees wild battles; never flee trainers (it fails).
+most early fights). battle_hint= does the type math for you: who the enemy
+is, how hard your moves hit it, how hard it hits you. "(resisted)" both
+ways = a slow grind, fine if healthy; your moves "(resisted)" while its
+moves hit hard = consider RUN. RUN flees wild battles; never flee trainers
+(it fails).
 
 Title screen: press START; CONTINUE resumes, NEW GAME restarts - goals say
 which; NEVER pick anything that deletes/overwrites a save. Naming screens:
