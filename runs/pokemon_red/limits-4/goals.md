@@ -19,11 +19,12 @@
     you. In Pewter, heal at the Center (the "Pewter Center door"
     bearing; inside, walk-to-counter puts you in front of the nurse -
     talk, ONE press A on her yes/no, mash through the rest). EMBER is
-    out of PP until the nurse refills it, so do NOT hunt battles on
-    the way: skip the dark grass where the path allows, and FLEE any
-    wild battle that starts - press DOWN then RIGHT to put the arrow
-    on RUN, then A (repeat if it fails). SCRATCH only when fleeing
-    keeps failing. Trainers who stop you cannot be fled - SCRATCH.
+    out of PP until the nurse refills it - skip the dark grass where
+    the path allows, and do not hunt battles. If a wild bug jumps you
+    anyway, SCRATCH it down: A on FIGHT, then A again (SCRATCH is
+    slot 1) - these bugs fall in 1-2 hits. Only if SCRATCH also reads
+    UNUSABLE, flee in ONE reply: chain press_B, press_DOWN,
+    press_RIGHT, press_A - that lands the arrow on RUN and confirms.
     Stamp when the nurse heals you and place= says Pewter Pokemon
     Center.
 
