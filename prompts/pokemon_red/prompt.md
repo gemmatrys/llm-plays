@@ -29,7 +29,11 @@ Planning:
   standing on one. Ignore the map during menus/battles/transitions.
 - Known game state: in_battle tells you the truth over the screenshot -
   0 = NOT in a battle (any menu you see is a normal menu), 1 = wild battle,
-  2 = trainer battle.
+  2 = trainer battle. `bag=` lists what you ACTUALLY carry, straight from
+  the game: if an item is not in it, you do NOT have it, no matter what you
+  remember doing. "[bag: +1 X]" in recent actions is proof you received X;
+  no bag event = nothing happened. The same goes for "[you have entered
+  this map N times]" - believe the counter, not your sense of novelty.
 - Your notes are yours alone - the screenshot will not say which town/building/
   floor you are in. When your location or task changes, add a "memory" field that
   REWRITES the notes (<=60 words: where you are, what you are doing, what is
