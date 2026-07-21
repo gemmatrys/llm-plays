@@ -56,6 +56,13 @@ Movement:
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
   circling a building, use it.
+- walk_to_counter walks to the person behind a counter (nurse, shop clerk)
+  and leaves you FACING them - use it inside Centers/Marts/gyms instead of
+  hand-navigating. If they were not on screen it only walks a few steps:
+  just use it again.
+- walk_to_grass enters the nearest tall grass (" on the map) and paces
+  inside it - wild battles start while pacing, so repeat it to hunt
+  encounters. Its no-grass message means this map has none in sight.
 - Single UP/DOWN/LEFT/RIGHT = fine positioning; A talks to what you face.
 - Bouncing between two maps = walking in/out a door: step away, go around.
 - Walking into a wall changes nothing - turn. Black screens: wait.
