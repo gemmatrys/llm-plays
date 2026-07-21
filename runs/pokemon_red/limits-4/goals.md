@@ -28,7 +28,7 @@
    DOWN then A for ITEM, choose POKE BALL, A. Nickname: NO. Keep the
    last ball.
 
-10. Follow the "forest gate door" bearing up the WEST side of Route 2
+10. [DONE] Follow the "forest gate door" bearing up the WEST side of Route 2
     and enter the gate building (a D). Inside, walk north across the
     room and out the far doorway (the "doorway into the forest"
     bearing) into VIRIDIAN FOREST. Stamp when place= says Viridian
