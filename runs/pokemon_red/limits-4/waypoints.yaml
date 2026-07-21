@@ -59,7 +59,11 @@ waypoints:
   # the EAST side, then runs west along the top, then down the west lane.
   # Anchors from pokered object coords (trainers/items sit ON the path);
   # exact corridor tiles are GUESS — promote from the live crossing.
-  the path north (east side): {map: 51, x: 30, y: 30}
+  # (east side) VERIFIED 2026-07-21 live: the (30,30) guess is a tree -
+  # the model stood at (31,30) 3+ times but a west step was never
+  # possible, and it orbited the unsatisfiable bearing for ~40min.
+  # (31,30) is the standable path tile.
+  the path north (east side): {map: 51, x: 31, y: 30}
   the top corridor: {map: 51, x: 25, y: 11}
   the west lane to the exit: {map: 51, x: 2, y: 18}
   # Forest north exit doormats, top-left corner — VERIFIED (forest warp
