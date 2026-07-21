@@ -7,8 +7,12 @@
 15. [DONE] Walk Route 2 north into Pewter City.
 16. [DONE] Heal at the Pewter Center - EMBER's PP is refilled.
 
-17. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
-    inside, use walk_to_counter, then buy_potion_x5 - it holds the
+17. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing).
+    Getting there: the Center's own door sits in the column just north
+    of it - walking north there walks you back INTO the Center (it has
+    three times now). Walk the EAST distance of the Mart bearing
+    FIRST, then the north distance. Inside, use walk_to_counter, then
+    buy_potion_x5 - it holds the
     whole conversation and purchase, one behavior, 1500 total. A
     "[bag: +5 POTION]" event is the proof - mark done when you see it.
     If you cannot afford it, move on without buying. Skip the MUSEUM -
