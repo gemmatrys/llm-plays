@@ -21,3 +21,48 @@ waypoints:
   # Oak inside the lab — GUESS from the starter-choice logs (model stood
   # at (5,3) facing the desk row); ±1 tile is fine, talking works adjacent
   oak: {map: 40, x: 5, y: 2}
+  # --- stretch 2: Route 2 / Viridian Forest / Pewter (2026-07-20).
+  # Sources: pret/pokered data/maps/objects/*.asm (warp+object tables),
+  # headers (connection offsets), constants/map_constants.asm
+  # (ROUTE_2=13, VF_SOUTH_GATE=50, VIRIDIAN_FOREST=51, VF_NORTH_GATE=47,
+  # PEWTER_CITY=2, PEWTER_GYM=54). "VERIFIED (pokered)" = from the
+  # game's own tables but not yet confirmed in this run's log — eyeball
+  # at first crossing.
+  # Viridian north edge -> Route 2 (map connection, no D). GUESS: road
+  # column from the trainer-tips sign flanking the exit; verify at
+  # first crossing.
+  route2_gap: {map: 1, x: 18, y: 0}
+  # Route 2 south edge -> back into Viridian. GUESS: mirror of
+  # route2_gap via the connection x-offset (-10); bottom row y=71.
+  viridian_return_gap: {map: 13, x: 8, y: 71}
+  # South gate of Viridian Forest, door on Route 2 — VERIFIED (pokered
+  # Route2 warp table -> VIRIDIAN_FOREST_SOUTH_GATE)
+  forest_gate_door: {map: 13, x: 3, y: 43}
+  # Inside the south gate: the NORTH doorway into the forest — VERIFIED
+  # (gate warp table; entry from Route 2 lands at (4,7), exit straight
+  # north across the room)
+  gate_forest_door: {map: 50, x: 4, y: 0}
+  # Free items on the forest's west path — VERIFIED (pokered object
+  # table). Ball sprites; face and press A. (A third item, an ANTIDOTE
+  # at (25,11), sits in a trainer's sight line — not waypointed on
+  # purpose.)
+  forest_potion: {map: 51, x: 12, y: 29}
+  forest_ball: {map: 51, x: 1, y: 31}
+  # Forest north exit doormats, top-left corner — VERIFIED (forest warp
+  # table: (1,0)/(2,0) -> north gate)
+  forest_exit: {map: 51, x: 1, y: 0}
+  # Inside the north gate: north doorway out to Route 2 — VERIFIED
+  # (gate warp table -> Route 2 (3,11))
+  gate_route2_door: {map: 47, x: 4, y: 0}
+  # Route 2 north edge -> Pewter. GUESS: road column ~x=8 from
+  # walkthrough maps. NOTE Diglett's Cave door (D) at (12,9) — goals
+  # say do not enter.
+  pewter_gap: {map: 13, x: 8, y: 0}
+  # Pewter City doors — VERIFIED (pokered PewterCity warp table)
+  pewter_center_door: {map: 2, x: 13, y: 25}
+  pewter_mart_door: {map: 2, x: 23, y: 17}
+  pewter_gym_door: {map: 2, x: 16, y: 17}
+  # Brock inside the gym — VERIFIED (object table (4,1)). Stand south,
+  # press A; adjacent works. Entrance mats (4,13)/(5,13); JR TRAINER at
+  # (3,6) facing right — his fight is effectively mandatory.
+  brock: {map: 54, x: 4, y: 1}
