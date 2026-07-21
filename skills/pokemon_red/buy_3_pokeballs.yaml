@@ -1,0 +1,24 @@
+# One Mart purchase as a deterministic sequence (user decision
+# 2026-07-21: shopping is wired as skills, like the nurse heal).
+# Precondition: standing at the Mart counter FACING the clerk.
+# Viridian stock order (pokered marts.asm): POKE_BALL, ANTIDOTE,
+# PARLYZ_HEAL, BURN_HEAL - Poke Ball is TOP of the list, no scrolling.
+# VERIFY via the [bag: +3 POKE BALL] event at first live use.
+# Recovery by construction: if the clear-A after paying lands on the
+# item list instead of leftover text, it opens a quantity box - the
+# trailing B presses unwind it before closing out. advance_text never
+# blind-presses at a visible choice cursor.
+name: buy_3_pokeballs
+description: Facing the Mart clerk, buy exactly 3 Poke Balls and close the menus.
+steps:
+  - {op: advance_text}                            # talk -> BUY/SELL/QUIT menu
+  - {button: A, hold_frames: 6, wait_frames: 60}  # BUY
+  - {button: A, hold_frames: 6, wait_frames: 40}  # POKE BALL (top of list)
+  - {button: UP, hold_frames: 4, wait_frames: 16} # qty x2
+  - {button: UP, hold_frames: 4, wait_frames: 16} # qty x3
+  - {button: A, hold_frames: 6, wait_frames: 60}  # confirm qty -> price yes/no
+  - {button: A, hold_frames: 6, wait_frames: 120} # YES - pay
+  - {button: A, hold_frames: 6, wait_frames: 60}  # clear "Here you are!"
+  - {button: B, hold_frames: 6, wait_frames: 40}  # leave the item list
+  - {button: B, hold_frames: 6, wait_frames: 40}  # leave BUY/SELL/QUIT
+  - {op: advance_text}                            # clerk's parting line, if any
