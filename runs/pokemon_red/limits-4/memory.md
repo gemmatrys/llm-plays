@@ -1,1 +1,1 @@
-I am in Pallet Town with Oak's Parcel. I am heading east to Professor Oak's lab to deliver it and get the Pokedex.
+I am in the Pokemon Mart in Viridian City. I have the parcel. I am leaving the Mart and heading south through Route 1 to Pallet Town to deliver it to Professor Oak.
