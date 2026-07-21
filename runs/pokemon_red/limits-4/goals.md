@@ -21,10 +21,8 @@
     talk, ONE press A on her yes/no, mash through the rest). EMBER is
     out of PP until the nurse refills it - skip the dark grass where
     the path allows, and do not hunt battles. If a wild bug jumps you
-    anyway, SCRATCH it down: A on FIGHT, then A again (SCRATCH is
-    slot 1) - these bugs fall in 1-2 hits. Only if SCRATCH also reads
-    UNUSABLE, flee in ONE reply: chain press_B, press_DOWN,
-    press_RIGHT, press_A - that lands the arrow on RUN and confirms.
+    anyway: flee_battle escapes it in one call, or attack_1 (SCRATCH)
+    kills it in a turn or two - pick one and go, do not deliberate.
     Your HP stays under half until that heal - there are no POTIONs
     in the bag, so Potion rules do not apply on this walk; these bugs
     cannot beat a level 14 CHARMANDER, just keep moving north.
