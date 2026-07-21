@@ -23,3 +23,8 @@ steps:
   - {button: RIGHT, hold_frames: 4, wait_frames: 12}
   - {button: A, hold_frames: 4, wait_frames: 40}
   - {op: advance_text}
+  # tripwire-judge validation (pilot): in_battle==0 confirms the escape for
+  # free; still 1 -> the LLM judges the settled screen. Feedback only on
+  # failure ("[verify FAILED: ...]"), silence = escaped.
+  - {op: verify, wait_frames: 30, tripwire: {field: in_battle, equals: 0},
+     expect: "the battle is over - the overworld is on screen, no battle menu"}
