@@ -1,1 +1,1 @@
-In Pewter Mart, buying 5 POTIONs (Goal 17). Next: win Boulderbadge at the Gym.
+In Pewter City, heading to the Pewter Gym to win the BOULDERBADGE (Goal 18).
