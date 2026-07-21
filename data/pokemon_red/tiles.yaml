@@ -106,6 +106,14 @@ tilesets:
     walkable: ["0x01","0x12","0x14","0x1a","0x1c","0x37","0x38","0x3b","0x3c","0x5e"]
     portal: []
     counter: ["0x17", "0x32"]
+  "0x11":
+    name: cavern
+    # pokered Cavern_Coll, ingested 2026-07-21 ahead of the stretch-3 Mt
+    # Moon crossing (three floors of this tileset; an unharvested cave =
+    # the forest-gate wedge, hours long). No grass, no counter — cave
+    # encounters roll on walkable floor, not a grass id.
+    walkable: ["0x05","0x15","0x18","0x1a","0x20","0x21","0x22","0x2a","0x2d","0x30"]
+    portal: []
   "0x08":
     name: house
     # generic house interior — harvested live 2026-07-20 in a Viridian home
