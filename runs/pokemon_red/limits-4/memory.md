@@ -1,1 +1,1 @@
-In Pewter City, navigating around the Gym's fence to reach the doormat on the west side to enter and challenge Brock.
+In Pewter City, walking around the gym's fence (south then west) to reach the doormat on the west side to enter.
