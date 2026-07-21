@@ -21,12 +21,12 @@
    hands you a PARCEL for Professor Oak the moment you talk to him. If
    someone only chats about school or coffee, wrong building - leave.
 
-5. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
+6. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
    Pallet Town (retrace the route you came up). Enter Oak's lab (the big
    building at the south of town) and talk to Professor Oak. Press A
    through his dialogue - he takes the parcel and gives you the POKEDEX.
 
-6. Walk north through Route 1 to Viridian City again, then head north out
+7. Walk north through Route 1 to Viridian City again, then head north out
    of the city. The old man now lets you pass. Continue to Route 2.
 
 Rules:
