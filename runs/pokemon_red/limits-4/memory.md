@@ -1,1 +1,1 @@
-In Viridian Poke Mart. Need to leave, heal at the Pokemon Center, then return to buy 3 Poke Balls and 3 Antidotes.
+In Viridian City, outside the Poke Mart. I have full HP, so I am skipping the Pokemon Center and proceeding to buy 3 Poke Balls and 3 Antidotes from the Mart.
