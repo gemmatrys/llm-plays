@@ -392,19 +392,48 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                 return (0 <= b[0] < cols_b and 0 <= b[1] < rows_b
                         and grid[b[1]][b[0]])
 
+            # while walking the ray, ENUMERATE the perpendicular openings it
+            # passes — a stride glides straight past a one-block gap in a
+            # parallel wall, and the model cannot spot a lone "." in a grid
+            # of "#" (same lesson as the warp "Exits:" summary line). The
+            # note reports each passage's side + distance in the same step
+            # units bearings use, so it plugs into the existing counted-walk
+            # drill ("east after 3" -> walk_north_3, walk_east).
+            side_name = {(-dxy[1], dxy[0]): btn_of[(-dxy[1], dxy[0])],
+                         (dxy[1], -dxy[0]): btn_of[(dxy[1], -dxy[0])]}
+            word = {"UP": "north", "DOWN": "south",
+                    "LEFT": "west", "RIGHT": "east"}
+            passages: list[tuple[str, int]] = []
+            last_open: dict[str, bool] = {}
             stride: list[str] = []
             cur = start
+            fwd_count = 0  # forward steps only — the distance the note reports
+
+            def _scan_sides() -> None:
+                for sv, btn in side_name.items():
+                    is_open = _open((cur[0] + sv[0], cur[1] + sv[1]))
+                    # a multi-block gap is ONE passage, reported at entry
+                    if is_open and not last_open.get(btn, False) \
+                            and fwd_count > 0 and len(passages) < 6:
+                        passages.append((word[btn], fwd_count))
+                    last_open[btn] = is_open
+
+            _scan_sides()  # seed adjacency so a gap at step 1 reports cleanly
             while len(stride) < MAX_STEPS:
                 n = (cur[0] + dxy[0], cur[1] + dxy[1])
                 if _open(n):
                     stride.append(fwd_btn)
                     cur = n
+                    fwd_count += 1
+                    _scan_sides()
                     continue
                 if fwd_btn == "DOWN" and n in ledge_blocks:
                     n2 = (cur[0], cur[1] + 2)
                     if _open(n2):
                         stride.append("DOWN*")
                         cur = n2
+                        fwd_count += 2
+                        _scan_sides()
                         continue
                 stepped = False
                 if len(stride) + 2 <= MAX_STEPS:
@@ -417,12 +446,30 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                             stride.append(btn_of[(sx, sy)])
                             stride.append(fwd_btn)
                             cur = s2
+                            fwd_count += 1
+                            last_open.clear()  # lateral shift: re-seed sides
+                            _scan_sides()
                             stepped = True
                             break
                 if not stepped:
                     break  # a real wall: the stride ends here, honestly
             if stride:
-                return Behavior(name=orig, source="builtin",
+                went = word[fwd_btn]
+                hit_cap = len(stride) >= MAX_STEPS
+                nxt = (cur[0] + dxy[0], cur[1] + dxy[1])
+                off_screen = not (0 <= nxt[0] < cols_b and 0 <= nxt[1] < rows_b)
+                # three honest endings: budget spent (say nothing), the
+                # visible window ran out (the world continues - walking
+                # again shows more), or an actual wall
+                note = f"[walk_{went}: went {fwd_count}" + \
+                       ("" if hit_cap else
+                        ", edge of sight - walk again to see further"
+                        if off_screen else ", stopped at a wall")
+                if passages:
+                    note += "; openings passed: " + ", ".join(
+                        f"{side} after {d}" for side, d in passages)
+                note += "]"
+                return Behavior(name=orig, source="builtin", note=note,
                                 steps=[Step(button=d.rstrip("*"),
                                             hold_frames=8,
                                             wait_frames=30 if d.endswith("*")

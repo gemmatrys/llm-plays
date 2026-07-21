@@ -405,6 +405,9 @@ class GameLoop:
             feedback = self.executor.execute(behavior)
             if feedback:
                 self._recent.append(feedback)
+            if behavior.note:
+                # navigation self-report (stride distance + passages passed)
+                self._recent.append(behavior.note)
             executed += 1
             if feedback and "choice/menu" in feedback:
                 # advance_text stopped at a live choice cursor. The ONE

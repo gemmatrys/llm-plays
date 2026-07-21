@@ -84,6 +84,10 @@ class Behavior:
     # optional: generate fresh steps at execute time (randomized/reflexive
     # behaviors). When set, the executor calls this instead of using `steps`.
     step_factory: Callable[[], list[Step]] | None = None
+    # optional feedback line the loop appends to recent-actions after this
+    # behavior executes (e.g. a stride reporting the passages it walked past
+    # — enumerated conclusions the model reads far better than map grids)
+    note: str | None = None
 
 
 @dataclass
