@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14. Ember is at 0 PP, so I am using Scratch. Next: enter grass and battle.
+In Viridian Forest, grinding Charmander to L14. Currently L13, HP 13/34. Ember is 0 PP, so I'm using Scratch. Next: enter grass and battle.
