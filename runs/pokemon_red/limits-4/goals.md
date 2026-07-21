@@ -57,6 +57,10 @@ Rules:
   carry you PAST it.
 - Inside a building, if walking finds no path out, stand on the doormat and
   press a SINGLE step toward the wall the door is in (usually press down).
+- Town and route connections sit at MAP EDGES (no D shown). When a gap
+  bearing says you are there (or 1 tile away) and walking goes nowhere:
+  line up on the gap, then take a SINGLE step toward the edge - walking
+  moves stop at edges, a single press crosses.
 - Do NOT mark a goal done unless the game showed it happen. "I think I did
   it" is not evidence.
 - Accidental menu: B closes it. Never save over or delete anything. Do not
