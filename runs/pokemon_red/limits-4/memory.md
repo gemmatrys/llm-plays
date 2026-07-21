@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14 (L11). Picking up the first item (3 north), then the second (1 north, 11 west), then continuing to grind.
+In Viridian Forest, grinding Charmander to L14 (L11). Picking up item 3 north, then item 1 north 11 west, then grinding.
