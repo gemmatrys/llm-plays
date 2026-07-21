@@ -10,17 +10,6 @@
 waypoints:
   Mart door: {map: 1, x: 29, y: 19}
   Pokemon Center door: {map: 1, x: 23, y: 25}
-  # Counter waypoints: consumed by the walk_to_counter macro (BFS to the
-  # spot, then a face tap). "face" = button that turns toward the person
-  # across the counter. Gen 1 interiors are identical per building type,
-  # so the Pewter copies reuse the Viridian local coords (GUESS until
-  # first live use there).
-  # VERIFIED: nurse dialogue live at (3,3); heal completed facing UP
-  nurse counter: {map: 41, x: 3, y: 3, face: UP}
-  # VERIFIED: Oak's Parcel bought standing (2,5); clerk is west
-  Mart counter: {map: 42, x: 2, y: 5, face: LEFT}
-  Pewter nurse counter: {map: 58, x: 3, y: 3, face: UP}
-  Pewter Mart counter: {map: 56, x: 2, y: 5, face: LEFT}
   # south exit to Route 1 — coords from the live 20:38 crossing (12->1
   # landed at (21,35)); map-edge connection, no D shown
   south gap to Route 1: {map: 1, x: 21, y: 35}
