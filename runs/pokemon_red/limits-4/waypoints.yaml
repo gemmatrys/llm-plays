@@ -1,0 +1,9 @@
+# Checkpoint-curated navigation targets. HOT: reloaded on change. Each
+# waypoint on the player's CURRENT map renders a live bearing into the
+# model's {ram} view ("mart_door: 12 east, 7 south"), recomputed from the
+# true position every decision — so goal text never carries compass
+# directions that rot as the player moves. Coordinates from the live warp
+# table (verified source), not memory.
+waypoints:
+  mart_door: {map: 1, x: 29, y: 19}
+  pokecenter_door: {map: 1, x: 23, y: 25}
