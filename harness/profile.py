@@ -31,7 +31,18 @@ class RatchetConfig:
 
 @dataclass
 class EscalationConfig:
-    stagnant_after_s: float = 1200.0  # same-screen time that counts as stuck
+    # Detector thresholds (seconds; <= 0 disables that detector) — see
+    # harness/stuckness.py for what each one catches and misses.
+    stagnant_after_s: float = 1200.0  # screen: no novel phash for this long
+    pos_stagnant_after_s: float = 900.0  # position: pinned in a tiny box, no RAM progress
+    pos_box_tiles: int = 2  # "pinned" = within this many tiles of the anchor
+    behavior_stagnant_after_s: float = 600.0  # behavior loop while position pinned
+    behavior_distinct_max: int = 3  # "loop" = at most this many distinct behaviors
+    milestone_stagnant_after_s: float = 7200.0  # no badge/map/party change at all
+    # Staged response: one bounded random-input burst first (requires
+    # ladder.allow_random), Claude escalation only if signals persist.
+    self_rescue: bool = True
+    rescue_grace_s: float = 300.0  # how long a rescue gets to show progress
     max_wakes_per_window: int = 2  # Claude-budget guard
     window_s: float = 18000.0  # 5 h
 

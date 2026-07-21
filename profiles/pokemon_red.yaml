@@ -32,7 +32,17 @@ ratchet:
   ingame_save_behavior: null  # not needed while savestates work
 
 escalation:
-  stagnant_after_s: 1200      # 20 min of same-screen = stuck
+  # Four detectors (harness/stuckness.py; <=0 disables one). Screen novelty
+  # alone is blind to UIs that echo inputs back — the naming grid minted a
+  # fresh phash per typed letter and held the screen clock at bay for good.
+  stagnant_after_s: 1200      # screen: 20 min with no NOVEL screen
+  pos_stagnant_after_s: 900   # position: 15 min pinned in a 2-tile box, no RAM progress
+  pos_box_tiles: 2
+  behavior_stagnant_after_s: 600  # behavior loop: 10 min of <=3 behaviors while pinned
+  behavior_distinct_max: 3
+  milestone_stagnant_after_s: 7200  # no badge/map/party change for 2 h - slow, sure alarm
+  self_rescue: true           # first response: one get_unstuck burst, not a Claude wake
+  rescue_grace_s: 300         # the rescue gets 5 min to show progress before escalating
   max_wakes_per_window: 2
   window_s: 18000             # 5 h
 

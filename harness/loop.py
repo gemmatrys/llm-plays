@@ -6,6 +6,7 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+from .behaviors import random_mash_steps
 from .executor import Executor
 from .interfaces import Extras, Eyes, Unsupported
 from .profile import GameProfile
@@ -13,7 +14,7 @@ from .runlog import RunLog
 from .stream import StreamState
 from .stuckness import StucknessMonitor
 from .tilemap import render_ascii
-from .types import Observation, phash_diff
+from .types import Behavior, Observation, phash_diff
 
 
 class GameLoop:
@@ -100,6 +101,7 @@ class GameLoop:
                          if k not in ("pos_x", "pos_y")}
                 self.runlog.log_metric("milestone", **marks)
                 self.runlog.snapshot(frame, tag="milestone")
+                self.stuckness.note_milestone()
             self._last_ram = ram
 
         obs = Observation(frame=frame, ram=ram, goals=self.runlog.goals(),
@@ -136,7 +138,8 @@ class GameLoop:
                                       thinking=decision.thinking)
 
         self._ratchet()
-        self._watch_stuckness(frame, fhash)
+        self._watch_stuckness(frame, fhash, ram,
+                              [b.name for b in decision.behaviors[:executed]])
         self._periodic_snapshot(frame)
 
     def _read_tilemap(self) -> str:
@@ -183,14 +186,29 @@ class GameLoop:
         self._last_save_ts = time.time()
 
     # -- invariant I3: bounded stuckness --------------------------------------
-    def _watch_stuckness(self, frame, fhash: str) -> None:
-        self.stuckness.observe(fhash)
-        if not self.stuckness.is_stuck():
+    def _watch_stuckness(self, frame, fhash: str, ram: dict | None,
+                         executed: list[str]) -> None:
+        self.stuckness.observe(fhash, ram, executed)
+        reasons = self.stuckness.stuck_reasons()
+        if not reasons:
+            return
+        response = self.stuckness.next_response(reasons,
+                                                self.profile.ladder.allow_random)
+        if response == "wait":  # a rescue is still inside its grace period
+            return
+        if response == "rescue":
+            # first response is mechanical: one bounded random-input burst (the
+            # same get_unstuck escape the model can pick) before spending a wake
+            self.runlog.log_metric("self_rescue", signals=reasons)
+            self.executor.execute(Behavior(
+                name="get_unstuck", source="builtin",
+                steps=random_mash_steps(self.profile.buttons)))
             return
         snap = self.runlog.snapshot(frame, tag="stuck")
         if self.stuckness.may_wake_claude():
-            self.runlog.escalate("stuck", "screen stagnant beyond threshold", snap)
-            self.runlog.log_metric("escalation", reason="stuck")
+            self.runlog.escalate("stuck",
+                                 f"stuck signals: {', '.join(reasons)}", snap)
+            self.runlog.log_metric("escalation", reason="stuck", signals=reasons)
             if self.stream is not None:
                 self.stream.bump("escalations")
             try:
@@ -200,7 +218,8 @@ class GameLoop:
             except Exception as e:  # noqa: BLE001 — briefing must never kill the loop
                 self.runlog.log_metric("briefing_error", error=repr(e))
         else:
-            self.runlog.log_metric("escalation_suppressed", reason="stuck")
+            self.runlog.log_metric("escalation_suppressed", reason="stuck",
+                                   signals=reasons)
         self.stuckness.reset()
 
     def _periodic_snapshot(self, frame, every_s: float = 600.0) -> None:

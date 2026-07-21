@@ -28,8 +28,10 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
 - **I2 — Progress ratchet.** The harness enforces save discipline ("never more than
   N minutes from a save/savestate") as a scheduled injected behavior. Failure then costs
   bounded time, converting punishing games back into brute-forceable segments.
-- **I3 — Bounded stuckness.** Stuckness is detected mechanically (frame-hash stagnation,
-  death loops, zero progress signals for N minutes) and triggers escalation rather than
+- **I3 — Bounded stuckness.** Stuckness is detected mechanically by independent
+  signals (screen-novelty stagnation, position pinned with no RAM progress,
+  behavior loops, milestone drought — harness/stuckness.py), and the response is
+  staged: one bounded random-input self-rescue first, then escalation rather than
   waiting for the next scheduled checkpoint.
 
 ## 2. Architecture
