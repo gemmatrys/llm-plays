@@ -1,1 +1,1 @@
-In Pewter City, outside the Mart. Walking to the gym doormat (Goal 19), then entering the gym (Goal 20).
+In Pewter Poke Mart. Leaving the Mart to walk to the gym's doormat (Goal 19).
