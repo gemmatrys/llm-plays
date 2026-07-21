@@ -1,1 +1,1 @@
-In Viridian Forest at x=1, y=18. Goal 12 is done. Now curing poison before walking north to the forest exit corner (Goal 13).
+In the Viridian Forest north gate building. Crossing to Route 2 (Goal 14), then heading to Pewter City (Goal 15) to heal CHARMANDER (Goal 16).
