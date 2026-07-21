@@ -49,13 +49,10 @@ Truth signals (these beat your memory AND the screenshot):
   turn. It can be stale on menu/naming screens - there, trust the
   screenshot.
 - "From this tile you can step" is your true immediate options, and
-  "You cannot step" names what blocks each other way - believe both
-  over the map and the screenshot.
-
-Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
-.=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
-from below it is solid, never push up into it. The line under the grid lists
-exits. Ignore the map during menus/battles/transitions.
+  "You cannot step" names what blocks each other way - believe them
+  over the screenshot. A person blocking a tile wanders: wait a turn
+  or step around. A ledge crosses ONE way - hop down it going south,
+  never push against it from below.
 
 Movement:
 - PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
@@ -64,12 +61,13 @@ Movement:
   went 9, stopped at a wall; openings passed: east after 3]" means a gap
   in the side wall sat 3 tiles along - walk_south_6 returns to it from
   where you stand (9-3), or remember it for the way back. Openings are
-  how mazes continue; trust the report over squinting at the map.
-  Walking the same direction again after a stop just bumps the same wall. Counted variants walk a bearing EXACTLY: "3 south,
-  4 east" = ["walk_south_3","walk_east_4"]. When nothing is walkable that
-  way it still takes ONE step in that direction - which is exactly how
-  you cross town/route boundaries at a gap (map edges show nothing; just
-  keep walking the bearing). "[move blocked]" afterward = a real wall.
+  how mazes continue; the report is the truth about what you passed.
+  Walking the same direction again after a stop just bumps the same
+  wall. Counted variants walk a bearing EXACTLY: "3 south, 4 east" =
+  ["walk_south_3","walk_east_4"]. When nothing is walkable that way it
+  still takes ONE step in that direction - which is exactly how you
+  cross town/route boundaries at the area's edge (just keep walking
+  the bearing). "[move blocked]" afterward = a real wall.
 - walk_to_exit goes THROUGH the nearest D - entering or leaving, including
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
@@ -78,9 +76,9 @@ Movement:
   and leaves you FACING them - use it inside Centers/Marts/gyms instead of
   hand-navigating. If they were not on screen it only walks a few steps:
   just use it again.
-- walk_to_grass enters the nearest tall grass (" on the map) and paces
-  inside it - wild battles start while pacing, so repeat it to hunt
-  encounters. Its no-grass message means this map has none in sight.
+- walk_to_grass enters the nearest tall grass and paces inside it -
+  wild battles start while pacing, so repeat it to hunt encounters.
+  Its no-grass message means none is in sight here.
 - Single UP/DOWN/LEFT/RIGHT = fine positioning; A talks to what you face.
 - Bouncing between two maps = walking in/out a door: step away, go around.
 - Walking into a wall changes nothing - turn. Black screens: wait.
@@ -132,9 +130,6 @@ lowest unstamped goal.
 
 ## Known game state
 {ram}
-
-## Map around you
-{tilemap}
 
 ## Recent actions (oldest first)
 {recent}
