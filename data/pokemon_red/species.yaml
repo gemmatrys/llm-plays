@@ -1,6 +1,160 @@
-# Gen 1 INTERNAL species id -> name (NOT dex order) for the party= view.
-# HOT: reloaded per read. LIVE-VERIFIED ids only — an unknown id renders
-# SPECIES_0xXX (a harvest tag: name it once the screenshot confirms).
-# Do not bulk-import recalled tables (the 0x55 "ledge" was a fence).
+# Gen 1 INTERNAL species id -> name + types (NOT dex order).
+# Internal order sourced from pret/pokered pokemon_constants.asm;
+# types are standard Gen 1 typing (Magnemite/Magneton pure ELECTRIC
+# - no Steel in Gen 1). User-authorized bulk knowledge 2026-07-20;
+# 0xB0=CHARMANDER cross-checked live. HOT file.
 species:
-  "0xb0": CHARMANDER   # verified 2026-07-20: the starter, nick "A"
+  "0x01": {name: RHYDON, types: [GROUND, ROCK]}
+  "0x02": {name: KANGASKHAN, types: [NORMAL]}
+  "0x03": {name: NIDORAN_M, types: [POISON]}
+  "0x04": {name: CLEFAIRY, types: [NORMAL]}
+  "0x05": {name: SPEAROW, types: [NORMAL, FLYING]}
+  "0x06": {name: VOLTORB, types: [ELECTRIC]}
+  "0x07": {name: NIDOKING, types: [POISON, GROUND]}
+  "0x08": {name: SLOWBRO, types: [WATER, PSYCHIC]}
+  "0x09": {name: IVYSAUR, types: [GRASS, POISON]}
+  "0x0a": {name: EXEGGUTOR, types: [GRASS, PSYCHIC]}
+  "0x0b": {name: LICKITUNG, types: [NORMAL]}
+  "0x0c": {name: EXEGGCUTE, types: [GRASS, PSYCHIC]}
+  "0x0d": {name: GRIMER, types: [POISON]}
+  "0x0e": {name: GENGAR, types: [GHOST, POISON]}
+  "0x0f": {name: NIDORAN_F, types: [POISON]}
+  "0x10": {name: NIDOQUEEN, types: [POISON, GROUND]}
+  "0x11": {name: CUBONE, types: [GROUND]}
+  "0x12": {name: RHYHORN, types: [GROUND, ROCK]}
+  "0x13": {name: LAPRAS, types: [WATER, ICE]}
+  "0x14": {name: ARCANINE, types: [FIRE]}
+  "0x15": {name: MEW, types: [PSYCHIC]}
+  "0x16": {name: GYARADOS, types: [WATER, FLYING]}
+  "0x17": {name: SHELLDER, types: [WATER]}
+  "0x18": {name: TENTACOOL, types: [WATER, POISON]}
+  "0x19": {name: GASTLY, types: [GHOST, POISON]}
+  "0x1a": {name: SCYTHER, types: [BUG, FLYING]}
+  "0x1b": {name: STARYU, types: [WATER]}
+  "0x1c": {name: BLASTOISE, types: [WATER]}
+  "0x1d": {name: PINSIR, types: [BUG]}
+  "0x1e": {name: TANGELA, types: [GRASS]}
+  "0x21": {name: GROWLITHE, types: [FIRE]}
+  "0x22": {name: ONIX, types: [ROCK, GROUND]}
+  "0x23": {name: FEAROW, types: [NORMAL, FLYING]}
+  "0x24": {name: PIDGEY, types: [NORMAL, FLYING]}
+  "0x25": {name: SLOWPOKE, types: [WATER, PSYCHIC]}
+  "0x26": {name: KADABRA, types: [PSYCHIC]}
+  "0x27": {name: GRAVELER, types: [ROCK, GROUND]}
+  "0x28": {name: CHANSEY, types: [NORMAL]}
+  "0x29": {name: MACHOKE, types: [FIGHTING]}
+  "0x2a": {name: MR_MIME, types: [PSYCHIC]}
+  "0x2b": {name: HITMONLEE, types: [FIGHTING]}
+  "0x2c": {name: HITMONCHAN, types: [FIGHTING]}
+  "0x2d": {name: ARBOK, types: [POISON]}
+  "0x2e": {name: PARASECT, types: [BUG, GRASS]}
+  "0x2f": {name: PSYDUCK, types: [WATER]}
+  "0x30": {name: DROWZEE, types: [PSYCHIC]}
+  "0x31": {name: GOLEM, types: [ROCK, GROUND]}
+  "0x33": {name: MAGMAR, types: [FIRE]}
+  "0x35": {name: ELECTABUZZ, types: [ELECTRIC]}
+  "0x36": {name: MAGNETON, types: [ELECTRIC]}
+  "0x37": {name: KOFFING, types: [POISON]}
+  "0x39": {name: MANKEY, types: [FIGHTING]}
+  "0x3a": {name: SEEL, types: [WATER]}
+  "0x3b": {name: DIGLETT, types: [GROUND]}
+  "0x3c": {name: TAUROS, types: [NORMAL]}
+  "0x40": {name: FARFETCHD, types: [NORMAL, FLYING]}
+  "0x41": {name: VENONAT, types: [BUG, POISON]}
+  "0x42": {name: DRAGONITE, types: [DRAGON, FLYING]}
+  "0x46": {name: DODUO, types: [NORMAL, FLYING]}
+  "0x47": {name: POLIWAG, types: [WATER]}
+  "0x48": {name: JYNX, types: [ICE, PSYCHIC]}
+  "0x49": {name: MOLTRES, types: [FIRE, FLYING]}
+  "0x4a": {name: ARTICUNO, types: [ICE, FLYING]}
+  "0x4b": {name: ZAPDOS, types: [ELECTRIC, FLYING]}
+  "0x4c": {name: DITTO, types: [NORMAL]}
+  "0x4d": {name: MEOWTH, types: [NORMAL]}
+  "0x4e": {name: KRABBY, types: [WATER]}
+  "0x52": {name: VULPIX, types: [FIRE]}
+  "0x53": {name: NINETALES, types: [FIRE]}
+  "0x54": {name: PIKACHU, types: [ELECTRIC]}
+  "0x55": {name: RAICHU, types: [ELECTRIC]}
+  "0x58": {name: DRATINI, types: [DRAGON]}
+  "0x59": {name: DRAGONAIR, types: [DRAGON]}
+  "0x5a": {name: KABUTO, types: [ROCK, WATER]}
+  "0x5b": {name: KABUTOPS, types: [ROCK, WATER]}
+  "0x5c": {name: HORSEA, types: [WATER]}
+  "0x5d": {name: SEADRA, types: [WATER]}
+  "0x60": {name: SANDSHREW, types: [GROUND]}
+  "0x61": {name: SANDSLASH, types: [GROUND]}
+  "0x62": {name: OMANYTE, types: [ROCK, WATER]}
+  "0x63": {name: OMASTAR, types: [ROCK, WATER]}
+  "0x64": {name: JIGGLYPUFF, types: [NORMAL]}
+  "0x65": {name: WIGGLYTUFF, types: [NORMAL]}
+  "0x66": {name: EEVEE, types: [NORMAL]}
+  "0x67": {name: FLAREON, types: [FIRE]}
+  "0x68": {name: JOLTEON, types: [ELECTRIC]}
+  "0x69": {name: VAPOREON, types: [WATER]}
+  "0x6a": {name: MACHOP, types: [FIGHTING]}
+  "0x6b": {name: ZUBAT, types: [POISON, FLYING]}
+  "0x6c": {name: EKANS, types: [POISON]}
+  "0x6d": {name: PARAS, types: [BUG, GRASS]}
+  "0x6e": {name: POLIWHIRL, types: [WATER]}
+  "0x6f": {name: POLIWRATH, types: [WATER, FIGHTING]}
+  "0x70": {name: WEEDLE, types: [BUG, POISON]}
+  "0x71": {name: KAKUNA, types: [BUG, POISON]}
+  "0x72": {name: BEEDRILL, types: [BUG, POISON]}
+  "0x74": {name: DODRIO, types: [NORMAL, FLYING]}
+  "0x75": {name: PRIMEAPE, types: [FIGHTING]}
+  "0x76": {name: DUGTRIO, types: [GROUND]}
+  "0x77": {name: VENOMOTH, types: [BUG, POISON]}
+  "0x78": {name: DEWGONG, types: [WATER, ICE]}
+  "0x7b": {name: CATERPIE, types: [BUG]}
+  "0x7c": {name: METAPOD, types: [BUG]}
+  "0x7d": {name: BUTTERFREE, types: [BUG, FLYING]}
+  "0x7e": {name: MACHAMP, types: [FIGHTING]}
+  "0x80": {name: GOLDUCK, types: [WATER]}
+  "0x81": {name: HYPNO, types: [PSYCHIC]}
+  "0x82": {name: GOLBAT, types: [POISON, FLYING]}
+  "0x83": {name: MEWTWO, types: [PSYCHIC]}
+  "0x84": {name: SNORLAX, types: [NORMAL]}
+  "0x85": {name: MAGIKARP, types: [WATER]}
+  "0x88": {name: MUK, types: [POISON]}
+  "0x8a": {name: KINGLER, types: [WATER]}
+  "0x8b": {name: CLOYSTER, types: [WATER, ICE]}
+  "0x8d": {name: ELECTRODE, types: [ELECTRIC]}
+  "0x8e": {name: CLEFABLE, types: [NORMAL]}
+  "0x8f": {name: WEEZING, types: [POISON]}
+  "0x90": {name: PERSIAN, types: [NORMAL]}
+  "0x91": {name: MAROWAK, types: [GROUND]}
+  "0x93": {name: HAUNTER, types: [GHOST, POISON]}
+  "0x94": {name: ABRA, types: [PSYCHIC]}
+  "0x95": {name: ALAKAZAM, types: [PSYCHIC]}
+  "0x96": {name: PIDGEOTTO, types: [NORMAL, FLYING]}
+  "0x97": {name: PIDGEOT, types: [NORMAL, FLYING]}
+  "0x98": {name: STARMIE, types: [WATER, PSYCHIC]}
+  "0x99": {name: BULBASAUR, types: [GRASS, POISON]}
+  "0x9a": {name: VENUSAUR, types: [GRASS, POISON]}
+  "0x9b": {name: TENTACRUEL, types: [WATER, POISON]}
+  "0x9d": {name: GOLDEEN, types: [WATER]}
+  "0x9e": {name: SEAKING, types: [WATER]}
+  "0xa3": {name: PONYTA, types: [FIRE]}
+  "0xa4": {name: RAPIDASH, types: [FIRE]}
+  "0xa5": {name: RATTATA, types: [NORMAL]}
+  "0xa6": {name: RATICATE, types: [NORMAL]}
+  "0xa7": {name: NIDORINO, types: [POISON]}
+  "0xa8": {name: NIDORINA, types: [POISON]}
+  "0xa9": {name: GEODUDE, types: [ROCK, GROUND]}
+  "0xaa": {name: PORYGON, types: [NORMAL]}
+  "0xab": {name: AERODACTYL, types: [ROCK, FLYING]}
+  "0xad": {name: MAGNEMITE, types: [ELECTRIC]}
+  "0xb0": {name: CHARMANDER, types: [FIRE]}
+  "0xb1": {name: SQUIRTLE, types: [WATER]}
+  "0xb2": {name: CHARMELEON, types: [FIRE]}
+  "0xb3": {name: WARTORTLE, types: [WATER]}
+  "0xb4": {name: CHARIZARD, types: [FIRE, FLYING]}
+  "0xb6": {name: FOSSIL_KABUTOPS, types: [ROCK, WATER]}
+  "0xb7": {name: FOSSIL_AERODACTYL, types: [ROCK, FLYING]}
+  "0xb8": {name: MON_GHOST, types: [GHOST]}
+  "0xb9": {name: ODDISH, types: [GRASS, POISON]}
+  "0xba": {name: GLOOM, types: [GRASS, POISON]}
+  "0xbb": {name: VILEPLUME, types: [GRASS, POISON]}
+  "0xbc": {name: BELLSPROUT, types: [GRASS, POISON]}
+  "0xbd": {name: WEEPINBELL, types: [GRASS, POISON]}
+  "0xbe": {name: VICTREEBEL, types: [GRASS, POISON]}
