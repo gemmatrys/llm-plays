@@ -76,9 +76,9 @@ Movement:
   and leaves you FACING them - use it inside Centers/Marts/gyms instead of
   hand-navigating. If they were not on screen it only walks a few steps:
   just use it again.
-- walk_to_grass enters the nearest tall grass (" on the map) and paces
-  inside it - wild battles start while pacing, so repeat it to hunt
-  encounters. Its no-grass message means this map has none in sight.
+- walk_to_grass enters the nearest tall grass and paces inside it -
+  wild battles start while pacing, so repeat it to hunt encounters.
+  Its no-grass message means none is in sight here.
 - Single UP/DOWN/LEFT/RIGHT = fine positioning; A talks to what you face.
 - Bouncing between two maps = walking in/out a door: step away, go around.
 - Walking into a wall changes nothing - turn. Black screens: wait.
