@@ -1,1 +1,1 @@
-I am inside the Poke Mart in Viridian City. I need to talk to the clerk to get Oak's Parcel, then leave the shop.
+I am in a house in Viridian City. I need to leave this house and find the real Poke Mart to get Oak's Parcel.
