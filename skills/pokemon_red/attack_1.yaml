@@ -1,0 +1,21 @@
+# Battle-menu geometry skill: use the move in party= slot 1 (see flee_battle
+# for the reset-to-corner rationale). advance_text reaches the menu without
+# blind presses; B B collapses submenus; UP LEFT pins FIGHT; A opens the move
+# list where the cursor sits on the LAST-USED move (pokered restores it), so
+# UP UP UP pins slot 1 (no wrap - extra presses are no-ops); A uses the move;
+# the trailing advance_text plays the whole turn out, ending at the next
+# battle menu ("[stopped at a choice]") or at battle end ("[text closed]").
+name: attack_1
+description: Use the move in slot 1 of party= and play the turn out.
+steps:
+  - {op: advance_text}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: LEFT, hold_frames: 4, wait_frames: 12}
+  - {button: A, hold_frames: 4, wait_frames: 30}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: A, hold_frames: 4, wait_frames: 40}
+  - {op: advance_text}
