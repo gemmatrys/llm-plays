@@ -51,6 +51,7 @@ class GameLoop:
         self._map_visits: dict[int, int] = {}
         self._items_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
+        self._goals_alarmed = False  # latch for the all-goals-done escalation
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
@@ -226,6 +227,25 @@ class GameLoop:
             if self.runlog.mark_goal_done(decision.done_goal):
                 self.runlog.log_metric("goal_done", goal=decision.done_goal)
                 self._recent.append(f"[goal {decision.done_goal} marked DONE]")
+
+        # out of objectives: ALARM once (toast + checkpoint wake), don't
+        # silently idle — the model wanders on a finished list. Latched so a
+        # goals.md rewrite with fresh goals re-arms it; catches both the
+        # model stamping the last goal AND a checkpoint writing an all-done
+        # file.
+        if self.runlog.all_goals_done():
+            if not self._goals_alarmed:
+                self._goals_alarmed = True
+                self.runlog.log_metric("all_goals_done")
+                self.runlog.escalate(
+                    "goals_complete",
+                    "every numbered goal is stamped [DONE] - write the next "
+                    "goals; the model is idling on a finished list")
+                self._recent.append(
+                    "[ALL GOALS DONE - new goals are being written; stay "
+                    "where you are, do not wander]")
+        else:
+            self._goals_alarmed = False
 
         # Execute the plan; abort remaining steps if the screen changes more than
         # expected between steps (wild encounter, dialogue popup, scene change).

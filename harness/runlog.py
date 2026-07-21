@@ -71,6 +71,19 @@ class RunLog:
             return self.learnings_path.read_text(encoding="utf-8")
         return ""
 
+    def all_goals_done(self) -> bool:
+        """True when every numbered goal line in goals.md carries [DONE] —
+        the run has exhausted its objectives and a checkpoint must write
+        the next stretch."""
+        found = False
+        for line in self.goals().splitlines():
+            s = line.lstrip()
+            if s and s[0].isdigit() and "." in s[:4]:
+                found = True
+                if "[DONE]" not in line:
+                    return False
+        return found
+
     def mark_goal_done(self, n: int) -> bool:
         """Stamp [DONE] on numbered goal `n` in goals.md (the model's only
         write access to its goals — via the done_goal schema field). Marking
