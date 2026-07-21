@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14 (currently L11, HP 15/30). Collecting dropped items before continuing. Next: item 3 west, then item 2 north 8 east.
+In Viridian Forest, grinding Charmander to L14 (L11, HP 15/30). Collecting items. Next: item at 1 north 4 east, then item at 1 south 7 west, then continue grinding.
