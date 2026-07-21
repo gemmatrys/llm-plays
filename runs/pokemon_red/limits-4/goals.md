@@ -17,9 +17,9 @@
 19. Walk to the gym's doormat. The gym's yard is FENCED on its east
     and south sides - it can only be entered from the WEST, off the
     Pokemon Center's block. In order: (a) use
-    walk_to_pewter_center_door until the "Pewter Center door" bearing
-    reads 3 tiles or less (yes - walk BACK toward the Center first; do
-    not enter it); (b) then use
+    walk_to_the_street_west_of_the_center until its bearing reads 2
+    tiles or less - it is plain street, no doors to fall into; (b)
+    then use
     walk_to_the_doormat_below_the_gym_entrance again and again - it
     climbs the column north of the Center and turns east into the
     yard. When a walk stops for a person in the way, call it again -
