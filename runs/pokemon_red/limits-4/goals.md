@@ -10,15 +10,14 @@
 17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
 18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
-    bearing). ENTERING: the gym's yard only opens from its WEST side -
-    the poles east of the door and the bushes south cannot be crossed.
-    (1) Use walk_to_the_doormat_below_the_gym_entrance, repeating it
-    until the landmark reads "you are here"; when its report says "as
-    close as the ground allows", you are on the wrong side - walk
-    around the building (south, then west, then north) and call it
-    again. (2) From the doormat ONE single UP press steps into the
-    door. Never walk_to_exit out here - it keeps walking you into the
-    Mart. Inside, a JR TRAINER blocks the way - beat him, then if
+    bearing). ENTERING - the yard opens from the EAST, off the Mart's
+    street; the bushes south of the yard cannot be crossed, stop
+    trying from below. In order: (1) walk_to_pewter_mart_door until
+    you stand beside the Mart. (2) walk_to_the_doormat_below_the_gym_entrance
+    - from the Mart's street it walks the open row straight west to
+    the gym door; repeat until it reads "you are here". (3) ONE single
+    UP press steps into the door. Never walk_to_exit outdoors - it
+    walks you into the Mart. Inside, a JR TRAINER blocks the way - beat him, then if
     you are below half HP step out, heal at the Center and come back
     (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
     and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
