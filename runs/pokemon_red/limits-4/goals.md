@@ -65,7 +65,7 @@
     you are below half HP step out, heal at the Center and come back
     (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
     and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
-    battle_hint will say so - use EMBER anyway: their special defense
+    the "About this battle" note will say so - use EMBER anyway: their special defense
     is terrible, it still wins, and everything else you have is worse.
     When ONIX is "storing energy" that is BIDE - it returns DOUBLE the
     damage it just took; that turn is the perfect time to use a POTION
@@ -80,8 +80,8 @@ Rules:
 - A fight the current goal does not say how to handle: attack_3
   (EMBER); at 0 PP, attack_1 (SCRATCH). When the goal names a battle
   drill, that drill IS the answer - use it without comparing.
-- Poke Balls only work on WILD Pokemon (in_battle: 1); in a trainer
-  battle they are simply lost. Keep the last ball for a PIKACHU.
+- Poke Balls only work on WILD Pokemon (the battle line says WILD); in a
+  trainer battle they are simply lost. Keep the last ball for a PIKACHU.
 - POISONED: START, ITEM, choose ANTIDOTE, A on USE, pick the Pokemon -
   or any Pokemon Center. Do not walk it off; it drains HP.
 - Potion early, not at the last moment - blacking out costs HALF your
