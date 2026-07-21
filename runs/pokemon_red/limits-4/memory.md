@@ -1,1 +1,1 @@
-In Viridian Forest, moving to the top-left exit to reach Pewter City. EMBER is unusable, so I will flee any wild battles.
+In Viridian Forest, heading to the top-left exit to reach Pewter City. Ember is unusable; will flee wild battles. Next: reach Pewter City and heal at the Pokemon Center.
