@@ -11,7 +11,7 @@
     carry a ball, catch it - it wins the SECOND gym for you later.
     POISONED after a battle: cure it right away (Rules).
 
-12. Leave the forest - it is a MAZE: tree walls cross every straight
+12. [DONE] Leave the forest - it is a MAZE: tree walls cross every straight
     line, so never chase the "forest exit corner" bearing directly.
     Walk these legs IN ORDER: "the path north (east side)", then "the
     top corridor", then "the west lane to the exit", then the "forest
