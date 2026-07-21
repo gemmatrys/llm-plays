@@ -1,1 +1,1 @@
-In Pewter Poke Mart. Goal: Exit the Mart and stand beside the door (Goal 18), then proceed to the Gym.
+Outside Pewter Mart. Goal 18 done. Now walking to the gym doormat (Goal 19).

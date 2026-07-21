@@ -9,7 +9,7 @@
 
 17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
-18. Stand beside the Pewter Mart's door (the gym is entered from this
+18. [DONE] Stand beside the Pewter Mart's door (the gym is entered from this
     street): use walk_to_pewter_mart_door, repeating until the "Pewter
     Mart door" bearing reads 2 tiles or less. Do NOT go inside. DONE
     when that bearing reads 2 or less: mark it done then.
