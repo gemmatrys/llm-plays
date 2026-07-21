@@ -1,0 +1,25 @@
+# Battle-menu geometry skill (reset-to-corner, then navigate). Gen 1 remembers
+# the cursor between turns, so nothing is assumed about where it starts:
+#   1. advance_text (closed loop) clears any pending battle text and stops at
+#      the menu WITHOUT pressing into it (no-op if a cursor is already up)
+#   2. B B collapses any submenu (move list / bag / party) to the main menu;
+#      B at the main menu is a no-op
+#   3. UP LEFT pins the 2x2 cursor at FIGHT (pokered: no wrap - extra presses
+#      are no-ops), DOWN RIGHT walks it to RUN
+#   4. A confirms; the trailing advance_text plays the result out and reports:
+#      escape failed = "[stopped at a choice]" with in_battle still 1 - the
+#      model just calls it again
+# Wild battles only - RUN always fails against trainers (game rule).
+# Misuse in the overworld is benign: UP LEFT DOWN RIGHT nets zero displacement.
+name: flee_battle
+description: Flee the current wild battle from anywhere in its menus.
+steps:
+  - {op: advance_text}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: LEFT, hold_frames: 4, wait_frames: 12}
+  - {button: DOWN, hold_frames: 4, wait_frames: 12}
+  - {button: RIGHT, hold_frames: 4, wait_frames: 12}
+  - {button: A, hold_frames: 4, wait_frames: 40}
+  - {op: advance_text}
