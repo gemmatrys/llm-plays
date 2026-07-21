@@ -1,1 +1,1 @@
-On Route 1. Heading north to Viridian City, then north out of the city to Route 2.
+In Viridian City at the south entrance. Goal: Head north out of the city to Route 2.
