@@ -82,6 +82,8 @@ waypoints:
   # Route 2 north edge -> Pewter. GUESS: road column ~x=8 from
   # walkthrough maps. NOTE Diglett's Cave door (D) at (12,9) — goals
   # say do not enter.
+  # VERIFIED 2026-07-21 live: model stood exactly on (8,0), bearing read
+  # "you are here", walked north across the edge into Pewter.
   gap to Pewter: {map: 13, x: 8, y: 0}
   # Pewter City doors — VERIFIED (pokered PewterCity warp table)
   Pewter Center door: {map: 2, x: 13, y: 25}
