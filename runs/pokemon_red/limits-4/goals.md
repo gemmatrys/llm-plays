@@ -7,10 +7,11 @@
    from your action list - it walks you to the counter, talks to the
    nurse, answers YES and clears the whole dialogue for you. Do not
    improvise the nurse conversation button by button. Full HP in
-   party= is the proof. Then at the MART (the "Mart door" bearing) buy 3
-   POKE BALLs and 3 ANTIDOTEs: talk to the clerk, choose BUY, pick the
-   item, press UP twice so the count reads x3, press A, then ONE press
-   A on the price question. The "[bag: +3 POKE BALL]" and
+   party= is the proof. Then at the MART (the "Mart door" bearing):
+   stand at the counter FACING the clerk and use the buy-3-pokeballs
+   skill from your action list, then use the buy-3-antidotes skill -
+   each one runs the whole shop conversation for you. Do not improvise
+   the menus button by button. The "[bag: +3 POKE BALL]" and
    "[bag: +3 ANTIDOTE]" events are the proof.
 
 9. Leave Viridian through the north edge - follow the "gap to Route 2"
