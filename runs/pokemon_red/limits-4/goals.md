@@ -16,8 +16,10 @@
     (its east part before its north part - the Center door sits in the
     column just north of you and swallows northbound walks). Inside, use walk_to_counter, then
     buy_potion_x5 - it holds the
-    whole conversation and purchase, one behavior, 1500 total. A
-    "[bag: +5 POTION]" event is the proof - mark done when you see it.
+    whole conversation and purchase, one behavior, 1500 total. If the
+    bag event shows FEWER than you asked (a "[bag: +1 POTION]" for a
+    x5 ask), just call it again - repeat until the bag line reads
+    POTION x5, then mark done. Your money covers it.
     If you cannot afford it, move on without buying. Skip the MUSEUM -
     it only costs money.
 
