@@ -50,9 +50,9 @@
     special defense is terrible, it still wins, and everything else
     you have is worse. When ONIX is "storing energy" that is BIDE - it
     returns DOUBLE the damage it just took; that turn is the perfect
-    time for use_potion_battle instead of attacking - it drinks a
-    POTION and plays the turn out, one behavior. Use it whenever you
-    fall below half HP. If you black
+    time for use_potion instead of attacking - it drinks a POTION and
+    plays the turn out, one behavior. Use it whenever you fall below
+    half HP. If you black
     out you wake at the Center with half your money gone - heal and
     march back; after TWO losses, grind the forest to level 16 first
     (CHARMANDER evolves) and try again. The badge announcement and the
