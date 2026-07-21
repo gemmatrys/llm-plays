@@ -1,1 +1,1 @@
-In Pewter City. Heading to the Mart to buy 5 potions (Goal 17), then I will head to the Gym (Goal 18).
+Inside Pewter Pokemon Center. Leaving to go to the Pewter Mart to buy 5 POTIONs (Goal 17), then heading to the Pewter Gym (Goal 18).
