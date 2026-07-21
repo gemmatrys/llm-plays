@@ -74,6 +74,11 @@ class Step:
     op: str | None = None  # "savestate" | "wait" | "keydown" | "keyup" | "verify"
     expect: str | None = None  # verify: expected screen state, natural language
     tripwire: dict | None = None  # verify: {field, equals} engine-bit accelerator
+    # verify: when the judge says the screen is NOT the expected one, stop the
+    # behavior right there instead of letting later steps fire blind - the
+    # judge's seen-text reaches the model as feedback (skill checkpoints,
+    # user 2026-07-21: a skill must know what screen it is on)
+    abort_on_fail: bool = False
 
 
 @dataclass

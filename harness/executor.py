@@ -48,6 +48,12 @@ class Executor:
                     v = self._verify(step)
                     if v is not None:  # only failures speak; success is silent
                         feedback = v
+                        if step.abort_on_fail:
+                            # checkpoint says wrong screen: remaining steps
+                            # would fire blind - stop, tell the model what
+                            # the judge actually saw
+                            feedback = f"[{behavior.name} stopped - " + v[1:]
+                            break
                 elif step.op == "keydown" and step.button is not None:
                     self.hands.key_down(step.button)
                     held.add(step.button)

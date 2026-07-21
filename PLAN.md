@@ -115,7 +115,13 @@ where mapped → pixel/phash tripwire where not → always-ask as the floor; the
 judge layer is identical everywhere. Rationale: the model keeps decision
 authority (user), the common success path costs zero LLM calls, and every
 anomaly gets model eyes. Pilot: flee_battle escape confirmation; next:
-done_goal grounding.
+done_goal grounding. Escalated 2026-07-21 (user, after the shop focus
+trap): skills CHECKPOINT their screen through the judge - a verify step
+with abort_on_fail at entry and after every screen transition, so a
+sequence never fires into a screen it has not confirmed; on mismatch the
+skill stops and the judge's seen-text goes to the model as feedback
+("[buy_potion_x5 stopped - expected the shop's item list; the screen
+shows: ...]"), turning a blind misfire into an informed next decision.
 
 **Intent vocabulary (sharpened 2026-07-21, user directive).** The model's
 allowed-behaviors list is a vocabulary of INTENTS, not inputs: the harness

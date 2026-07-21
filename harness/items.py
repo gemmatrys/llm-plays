@@ -95,7 +95,9 @@ def resolve(name: str, bag_names: list[str], mart_names: list[str],
                      _press("B", 24), _press("B", 24),
                      _press("UP", 12), _press("LEFT", 12),  # pin FIGHT
                      _press("DOWN", 12),                    # ITEM
-                     _press("A", 30)]
+                     _press("A", 30),
+                     Step(op="verify", wait_frames=15, abort_on_fail=True,
+                          expect="the battle bag's item list is open")]
             steps += _pin(len(slugs))
             steps += [_press("DOWN") for _ in range(slot)]
             steps += [_press("A", 30), _press("A", 40)]     # item, lead mon
@@ -104,7 +106,9 @@ def resolve(name: str, bag_names: list[str], mart_names: list[str],
             steps = [_press("START", 30)]
             steps += _pin(6)                                # top of START menu
             steps += [_press("DOWN"), _press("DOWN"),       # ITEM
-                      _press("A", 30)]
+                      _press("A", 30),
+                      Step(op="verify", wait_frames=15, abort_on_fail=True,
+                           expect="the bag's item list is open")]
             steps += _pin(len(slugs))
             steps += [_press("DOWN") for _ in range(slot)]
             steps += [_press("A", 20), _press("A", 30),     # USE
@@ -125,16 +129,25 @@ def resolve(name: str, bag_names: list[str], mart_names: list[str],
         # two Bs first: collapse any half-open shop state (item list or
         # quantity box from an earlier buy) back to closed - the first
         # live retries no-op'd because A(BUY) landed into an already-open
-        # list where focus sat on BUY/SELL/QUIT (the shop focus trap)
+        # list where focus sat on BUY/SELL/QUIT (the shop focus trap).
+        # Judge checkpoints at every screen transition (user 2026-07-21):
+        # the skill never fires steps into a screen it has not confirmed.
         steps = [_press("B", 20), _press("B", 20),
                  Step(op="advance_text"),                   # (re)greet -> menu
+                 Step(op="verify", wait_frames=20, abort_on_fail=True,
+                      expect="the shop's BUY/SELL/QUIT choice is on screen"),
                  _press("A", 30),                           # BUY (tops there)
-                 Step(op="advance_text")]                   # -> item list
+                 Step(op="advance_text"),                   # -> item list
+                 Step(op="verify", wait_frames=20, abort_on_fail=True,
+                      expect="the shop's item list with prices is open")]
         steps += _pin(len(slugs))
         steps += [_press("DOWN") for _ in range(slot)]
         steps += [_press("A", 45)]                          # wait for the
         # quantity box to render before counting - a fast A ate the UPs on
         # the first live buy (x5 asked, x1 bought, 2026-07-21 Pewter)
+        if count > 1:
+            steps += [Step(op="verify", wait_frames=15, abort_on_fail=True,
+                           expect="a how-many quantity box is on screen")]
         steps += [_press("UP", 14) for _ in range(count - 1)]
         steps += [_press("A", 30),                          # -> price yes/no
                   _press("A", 40),                          # yes
