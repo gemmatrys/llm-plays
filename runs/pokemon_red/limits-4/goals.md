@@ -35,7 +35,8 @@
     Forest.
 
 11. Grind until CHARMANDER is LEVEL 14 or higher - party= is the proof.
-    Pace back and forth in the dark grass to start battles; EMBER
+    Use walk-to-grass over and over to pace the dark grass and start
+    battles; EMBER
     roasts the bugs here in 1-2 hits. Grab the two free items where
     the "free Potion" and "free Poke Ball" bearings point - a lone
     ball on the ground is an item: face it, press A, watch for the
