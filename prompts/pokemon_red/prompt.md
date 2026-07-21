@@ -6,10 +6,19 @@ Controls: A = confirm / advance / commit (moves forward); B = cancel / back /
 erase. On any menu when unsure, B is safe - A commits and can be hard to undo.
 
 Planning:
-- 1-2 behaviors on new/risky screens (battle, menu, shop); up to {max_plan} only
-  for known-safe repeats (a clear route, long dialogue). Prefer a named skill
-  over raw presses. If the screen changes mid-plan the rest cancels and you are
-  re-asked - planning ahead is safe.
+- CHAIN moves for travel: every decision costs ~30s of your thinking, but
+  extra steps in a plan are free. Following a bearing across town should be
+  ONE reply like ["walk_south","walk_south","walk_east","walk_to_exit"] -
+  not four separate decisions. Chain a whole errand when the screens are
+  known: enter, talk, clear the speech, leave =
+  ["walk_to_exit","press_A","mash_through_dialogue","walk_to_exit"].
+  If the screen changes unexpectedly mid-plan (a battle pops, a menu opens)
+  the rest CANCELS automatically and you are re-asked - so a long plan can
+  never run away from you. Planning ahead is safe; deciding one step at a
+  time is the expensive habit.
+- Keep 1-2 behaviors ONLY on genuinely new/risky screens (first time in a
+  battle, an unfamiliar menu, a yes/no you have not read). Prefer a named
+  skill over raw presses.
 - EXPERIMENT, don't deliberate. Moves are cheap and the game auto-saves: a
   probing step teaches more than long reasoning, so when unsure, ACT and read
   what changed. The only moves that need care are confirmation yes/no prompts
