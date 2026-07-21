@@ -1,0 +1,38 @@
+# Gen 1 type system: RAM type-id bytes and the GEN 1 attack chart
+# (differs from later gens: BUG 2x vs POISON, POISON 2x vs BUG, GHOST 0x
+# vs PSYCHIC, ICE neutral vs FIRE; no DARK/STEEL/FAIRY). User-authorized
+# bulk knowledge 2026-07-20; type-id byte 0x14=FIRE live-verified against
+# the party Charmander. HOT file.
+type_ids:
+  "0x00": NORMAL
+  "0x01": FIGHTING
+  "0x02": FLYING
+  "0x03": POISON
+  "0x04": GROUND
+  "0x05": ROCK
+  "0x07": BUG
+  "0x08": GHOST
+  "0x14": FIRE
+  "0x15": WATER
+  "0x16": GRASS
+  "0x17": ELECTRIC
+  "0x18": PSYCHIC
+  "0x19": ICE
+  "0x1a": DRAGON
+# attacker -> {defender: multiplier}; omitted pairs are 1x
+chart:
+  NORMAL:   {ROCK: 0.5, GHOST: 0}
+  FIRE:     {GRASS: 2, ICE: 2, BUG: 2, FIRE: 0.5, WATER: 0.5, ROCK: 0.5, DRAGON: 0.5}
+  WATER:    {FIRE: 2, GROUND: 2, ROCK: 2, WATER: 0.5, GRASS: 0.5, DRAGON: 0.5}
+  ELECTRIC: {WATER: 2, FLYING: 2, ELECTRIC: 0.5, GRASS: 0.5, DRAGON: 0.5, GROUND: 0}
+  GRASS:    {WATER: 2, GROUND: 2, ROCK: 2, FIRE: 0.5, GRASS: 0.5, POISON: 0.5, FLYING: 0.5, BUG: 0.5, DRAGON: 0.5}
+  ICE:      {GRASS: 2, GROUND: 2, FLYING: 2, DRAGON: 2, WATER: 0.5, ICE: 0.5}
+  FIGHTING: {NORMAL: 2, ICE: 2, ROCK: 2, POISON: 0.5, FLYING: 0.5, PSYCHIC: 0.5, BUG: 0.5, GHOST: 0}
+  POISON:   {GRASS: 2, BUG: 2, POISON: 0.5, GROUND: 0.5, ROCK: 0.5, GHOST: 0.5}
+  GROUND:   {FIRE: 2, ELECTRIC: 2, POISON: 2, ROCK: 2, GRASS: 0.5, BUG: 0.5, FLYING: 0}
+  FLYING:   {GRASS: 2, FIGHTING: 2, BUG: 2, ELECTRIC: 0.5, ROCK: 0.5}
+  PSYCHIC:  {FIGHTING: 2, POISON: 2, PSYCHIC: 0.5}
+  BUG:      {GRASS: 2, PSYCHIC: 2, POISON: 2, FIRE: 0.5, FIGHTING: 0.5, FLYING: 0.5, GHOST: 0.5}
+  ROCK:     {FIRE: 2, ICE: 2, FLYING: 2, BUG: 2, FIGHTING: 0.5, GROUND: 0.5}
+  GHOST:    {GHOST: 2, NORMAL: 0, PSYCHIC: 0}
+  DRAGON:   {DRAGON: 2}
