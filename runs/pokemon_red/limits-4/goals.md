@@ -19,7 +19,13 @@
     whole conversation and purchase, one behavior, 1500 total. If the
     bag event shows FEWER than you asked (a "[bag: +1 POTION]" for a
     x5 ask), just call it again - repeat until the bag line reads
-    POTION x5, then mark done. Your money covers it.
+    POTION x5, then mark done. Your money covers it. SHOP SCREEN TRAP:
+    when the BUY/SELL/QUIT box and the item list show AT THE SAME
+    TIME, the active menu is BUY/SELL/QUIT - your DOWNs move ITS
+    selection, not the item cursor, even though the item list shows an
+    arrow. Press A on BUY first; only then do DOWNs move the item
+    cursor. Buying by hand: A on POTION, then UP presses set the
+    count (x1 -> x5 needs four), A, then ONE A on the price yes/no.
     If you cannot afford it, move on without buying. Skip the MUSEUM -
     it only costs money.
 
