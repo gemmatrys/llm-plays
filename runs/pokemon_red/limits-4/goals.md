@@ -1,39 +1,11 @@
 # Goals
 
-11. [DONE] Grind until CHARMANDER is LEVEL 14 or higher - your team line is the proof.
-
-12. [DONE] Get to the WEST SIDE of the forest. Follow "the west side path"
-    bearing: walk the direction with the bigger number of tiles left;
-    when a walk stops, read its report - the FIRST opening WEST is the
-    way (walk the counted steps back to it, then turn west). The
-    top-left pocket is CLOSED (trees block north and west up there) -
-    never go back up. DONE when your west-east position reads x = 4 or
-    less: mark it done then.
-
-13. [DONE] Walk NORTH up the west edge of the forest to the exit mats in the
-    top-left corner (the "forest exit corner" bearing). Stepping onto
-    the mats leaves the forest by itself. DONE the moment your
-    location no longer reads Viridian Forest: mark it done then.
-
-14. [DONE] Cross the little gate building northward. Use plain walk_north to
-    the far (north) wall - do NOT use walk_to_exit from the south half
-    of the room (it walks back through the door you came from; it just
-    did). Straight walks stop AT doorways, so at the north wall, when
-    the "doorway out to Route 2" bearing reads 1 north, press UP once -
-    that single step goes through the doorway and out. DONE when your
-    location reads Route 2: mark it done then.
-
-15. [DONE] Walk Route 2 NORTH into PEWTER CITY (the "gap to Pewter" bearing).
-    Do NOT enter the cave door east of the path - its Pokemon are ten
-    levels above you. Skip dark grass where the path allows and do not
-    hunt battles. DONE when your location reads Pewter City: mark it
-    done then.
-
-16. [DONE] Heal at the Pewter Pokemon Center (the "Pewter Center door"
-    bearing): inside, walk_to_counter puts you in front of the nurse -
-    talk, ONE press A on her yes/no, mash through the rest. She also
-    refills EMBER's PP. DONE when the heal finished and your team line
-    shows full HP: mark it done then.
+11. [DONE] Grind to level 14+ in Viridian Forest.
+12. [DONE] Reach the forest's west side.
+13. [DONE] Exit the forest.
+14. [DONE] Cross the gate to Route 2.
+15. [DONE] Walk Route 2 north into Pewter City.
+16. [DONE] Heal at the Pewter Center - EMBER's PP is refilled.
 
 17. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
     inside, use walk_to_counter, then buy_potion_x5 - it holds the
@@ -60,11 +32,6 @@
     TM he hands over ("[bag: +1 ...]") are the proof - mark done then.
 
 Rules:
-- Until the goal-16 heal there are NO POTIONs in the bag and EMBER has
-  0 PP - Potion rules do not apply, and a wild bug that jumps you:
-  flee_battle escapes in one call, or attack_1 (SCRATCH) kills it in a
-  turn or two - pick one and go, do not deliberate. These bugs cannot
-  beat your CHARMANDER; keep walking.
 - A fight the current goal does not say how to handle: attack_3
   (EMBER); at 0 PP, attack_1 (SCRATCH). When the goal names a battle
   drill, that drill IS the answer - use it without comparing.
