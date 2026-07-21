@@ -11,3 +11,7 @@ waypoints:
   # landed at (21,35)); it is a map-edge connection, not a warp, so the
   # map shows no D there
   route1_south_gap: {map: 1, x: 21, y: 35}
+  # Route 1 -> Pallet Town gap (live 18:34/18:39 crossings, both at x=10)
+  pallet_gap: {map: 12, x: 10, y: 35}
+  # Oak's lab door (live 18:24 exit landed on (12,12); door is one north)
+  oak_lab_door: {map: 0, x: 12, y: 11}
