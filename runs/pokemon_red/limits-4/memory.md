@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14 (currently L12). Picking up dropped items and fighting wild Pokemon before heading to Pewter City.
+In Viridian Forest, grinding Charmander to L14 (currently L13). Fighting wild Pokemon before heading to Pewter City.
