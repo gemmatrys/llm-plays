@@ -1,1 +1,1 @@
-In Pewter City, moving south to clear the sign poles so I can walk west to the Gym doormat.
+In Pewter City, heading to the doormat below the Gym entrance (3 north, 3 west) to enter the Pewter Gym and challenge Brock for the BOULDERBADGE.
