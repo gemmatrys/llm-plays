@@ -95,6 +95,10 @@ bag:
 party:
   names_file: data/pokemon_red/species.yaml
 
+# battle_hint= view: enemy identity + Gen 1 type-chart math, computed
+battle:
+  types_file: data/pokemon_red/types.yaml
+
 driver_opts:
   host: 127.0.0.1
   port: 8765

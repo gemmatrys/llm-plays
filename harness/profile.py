@@ -139,6 +139,21 @@ class PartyConfig:
 
 
 @dataclass
+class BattleConfig:
+    """Battle hint: enemy species/level/HP/types from the enemy battle
+    struct + the Gen 1 type chart -> a computed `battle_hint=` line.
+    Enemy struct mirrors the battle_struct layout (species, HP, boxlevel,
+    status, type1, type2, catch, moves, DVs, level at +14, maxHP +15)."""
+    enemy_addr: int = 0xCFE5       # wEnemyMon
+    hp_off: int = 1                # 2 bytes big-endian
+    type1_off: int = 5
+    type2_off: int = 6
+    level_off: int = 14
+    maxhp_off: int = 15            # 2 bytes big-endian
+    types_file: str | None = None  # data/<game>/types.yaml
+
+
+@dataclass
 class GameProfile:
     name: str
     platform: str  # gba | gb | nds | switch ...
@@ -156,6 +171,7 @@ class GameProfile:
     tilemap: TilemapConfig | None = None
     bag: BagConfig | None = None
     party: PartyConfig | None = None
+    battle: BattleConfig | None = None
     driver_opts: dict = field(default_factory=dict)
     # Gemma-facing prompts are NOT part of the profile — see harness/prompts.py.
     # Profiles are COLD config: loaded once at startup; changing one requires
@@ -182,6 +198,11 @@ class GameProfile:
                 if k in pt:
                     pt[k] = _hex(pt[k])
             raw["party"] = PartyConfig(**pt)
+        if raw.get("battle"):
+            bt = dict(raw["battle"])
+            if "enemy_addr" in bt:
+                bt["enemy_addr"] = _hex(bt["enemy_addr"])
+            raw["battle"] = BattleConfig(**bt)
         # RAM addresses in YAML may be hex strings
         raw["ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
                           for k, v in raw.get("ram_map", {}).items()}

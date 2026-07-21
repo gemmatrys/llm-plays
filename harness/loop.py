@@ -208,6 +208,19 @@ class GameLoop:
             except Exception:  # noqa: BLE001 — party context is optional
                 pass
 
+        # battle hint: enemy identity + Gen 1 type math, computed — a 31B
+        # shouldn't burn thinking tokens deriving that Ember is resisted by
+        # a Geodude when a lookup table knows it cold
+        if ram_ctx is not None and ram_ctx.get("in_battle") \
+                and self.profile.battle is not None and self.extras is not None:
+            try:
+                h = self._battle_hint()
+                if h:
+                    ram_ctx = dict(ram_ctx)
+                    ram_ctx["battle_hint"] = h
+            except Exception:  # noqa: BLE001 — hint is optional context
+                pass
+
         # stale notes: the model keeps acting on a world description it wrote
         # rooms ago (this repeatedly cost progress). When its notes predate a
         # map change or sit unchanged too long, tell the policy to FORCE a
@@ -384,24 +397,73 @@ class GameLoop:
                 out.append("?")
         return "".join(out)
 
+    def _species(self) -> dict[int, tuple[str, list[str]]]:
+        """HOT species table: internal id -> (name, [types])."""
+        pc = self.profile.party
+        if pc is None or not pc.names_file:
+            return {}
+        try:
+            raw = yaml.safe_load(
+                (self.base / pc.names_file).read_text(encoding="utf-8"))
+            out = {}
+            for k, v in ((raw or {}).get("species") or {}).items():
+                sid = int(k, 0) if isinstance(k, str) else int(k)
+                if isinstance(v, dict):
+                    out[sid] = (str(v.get("name", f"SPECIES_0x{sid:02x}")),
+                                [str(t) for t in v.get("types", [])])
+                else:
+                    out[sid] = (str(v), [])
+            return out
+        except Exception:  # noqa: BLE001 — cosmetic
+            return {}
+
+    def _type_data(self) -> tuple[dict[int, str], dict[str, dict[str, float]]]:
+        """HOT type table: RAM type-id byte -> name, and the attack chart."""
+        bt = self.profile.battle
+        if bt is None or not bt.types_file:
+            return {}, {}
+        try:
+            raw = yaml.safe_load(
+                (self.base / bt.types_file).read_text(encoding="utf-8")) or {}
+            ids = {int(k, 0): str(v)
+                   for k, v in (raw.get("type_ids") or {}).items()}
+            chart = {str(a): {str(d): float(m) for d, m in (row or {}).items()}
+                     for a, row in (raw.get("chart") or {}).items()}
+            return ids, chart
+        except Exception:  # noqa: BLE001
+            return {}, {}
+
+    @staticmethod
+    def _effect(attack_types: list[str], defend_types: list[str],
+                chart: dict[str, dict[str, float]]) -> tuple[str, float]:
+        """Best multiplier any of our types achieves vs the defender."""
+        best_t, best_m = "", -1.0
+        for at in attack_types:
+            m = 1.0
+            for dt in defend_types:
+                m *= chart.get(at, {}).get(dt, 1.0)
+            if m > best_m:
+                best_t, best_m = at, m
+        return best_t, best_m
+
+    @staticmethod
+    def _mult_word(m: float) -> str:
+        if m == 0:
+            return "NO effect"
+        if m >= 2:
+            return f"{m:g}x (super effective!)"
+        if m < 1:
+            return f"{m:g}x (resisted)"
+        return "1x"
+
     def _read_party(self) -> str:
         """Render party state: 'A (CHARMANDER) lv8 HP 16/24' per mon, plus
-        status words and a LOW! tag under quarter HP. Species names come
-        from HOT data/<game>/species.yaml (live-verified ids only; unknown
-        ids self-tag for harvest)."""
+        status words and a LOW! tag under quarter HP."""
         pc = self.profile.party
         n = min(self.extras.read_block(pc.count_addr, 1)[0], 6)
         if not n:
             return ""
-        names: dict[int, str] = {}
-        if pc.names_file:
-            try:
-                raw = yaml.safe_load(
-                    (self.base / pc.names_file).read_text(encoding="utf-8"))
-                names = {int(k, 0) if isinstance(k, str) else int(k): str(v)
-                         for k, v in ((raw or {}).get("species") or {}).items()}
-            except Exception:  # noqa: BLE001 — cosmetic
-                pass
+        species = self._species()
         out = []
         for i in range(n):
             mon = self.extras.read_block(pc.mons_addr + i * pc.mon_size,
@@ -409,7 +471,7 @@ class GameLoop:
             nick = self._gen1_text(
                 self.extras.read_block(pc.nicks_addr + i * pc.nick_size,
                                        pc.nick_size))
-            sp = names.get(mon[0], f"SPECIES_0x{mon[0]:02x}")
+            sp = species.get(mon[0], (f"SPECIES_0x{mon[0]:02x}", []))[0]
             hp = (mon[pc.hp_off] << 8) | mon[pc.hp_off + 1]
             mx = (mon[pc.maxhp_off] << 8) | mon[pc.maxhp_off + 1]
             s = f"{nick} ({sp}) lv{mon[pc.level_off]} HP {hp}/{mx}"
@@ -422,6 +484,34 @@ class GameLoop:
                 s += " (LOW!)"
             out.append(s)
         return "; ".join(out)
+
+    def _battle_hint(self) -> str:
+        """Computed Gen 1 type math for the current battle: who the enemy
+        is, how hard our types hit it, how hard its types hit us."""
+        bt, pc = self.profile.battle, self.profile.party
+        ids, chart = self._type_data()
+        if not ids or not chart or pc is None:
+            return ""
+        e = self.extras.read_block(bt.enemy_addr, bt.maxhp_off + 2)
+        et1, et2 = ids.get(e[bt.type1_off]), ids.get(e[bt.type2_off])
+        if et1 is None:  # garbage struct (menu screens etc.) — stay silent
+            return ""
+        etypes = [t for t in dict.fromkeys((et1, et2)) if t]
+        mon = self.extras.read_block(pc.mons_addr, 7)
+        mt1, mt2 = ids.get(mon[5]), ids.get(mon[6])
+        mtypes = [t for t in dict.fromkeys((mt1, mt2)) if t]
+        species = self._species()
+        name = species.get(e[0], (f"SPECIES_0x{e[0]:02x}", []))[0]
+        hp = (e[bt.hp_off] << 8) | e[bt.hp_off + 1]
+        mx = (e[bt.maxhp_off] << 8) | e[bt.maxhp_off + 1]
+        parts = [f"enemy {name} lv{e[bt.level_off]} "
+                 f"({'/'.join(etypes)}) HP {hp}/{mx}"]
+        if mtypes:
+            at, m = self._effect(mtypes, etypes, chart)
+            parts.append(f"your {at} moves hit it {self._mult_word(m)}")
+            dt, dm = self._effect(etypes, mtypes, chart)
+            parts.append(f"its {dt} moves hit you {self._mult_word(dm)}")
+        return "; ".join(parts)
 
     def _map_names(self) -> dict[int, str]:
         """HOT map-id -> place-name table (data/<game>/maps.yaml)."""
