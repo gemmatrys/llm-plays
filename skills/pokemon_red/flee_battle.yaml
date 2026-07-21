@@ -25,6 +25,10 @@ steps:
   - {op: advance_text}
   # tripwire-judge validation (pilot): in_battle==0 confirms the escape for
   # free; still 1 -> the LLM judges the settled screen. Feedback only on
-  # failure ("[verify FAILED: ...]"), silence = escaped.
+  # failure ("[verify FAILED: ...]"), silence = escaped. The wait first:
+  # in_battle lags the escape text (both 08:2x/08:3x judge calls were RAM
+  # lag, not real failures) - 90 frames lets the bit clear so the tripwire
+  # answers free.
+  - {op: wait, wait_frames: 90}
   - {op: verify, wait_frames: 30, tripwire: {field: in_battle, equals: 0},
      expect: "the battle is over - the overworld is on screen, no battle menu"}
