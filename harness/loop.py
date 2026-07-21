@@ -51,6 +51,7 @@ class GameLoop:
         self._map_visits: dict[int, int] = {}
         self._items_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
+        self._maps_cache: tuple[float, dict[int, str]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
@@ -183,6 +184,16 @@ class GameLoop:
             if b:
                 ram_ctx = dict(ram_ctx)
                 ram_ctx["bearings"] = b
+
+        # place name: interiors all look alike to the model (it has called a
+        # house the Center, a house the Mart, and the lab both) — the harness
+        # KNOWS the map id, so say it by name (HOT data/<game>/maps.yaml,
+        # live-verified ids only; unlisted ids self-tag as unknown)
+        if ram_ctx is not None and "map_id" in ram_ctx:
+            names = self._map_names()
+            ram_ctx = dict(ram_ctx)
+            ram_ctx["place"] = names.get(
+                ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
 
         # stale notes: the model keeps acting on a world description it wrote
         # rooms ago (this repeatedly cost progress). When its notes predate a
@@ -340,6 +351,20 @@ class GameLoop:
             return "; ".join(parts) or None
         except Exception:  # noqa: BLE001 — bearings are optional context
             return None
+
+    def _map_names(self) -> dict[int, str]:
+        """HOT map-id -> place-name table (data/<game>/maps.yaml)."""
+        path = self.base / "data" / self.profile.name / "maps.yaml"
+        try:
+            mtime = path.stat().st_mtime
+            if self._maps_cache is not None and self._maps_cache[0] == mtime:
+                return self._maps_cache[1]
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            names = {int(k): str(v) for k, v in (raw.get("maps") or {}).items()}
+            self._maps_cache = (mtime, names)
+            return names
+        except Exception:  # noqa: BLE001 — names are context, never fatal
+            return self._maps_cache[1] if self._maps_cache else {}
 
     def _read_tilemap(self) -> str:
         """Bulk-read the screen tilemap + map dims + warps and render an ASCII
