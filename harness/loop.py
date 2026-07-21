@@ -3,6 +3,7 @@ and logging together. This is invariants I1–I3 in motion.
 """
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -57,6 +58,9 @@ class GameLoop:
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._grass_seen: dict[int, tuple[int, int]] = {}  # map_id -> map (x,y)
         self._nav_blocked = 0  # consecutive walk-attempts with zero movement
+        # (map_id, stride self-report) of the newest walk — resurfaced as a
+        # state line so the model needn't dig it out of recent-actions
+        self._last_move: tuple | None = None
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
         # confusion detectors (user design 2026-07-21): the model cannot see
@@ -358,6 +362,21 @@ class GameLoop:
             if cm:
                 ram_ctx = dict(ram_ctx)
                 ram_ctx["can_move"] = cm
+            # last movement's self-report as state (user 2026-07-21): the
+            # openings a walk passed are navigation facts, not history —
+            # resurface the newest one until a walk replaces it. Dropped on
+            # map change (its distances describe the old map).
+            if self._last_move is not None:
+                lm_map, lm_note = self._last_move
+                if lm_map != ram_ctx.get("map_id"):
+                    self._last_move = None
+                else:
+                    m = re.match(r"\[walk_(\w+): went (\d+)(.*)\]$", lm_note)
+                    if m:
+                        ram_ctx = dict(ram_ctx)
+                        ram_ctx["last_move"] = (
+                            f"walking {m.group(1)} you went "
+                            f"{m.group(2)} tile(s){m.group(3)}")
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=tilemap, extra=extra)
@@ -448,6 +467,8 @@ class GameLoop:
             if behavior.note:
                 # navigation self-report (stride distance + passages passed)
                 self._recent.append(behavior.note)
+                self._last_move = ((self._last_ram or {}).get("map_id"),
+                                   behavior.note)
             executed += 1
             if feedback and "choice/menu" in feedback:
                 # advance_text stopped at a live choice cursor. The ONE
