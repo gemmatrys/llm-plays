@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to L14. Currently L13, HP 13/34. Ember is 0 PP, so I'm using Scratch. Next: enter grass and battle.
+Leaving Viridian Forest via the top-left exit to head toward Pewter City (Goal 12).
