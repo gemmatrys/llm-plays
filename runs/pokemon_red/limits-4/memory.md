@@ -1,1 +1,1 @@
-In Viridian City. Goal: Buy 3 Poke Balls and 3 Antidotes at the Mart, then head to Route 2.
+In Viridian Pokemon Center. Just healed. Now leaving to buy 3 Poke Balls and 3 Antidotes at the Mart.
