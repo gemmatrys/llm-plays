@@ -34,6 +34,35 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
   staged: one bounded random-input self-rescue first, then escalation rather than
   waiting for the next scheduled checkpoint.
 
+**Navigation division of labor (decided 2026-07-21, after the limits-4
+forest arc).** Constraint set by the user: the local LLM is not very smart,
+everything it reads is natural language, and the harness must not direct or
+judge. So navigation splits three ways:
+
+- **Harness: facts only, as sentences.** What is here ("You are in X", the
+  battle/team/bag lines), what is adjacent ("From this tile you can step:
+  south, east. You cannot step: north (an obstacle)"), what just happened
+  ("Your last movement: walking north you went 9 tile(s); openings passed:
+  east after 3"), where the world ends ("You are ON the northern edge"),
+  and — run-2 — what the model itself has already covered ("the top-left
+  pocket is fully explored - a dead end", "unexplored ground lies south",
+  "your last 6 walks net moved you 2 tiles"). Facts about the world or the
+  model's own history; never "go this way", never a verdict. The ASCII map
+  grid is gone from the prompt — the local LLM could not read it (one-block
+  gaps invisible), and the sentence set replaced it with no loss.
+- **Checkpoint: strategy in natural language, validated against data.**
+  Routes are micro-goals — one tangible action each, an explicit verifiable
+  DONE line in the state vocabulary ("DONE when your location reads Route
+  2: mark it done then") — and procedures over coordinates ("take the FIRST
+  opening WEST a walk report shows"): two coordinate guesses were falsified
+  live in one forest; the procedure fixed both. Run-2: ingest pret
+  walkability grids so waypoint anchors are validated (unwalkable -> snap
+  to nearest walkable) instead of guessed, and map-connection headers so
+  edge crossings are announced as facts the game itself shows.
+- **Model: every choice.** The drills it follows live in goals text it can
+  quote; the harness executes geometry it could never sequence (strides,
+  battle menus) but picks nothing.
+
 ## 2. Architecture
 
 ```
