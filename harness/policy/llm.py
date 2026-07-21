@@ -238,11 +238,17 @@ class LLMPolicy:
                 if delta.get("reasoning"):
                     reasoning_parts.append(delta["reasoning"])
                     if self.on_stream is not None and pushed < len(reasoning_parts):
-                        text = "".join(reasoning_parts)[:MAX_THINKING_CHARS]
+                        # TAIL of the transcript: a head cap froze the overlay
+                        # solid once thinking passed the limit (every push was
+                        # the same truncated prefix) — precisely on the long
+                        # decisions where watching the reasoning matters most
+                        text = "".join(reasoning_parts)[-MAX_THINKING_CHARS:]
                         self.on_stream(text, False)
                         pushed = len(reasoning_parts)
         finally:
-            self.last_thinking = "".join(reasoning_parts)[:MAX_THINKING_CHARS]
+            # tail for the log too: the END of the reasoning (the conclusion
+            # that produced the plan) is the part worth keeping when bounded
+            self.last_thinking = "".join(reasoning_parts)[-MAX_THINKING_CHARS:]
             if self.on_stream is not None:
                 self.on_stream(self.last_thinking, True)  # mark generation done
         content = "".join(content_parts).strip()
