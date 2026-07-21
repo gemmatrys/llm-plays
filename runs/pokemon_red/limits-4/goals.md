@@ -16,7 +16,7 @@
    then ONE press A on the price question. The "[bag: +3 POKE BALL]"
    and "[bag: +3 ANTIDOTE]" events are the proof.
 
-9. Leave Viridian through the north edge - follow the "gap to Route 2"
+9. [DONE] Leave Viridian through the north edge - follow the "gap to Route 2"
    bearing; the old man lets you pass now - onto ROUTE 2. Tall grass
    shows as " on your map; the walk-to-grass action walks you into the
    nearest patch and paces several steps inside it - use it again and
