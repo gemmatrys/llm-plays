@@ -10,12 +10,12 @@
     never go back up. DONE when your west-east position reads x = 4 or
     less: mark it done then.
 
-13. Walk NORTH up the west edge of the forest to the exit mats in the
+13. [DONE] Walk NORTH up the west edge of the forest to the exit mats in the
     top-left corner (the "forest exit corner" bearing). Stepping onto
     the mats leaves the forest by itself. DONE the moment your
     location no longer reads Viridian Forest: mark it done then.
 
-14. Cross the little gate building northward. Use plain walk_north to
+14. [DONE] Cross the little gate building northward. Use plain walk_north to
     the far (north) wall - do NOT use walk_to_exit from the south half
     of the room (it walks back through the door you came from; it just
     did). Straight walks stop AT doorways, so at the north wall, when
@@ -23,7 +23,7 @@
     that single step goes through the doorway and out. DONE when your
     location reads Route 2: mark it done then.
 
-15. Walk Route 2 NORTH into PEWTER CITY (the "gap to Pewter" bearing).
+15. [DONE] Walk Route 2 NORTH into PEWTER CITY (the "gap to Pewter" bearing).
     Do NOT enter the cave door east of the path - its Pokemon are ten
     levels above you. Skip dark grass where the path allows and do not
     hunt battles. DONE when your location reads Pewter City: mark it
