@@ -1,1 +1,1 @@
-I am in Pallet Town, delivering Oak's Parcel to Professor Oak. Next: Enter Oak's lab and talk to him.
+I am in the Pallet Town Pokemon Center with Oak's Parcel. I need to leave and deliver it to Professor Oak at his lab.
