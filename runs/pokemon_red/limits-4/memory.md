@@ -1,1 +1,1 @@
-At the north exit of Viridian Forest. Crossing the gate building to Route 2 (Goal 14), then heading to Pewter City (Goal 15) to heal CHARMANDER (Goal 16).
+In the Viridian Forest north gate building. Crossing to Route 2 (Goal 14), then heading to Pewter City (Goal 15) to heal CHARMANDER (Goal 16).
