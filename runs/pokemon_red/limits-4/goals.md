@@ -28,9 +28,14 @@
    or coffee, wrong building - leave.
 
 6. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
-   Pallet Town (retrace the route you came up). Enter Oak's lab (the big
-   building at the south of town) and talk to Professor Oak. Press A
-   through his dialogue - he takes the parcel and gives you the POKEDEX.
+   Pallet Town (retrace the route you came up). This is a LONG walk -
+   chain it: plan several walking moves in ONE reply (e.g. walk south,
+   walk south, walk south). Route 1 southbound is full of v ledges that
+   hop automatically - south chains are fast and safe. In Pallet, enter
+   Oak's lab (the big building at the south of town) and talk to
+   Professor Oak. Press A through his dialogue - he takes the parcel
+   (watch for the "[bag: -1 OAK'S PARCEL]" event - that is the delivery
+   proof) and gives you the POKEDEX.
 
 7. Walk north through Route 1 to Viridian City again, then head north out
    of the city. The old man now lets you pass. Continue to Route 2.
