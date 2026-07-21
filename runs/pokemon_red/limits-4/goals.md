@@ -11,19 +11,26 @@
     carry a ball, catch it - it wins the SECOND gym for you later.
     POISONED after a battle: cure it right away (Rules).
 
-12. Leave the forest - but the forest is a MAZE: tree walls cross the
-    straight line to the exit, so do NOT chase the "forest exit
-    corner" bearing directly. Walk the path IN THIS ORDER, one leg at
-    a time: "the path north (east side)" FIRST - walk EAST along the
-    bottom until that bearing is reached - then "the top corridor",
-    then "the west lane to the exit", and only then the "forest exit
-    corner". Each bearing is the next stop; when one reads "you are
-    here", switch to the next. The dropped-item Potion sits behind a
-    tree wall you CANNOT cross from the south - stop trying; grab it
-    only if its bearing reads 1-2 tiles away while you are ON the
-    path, and never leave the path for it otherwise. The south-west
-    corner ball is already in your bag - there is nothing left down
-    there. Then walk north through the
+12. Leave the forest - it is a MAZE: tree walls cross every straight
+    line, so never chase the "forest exit corner" bearing directly.
+    Walk these legs IN ORDER: "the path north (east side)", then "the
+    top corridor", then "the west lane to the exit", then the "forest
+    exit corner". THE MAZE DRILL, every decision: read the CURRENT
+    leg's bearing and walk the direction with the BIGGER number of
+    tiles left ("12 north, 5 west" = walk_north). Your walk goes
+    straight and stops when trees block it - that stop is the maze
+    talking. After a stop, walk ONCE the bearing's OTHER direction,
+    then go back to the bigger one. If a walk ends on a tile you have
+    already stopped on, that way is sealed: work the other direction
+    2-3 walks before trying it again. A leg counts as REACHED when its
+    bearing reads 2 tiles or less - switch to the next leg then, do
+    not hunt the exact tile. If a leg gets no closer after trying both
+    directions several times, skip to the NEXT leg's bearing and write
+    what blocked you into your notes. The dropped-item Potion sits
+    behind a tree wall you CANNOT cross from the south - grab it only
+    if its bearing reads 1-2 tiles while you walk the legs; never
+    leave the path for it. The south-west corner ball is already in
+    your bag - there is nothing left down there. Then walk north through the
     gate building (the "doorway out to Route 2" bearing) and continue
     north on Route 2 into PEWTER CITY (the "gap to Pewter" bearing).
     Do NOT enter the cave door east of the path - its Pokemon are ten
