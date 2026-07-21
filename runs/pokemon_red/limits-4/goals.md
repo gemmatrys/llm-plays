@@ -15,9 +15,12 @@
     the mats leaves the forest by itself. DONE the moment your
     location no longer reads Viridian Forest: mark it done then.
 
-14. Cross the little gate building northward: cross the room, then use
-    the far doorway ahead of you. DONE when your location reads
-    Route 2: mark it done then.
+14. Cross the little gate building northward. Do NOT use walk_to_exit
+    inside it - that walks back through the NEAR door and puts you in
+    the forest again (it just did). Use plain walk_north to cross the
+    room; stepping through the doorway on the far (north) side leads
+    out by itself. DONE when your location reads Route 2: mark it
+    done then.
 
 15. Walk Route 2 NORTH into PEWTER CITY (the "gap to Pewter" bearing).
     Do NOT enter the cave door east of the path - its Pokemon are ten
@@ -73,7 +76,8 @@ Rules:
   money.
 - Buy ONLY what a goal lists. Nothing else, no museum tickets.
   Nickname prompts: NO.
-- In the little gate buildings the door you WANT is the far one:
-  cross the room first, then use the doorway ahead of you.
+- In the little gate buildings the door you WANT is the far one, and
+  walk_to_exit always picks the NEAR one - never use it inside a gate;
+  cross the room with plain walks and step through the doorway ahead.
 - Do NOT mark a goal done unless its DONE line happened on screen. "I
   think I did it" is not evidence.
