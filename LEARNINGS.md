@@ -344,6 +344,9 @@ phases don't relearn them. Format: lesson → where it now lives.
   Bracketed feedback strings tell the model which way it ended. The menu
   RAM (wCurrentMenuItem/wMaxMenuItem) is STALE after menus close — useless
   as an open-menu signal; the on-screen cursor glyph is the honest one.
+  wFontLoaded is OVERWORLD-ONLY: battles never set it (live-verified —
+  font=0 with EXP text on screen), so battle text needs its own gate:
+  in battle, press A until the menu cursor appears or in_battle drops.
   Still to verify live: 0xED presence during an actual menu (first battle
   or shop will show it). The old blind burst survives only in the fish.
 - **The model cannot identify repeated structures or verify its own event

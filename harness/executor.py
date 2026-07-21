@@ -67,16 +67,23 @@ class Executor:
             return "[text advance unavailable - no RAM access]"
         for i in range(d.max_text_presses):
             try:
-                font = self.extras.read_block(d.font_addr, 1)[0]
-                if not (font & 1):
-                    return (f"[text closed after {i} presses]" if i else
-                            "[no text box is open - nothing pressed]")
                 tiles = self.extras.read_block(d.addr, d.cols * d.rows)
                 if d.menu_cursor_tile in tiles:
-                    return ("[stopped at a choice - answer it with ONE "
+                    return ("[stopped at a choice/menu - answer it with ONE "
                             "deliberate press]" if i else
-                            "[a choice is on screen - answer it with ONE "
-                            "deliberate press]")
+                            "[a choice/menu is on screen - answer it with "
+                            "ONE deliberate press]")
+                in_battle = (self.extras.read_block(d.battle_addr, 1)[0]
+                             if d.battle_addr is not None else 0)
+                if not in_battle:
+                    # overworld: wFontLoaded bit 0 is the text-box truth
+                    font = self.extras.read_block(d.font_addr, 1)[0]
+                    if not (font & 1):
+                        return (f"[text closed after {i} presses]" if i else
+                                "[no text box is open - nothing pressed]")
+                # in battle there is no font flag (battles never set it):
+                # press through result text until the menu cursor shows up
+                # or the battle ends (the not-in-battle branch then closes)
             except Exception:  # noqa: BLE001 — degrade loud, not wedged
                 return "[text advance aborted - RAM read failed]"
             self.hands.press("A", 4)

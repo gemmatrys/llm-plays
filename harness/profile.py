@@ -100,6 +100,10 @@ class TilemapConfig:
     font_addr: int = 0xCFC4        # wFontLoaded
     menu_cursor_tile: int = 0xED   # ▶
     max_text_presses: int = 12
+    # battles never set wFontLoaded (live-verified: font=0 with EXP text on
+    # screen), so in battle advance_text presses A until the menu cursor
+    # appears or the battle ends instead of consulting the font flag
+    battle_addr: int | None = 0xD057  # wIsInBattle
 
 
 @dataclass
