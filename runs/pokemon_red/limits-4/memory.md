@@ -1,1 +1,1 @@
-In Pewter City, heading to the doormat below the Gym entrance to enter the Pewter Gym and challenge Brock for the BOULDERBADGE.
+In Pewter City, navigating around the Gym's fence to reach the doormat on the west side to enter and challenge Brock.
