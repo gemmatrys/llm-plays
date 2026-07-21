@@ -1,1 +1,1 @@
-I am in Viridian City with Oak's Parcel. I am heading south to Pallet Town, but I've hit a fence and need to navigate around it to find the south exit to Route 1.
+I am in Viridian City. I have Oak's Parcel and am heading south to Pallet Town to deliver it.
