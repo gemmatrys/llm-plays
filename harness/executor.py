@@ -65,30 +65,39 @@ class Executor:
         d = self.dialog
         if self.extras is None or d is None:
             return "[text advance unavailable - no RAM access]"
-        for i in range(d.max_text_presses):
+        pressed = 0
+        saw_text = False
+        for _ in range(d.max_text_presses):
             try:
                 tiles = self.extras.read_block(d.addr, d.cols * d.rows)
                 if d.menu_cursor_tile in tiles:
+                    # the ONE state that never gets a blind press: a visible
+                    # choice cursor — an A here commits irreversibly
                     return ("[stopped at a choice/menu - answer it with ONE "
-                            "deliberate press]" if i else
+                            "deliberate press]" if pressed else
                             "[a choice/menu is on screen - answer it with "
                             "ONE deliberate press]")
                 in_battle = (self.extras.read_block(d.battle_addr, 1)[0]
                              if d.battle_addr is not None else 0)
-                if not in_battle:
-                    # overworld: wFontLoaded bit 0 is the text-box truth
-                    font = self.extras.read_block(d.font_addr, 1)[0]
-                    if not (font & 1):
-                        return (f"[text closed after {i} presses]" if i else
-                                "[no text box is open - nothing pressed]")
-                # in battle there is no font flag (battles never set it):
-                # press through result text until the menu cursor shows up
-                # or the battle ends (the not-in-battle branch then closes)
+                # battles never set wFontLoaded — in battle, "text open"
+                # until the menu cursor shows or the battle ends
+                text_open = bool(in_battle) or bool(
+                    self.extras.read_block(d.font_addr, 1)[0] & 1)
+                saw_text = saw_text or text_open
+                if not text_open and pressed:
+                    # ALWAYS press at least once (universal rule: text-state
+                    # flags have per-mode blind spots, and the first A also
+                    # STARTS a conversation with whoever is faced) — then
+                    # stop the moment the follow-through sees it closed
+                    return (f"[text closed after {pressed} presses]"
+                            if saw_text else
+                            "[pressed A once - nothing opened]")
             except Exception:  # noqa: BLE001 — degrade loud, not wedged
                 return "[text advance aborted - RAM read failed]"
             self.hands.press("A", 4)
+            pressed += 1
             time.sleep((4 + 24) * FRAME_S)
-        return f"[text still open after {d.max_text_presses} presses]"
+        return f"[text still open after {pressed} presses]"
 
     def savestate(self) -> bool:
         """Ratchet primitive. Returns False when the platform can't savestate

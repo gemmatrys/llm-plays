@@ -48,11 +48,13 @@ Movement:
 - Bouncing between two maps = walking in/out a door: step away, go around.
 - Walking into a wall changes nothing - turn. Black screens: wait.
 
-Dialogue: mash_through_dialogue clears a speech safely - stops when the text
-closes or a choice appears, never answers choices, does NOTHING if no text
-is open (cannot restart a conversation). Read its feedback: "[text
-closed...]" move on; "[stopped at a choice...]" answer with ONE press;
-"[no text box is open...]" stop mashing, act on your goal.
+Dialogue: mash_through_dialogue ALWAYS presses A at least once, then keeps
+pressing until the text closes or a choice appears - so facing someone and
+calling it both STARTS and clears their speech. It never answers choices.
+Careful: calling it again while still facing someone restarts their speech.
+Read its feedback: "[text closed...]" = speech over, move on; "[stopped at
+a choice...]" = answer with ONE press; "[pressed A once - nothing
+opened]" = nothing to talk to, act on your goal.
 
 Menus: UP/DOWN cursor, A confirm, B cancel; START = main menu (B closes).
 A yes/no CONFIRMING something (take/buy/learn/nickname): ONE press, never
