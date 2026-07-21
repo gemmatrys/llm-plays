@@ -1,1 +1,1 @@
-In Viridian City. Goal 8: Heal at the Pokemon Center, then buy 3 Poke Balls and 3 Antidotes at the Mart.
+In Viridian Pokemon Center. Healing Charmander, then going to the Mart to buy 3 Poke Balls and 3 Antidotes.
