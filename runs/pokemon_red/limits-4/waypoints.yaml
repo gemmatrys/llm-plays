@@ -13,6 +13,9 @@ waypoints:
   route1_south_gap: {map: 1, x: 21, y: 35}
   # Route 1 -> Pallet Town gap (live 18:34/18:39 crossings, both at x=10)
   pallet_gap: {map: 12, x: 10, y: 35}
+  # Route 1 -> Viridian City north gap (live crossings: 20:38 exit from
+  # (11,2), 22:30 southbound entry landed at (11,2))
+  viridian_gap: {map: 12, x: 11, y: 2}
   # Oak's lab door (live 18:24 exit landed on (12,12); door is one north)
   oak_lab_door: {map: 0, x: 12, y: 11}
   # Oak inside the lab — GUESS from the starter-choice logs (model stood
