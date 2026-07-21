@@ -50,7 +50,18 @@ waypoints:
   # (A third item, an ANTIDOTE at (25,11), sits in a trainer's sight
   # line — not waypointed on purpose.)
   a dropped item: {map: 51, x: 12, y: 29}
-  another dropped item: {map: 51, x: 1, y: 31}
+  # (the Poke Ball at (1,31) was collected ~07:00 — bearing removed; the
+  # object table still lists it and the harness does not yet filter taken
+  # items, so keeping it advertised sent the model circling a ghost.
+  # Backlog: filter collected items by missable flag.)
+  # --- forest maze route (added 2026-07-21 08:50 after a 2h+ compass
+  # wedge at the west tree wall y~30): the forest only opens northward on
+  # the EAST side, then runs west along the top, then down the west lane.
+  # Anchors from pokered object coords (trainers/items sit ON the path);
+  # exact corridor tiles are GUESS — promote from the live crossing.
+  the path north (east side): {map: 51, x: 30, y: 30}
+  the top corridor: {map: 51, x: 25, y: 11}
+  the west lane to the exit: {map: 51, x: 2, y: 18}
   # Forest north exit doormats, top-left corner — VERIFIED (forest warp
   # table: (1,0)/(2,0) -> north gate)
   forest exit corner: {map: 51, x: 1, y: 0}
