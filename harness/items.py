@@ -122,13 +122,20 @@ def resolve(name: str, bag_names: list[str], mart_names: list[str],
         if want not in slugs:
             return None  # this shop does not sell it
         slot = slugs.index(want)
-        steps = [Step(op="advance_text"),                   # greeting -> menu
+        # two Bs first: collapse any half-open shop state (item list or
+        # quantity box from an earlier buy) back to closed - the first
+        # live retries no-op'd because A(BUY) landed into an already-open
+        # list where focus sat on BUY/SELL/QUIT (the shop focus trap)
+        steps = [_press("B", 20), _press("B", 20),
+                 Step(op="advance_text"),                   # (re)greet -> menu
                  _press("A", 30),                           # BUY (tops there)
                  Step(op="advance_text")]                   # -> item list
         steps += _pin(len(slugs))
         steps += [_press("DOWN") for _ in range(slot)]
-        steps += [_press("A", 20)]                          # quantity x1
-        steps += [_press("UP") for _ in range(count - 1)]
+        steps += [_press("A", 45)]                          # wait for the
+        # quantity box to render before counting - a fast A ate the UPs on
+        # the first live buy (x5 asked, x1 bought, 2026-07-21 Pewter)
+        steps += [_press("UP", 14) for _ in range(count - 1)]
         steps += [_press("A", 30),                          # -> price yes/no
                   _press("A", 40),                          # yes
                   Step(op="advance_text"),                  # "here you are"
