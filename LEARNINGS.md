@@ -331,3 +331,18 @@ phases don't relearn them. Format: lesson → where it now lives.
   exist in prompt.md's allowed-behaviors contract (the parser is
   exact-match, llm.py raises on unknown names). Run-2 candidate: a reply
   normalizer (spaces→underscores + synonyms) to drop even that.
+- **Blind dialogue mashing is self-defeating at NPCs that re-greet**: the
+  open-loop A/B burst overshoots the dialogue's end, and the leftover A
+  presses (still facing the NPC) START THE CONVERSATION OVER — the model
+  looped the nurse's entire heal cycle 10+ times, each pass reinforcing
+  "I must finish this dialogue". The trailing-B trick can't save it; only
+  not-pressing-after-close can. → mash_through_dialogue is now a
+  RAM-grounded executor op (`advance_text`): press A only while
+  wFontLoaded (0xCFC4 bit 0, live-verified 1↔0) says a text box is open,
+  stop when a choice cursor (▶ tile 0xED anywhere in wTileMap) appears so
+  the model answers choices deliberately, do nothing when no text is open.
+  Bracketed feedback strings tell the model which way it ended. The menu
+  RAM (wCurrentMenuItem/wMaxMenuItem) is STALE after menus close — useless
+  as an open-menu signal; the on-screen cursor glyph is the honest one.
+  Still to verify live: 0xED presence during an actual menu (first battle
+  or shop will show it). The old blind burst survives only in the fish.

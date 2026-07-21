@@ -14,13 +14,18 @@ FRAME_S = 1 / 60
 
 
 class Executor:
-    def __init__(self, hands: Hands, extras: Extras | None, savestate_slot: int = 1):
+    def __init__(self, hands: Hands, extras: Extras | None, savestate_slot: int = 1,
+                 dialog=None):
         self.hands = hands
         self.extras = extras
         self.savestate_slot = savestate_slot
+        self.dialog = dialog  # TilemapConfig (font/cursor fields) or None
 
-    def execute(self, behavior: Behavior) -> None:
+    def execute(self, behavior: Behavior) -> str | None:
+        """Run the behavior. Returns an optional feedback string for the
+        model's recent-actions context (e.g. how a text advance ended)."""
         held: set[str] = set()
+        feedback: str | None = None
         # step_factory lets a behavior generate fresh steps each run (e.g. a
         # randomized dialogue-masher); otherwise its static steps are used.
         steps = (behavior.step_factory() if behavior.step_factory is not None
@@ -31,6 +36,8 @@ class Executor:
                     time.sleep(step.wait_frames * FRAME_S)
                 elif step.op == "savestate":
                     self.savestate()
+                elif step.op == "advance_text":
+                    feedback = self._advance_text()
                 elif step.op == "keydown" and step.button is not None:
                     self.hands.key_down(step.button)
                     held.add(step.button)
@@ -47,6 +54,34 @@ class Executor:
             # not even if it forgot a keyup, raised, or the plan gets aborted
             for button in held:
                 self.hands.key_up(button)
+        return feedback
+
+    def _advance_text(self) -> str:
+        """Closed-loop dialogue advance (op "advance_text"): press A only
+        while a text box is actually open, stop the moment it closes or a
+        choice menu appears. RAM-grounded so it can neither re-open a
+        conversation by pressing into the overworld nor blind-confirm a
+        yes/no — the two failure modes of the old open-loop mash."""
+        d = self.dialog
+        if self.extras is None or d is None:
+            return "[text advance unavailable - no RAM access]"
+        for i in range(d.max_text_presses):
+            try:
+                font = self.extras.read_block(d.font_addr, 1)[0]
+                if not (font & 1):
+                    return (f"[text closed after {i} presses]" if i else
+                            "[no text box is open - nothing pressed]")
+                tiles = self.extras.read_block(d.addr, d.cols * d.rows)
+                if d.menu_cursor_tile in tiles:
+                    return ("[stopped at a choice - answer it with ONE "
+                            "deliberate press]" if i else
+                            "[a choice is on screen - answer it with ONE "
+                            "deliberate press]")
+            except Exception:  # noqa: BLE001 — degrade loud, not wedged
+                return "[text advance aborted - RAM read failed]"
+            self.hands.press("A", 4)
+            time.sleep((4 + 24) * FRAME_S)
+        return f"[text still open after {d.max_text_presses} presses]"
 
     def savestate(self) -> bool:
         """Ratchet primitive. Returns False when the platform can't savestate

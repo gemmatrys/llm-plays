@@ -57,7 +57,13 @@ Screens:
   if it answers "[no path visible]" that way is truly walled, try another.
   Single UP/DOWN/LEFT/RIGHT presses are for fine positioning; A talks to
   who/what you face.
-- Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
+- Dialogue (text at bottom): A advances; mash_through_dialogue clears a whole
+  speech safely - it watches the game's own state, stops the instant the text
+  closes OR a choice appears (it never answers choices), and does NOTHING if
+  no text is open, so it cannot restart a conversation. Watch its bracketed
+  feedback in recent actions: "[text closed...]" = speech over, move on;
+  "[stopped at a choice...]" = answer with ONE press; "[no text box is
+  open...]" = you are in the overworld, stop mashing and act on your goal.
 - Menus/shops: UP/DOWN move cursor, A confirms, B cancels/exits; START opens the
   main menu (close with B). Yes/no: A=YES, B=NO.
 - A yes/no CONFIRMING a specific choice (take a pokemon, buy, learn a move,

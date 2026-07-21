@@ -81,7 +81,8 @@ def main() -> None:
         policy = None
 
     eyes, hands, extras = drivers.create(profile)
-    executor = Executor(hands, extras, profile.ratchet.savestate_slot)
+    executor = Executor(hands, extras, profile.ratchet.savestate_slot,
+                        dialog=profile.tilemap)
     watchdog = Watchdog(policy, library, profile.ladder,
                         on_llm_failure=lambda why: runlog.log_metric(
                             "llm_failure", detail=str(why)[:300]))

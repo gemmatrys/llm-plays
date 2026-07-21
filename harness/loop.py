@@ -164,7 +164,9 @@ class GameLoop:
                                            total=len(decision.behaviors))
                     break
                 prev_hash = cur_hash
-            self.executor.execute(behavior)
+            feedback = self.executor.execute(behavior)
+            if feedback:
+                self._recent.append(feedback)
             executed += 1
 
         self._recent.extend(b.name for b in decision.behaviors[:executed])

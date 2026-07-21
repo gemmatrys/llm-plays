@@ -90,6 +90,15 @@ class TilemapConfig:
     # warps = doors/stairs/holes; count then 4-byte entries (y, x, destWarp, destMap)
     warp_count_addr: int = 0xD3AE  # wNumberOfWarps
     warp_entry_addr: int = 0xD3AF  # wWarpEntries
+    # dialogue state, for the executor's closed-loop text advance
+    # (op "advance_text"): font_addr bit 0 is set while a text box is open
+    # (wFontLoaded — verified live 2026-07-20: 1 through the whole nurse
+    # dialogue, 0 in the overworld); menu_cursor_tile is the ▶ selection
+    # glyph drawn whenever a choice menu is up — its presence anywhere on
+    # screen means "stop, the model must answer".
+    font_addr: int = 0xCFC4        # wFontLoaded
+    menu_cursor_tile: int = 0xED   # ▶
+    max_text_presses: int = 12
 
 
 @dataclass

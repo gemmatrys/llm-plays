@@ -129,10 +129,14 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
         # short, bursty taps — quick presses in rapid succession clear dialogue
         # and confirm menus/naming screens faster than long-held/spaced presses
         "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=4, wait_frames=6)] * 6),
-        # randomized each run via step_factory (see mash_dialogue_steps)
-        "mash_through_dialogue": Behavior(
-            name="mash_through_dialogue", steps=mash_dialogue_steps(),
-            source="builtin", step_factory=mash_dialogue_steps),
+        # RAM-grounded closed loop (executor op "advance_text"): presses A
+        # only while a text box is open, stops when it closes or a choice
+        # cursor appears, does nothing at all in the overworld — so it can
+        # never re-open a conversation or blind-confirm a yes/no. The old
+        # open-loop randomized burst (mash_dialogue_steps) survives only in
+        # the fish's repertoire.
+        "mash_through_dialogue": _builtin(
+            "mash_through_dialogue", [Step(op="advance_text")]),
         # explore: a fresh short random walk each run (fish + lost-model use)
         "wander": Behavior(name="wander", steps=wander_steps(),
                            source="builtin", step_factory=wander_steps),
