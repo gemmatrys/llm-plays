@@ -1,1 +1,1 @@
-I am in Viridian City. I have Oak's Parcel and am heading south to Pallet Town to deliver it.
+I am on Route 1, heading south back to Pallet Town to deliver Oak's Parcel to Professor Oak. Next: Enter Pallet Town and then Oak's lab.
