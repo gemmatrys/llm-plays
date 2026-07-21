@@ -87,6 +87,33 @@ tilesets:
                "0x51","0x52","0x5a","0x5c","0x5e","0x5f"]
     portal: []
     grass: ["0x20"]
+  "0x07":
+    name: gym
+    # pokered Gym_Coll, ingested 2026-07-21 ahead of goal 14 (Pewter Gym /
+    # Brock) — an unharvested gym tileset would kill every walk macro at the
+    # door. Counter id 0x3a from the tileset headers (the gym has no
+    # walk-up desk in Pewter, but the id is authoritative). No grass.
+    walkable: ["0x03","0x11","0x16","0x19","0x2b","0x3c","0x3d","0x3f",
+               "0x4a","0x4c","0x4d"]
+    portal: []
+    counter: ["0x3a"]
+  "0x0a":
+    name: museum
+    # pokered: Museum_Coll IS Gate_Coll (shared label with ForestGate_Coll,
+    # same list as tileset 0x09 above); counters 0x17/0x32 from the tileset
+    # headers. Ingested 2026-07-21 — goal says skip the museum, but a
+    # misstep inside would otherwise land in an unmapped tileset.
+    walkable: ["0x01","0x12","0x14","0x1a","0x1c","0x37","0x38","0x3b","0x3c","0x5e"]
+    portal: []
+    counter: ["0x17", "0x32"]
+  "0x11":
+    name: cavern
+    # pokered Cavern_Coll, ingested 2026-07-21 ahead of the stretch-3 Mt
+    # Moon crossing (three floors of this tileset; an unharvested cave =
+    # the forest-gate wedge, hours long). No grass, no counter — cave
+    # encounters roll on walkable floor, not a grass id.
+    walkable: ["0x05","0x15","0x18","0x1a","0x20","0x21","0x22","0x2a","0x2d","0x30"]
+    portal: []
   "0x08":
     name: house
     # generic house interior — harvested live 2026-07-20 in a Viridian home

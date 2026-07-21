@@ -1,0 +1,18 @@
+# Slot 3 variant of attack_1 (see that file for the mechanism): pin slot 1,
+# then two DOWNs.
+name: attack_3
+description: Use the move in slot 3 of party= and play the turn out.
+steps:
+  - {op: advance_text}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: B, hold_frames: 4, wait_frames: 24}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: LEFT, hold_frames: 4, wait_frames: 12}
+  - {button: A, hold_frames: 4, wait_frames: 30}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: UP, hold_frames: 4, wait_frames: 12}
+  - {button: DOWN, hold_frames: 4, wait_frames: 12}
+  - {button: DOWN, hold_frames: 4, wait_frames: 12}
+  - {button: A, hold_frames: 4, wait_frames: 40}
+  - {op: advance_text}

@@ -82,7 +82,13 @@ def main() -> None:
 
     eyes, hands, extras = drivers.create(profile)
     executor = Executor(hands, extras, profile.ratchet.savestate_slot,
-                        dialog=profile.tilemap)
+                        dialog=profile.tilemap, eyes=eyes,
+                        ram_map=profile.ram_map)
+    if args.policy == "llm":
+        # tripwire-judge step validation: skills may carry op "verify" steps;
+        # the LLM is the judge, the metric line is the audit trail
+        executor.judge = policy.verify
+    executor.on_verify = lambda **kw: runlog.log_metric("verify", **kw)
     watchdog = Watchdog(policy, library, profile.ladder,
                         on_llm_failure=lambda why: runlog.log_metric(
                             "llm_failure", detail=str(why)[:300]))

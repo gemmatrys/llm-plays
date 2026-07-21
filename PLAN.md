@@ -71,6 +71,23 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
 The local LLM is a *behavior selector*, not a button presser. In Phase 1–2 the "skill
 library" is nearly empty (behaviors like `press_A`), but the interface exists from day one.
 
+**Step validation — tripwire-judge (decided 2026-07-21).** Skills may carry
+`op: verify` steps ({expect, tripwire}). The tripwire — a cheap engine-bit
+read against the profile ram_map, e.g. `in_battle == 0` after flee — decides
+only WHETHER to ask; it never rules on truth (predicted-outcome asserts are
+banned: harness world-model claims are exactly what the warp-table/0x55
+lessons burned). When the tripwire is absent, unreadable, or tripped, the
+JUDGE rules: the local LLM gets the settled screenshot and one line of
+expectation (template `prompts/<game>/verify.md`, checkpoint-owned, hot) and
+returns `{matches, seen}` — the sole authority on what happened. Fails open
+with loud feedback; every verdict logged (`kind: "verify"`) so the judge's
+own accuracy is auditable. Portability ladder for future games: RAM tripwire
+where mapped → pixel/phash tripwire where not → always-ask as the floor; the
+judge layer is identical everywhere. Rationale: the model keeps decision
+authority (user), the common success path costs zero LLM calls, and every
+anomaly gets model eyes. Pilot: flee_battle escape confirmation; next:
+done_goal grounding.
+
 ## 3. Interfaces (the seams that make platform/game swaps config, not rewrites)
 
 ```python

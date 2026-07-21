@@ -59,12 +59,21 @@ class Step:
       (any key still down when the behavior ends is auto-released by the executor)
     - op "wait": idle wait_frames
     - op "savestate": ratchet save
+    - op "verify": tripwire-judge check (PLAN: step validation). `tripwire`
+      ({field, equals} against the profile ram_map) is an optional accelerator:
+      when the engine bit already confirms `expect`, no call is made. Tripwire
+      absent, unreadable, or tripped -> the JUDGE: the LLM looks at the settled
+      screen and rules {matches, seen} - its verdict is the sole authority; the
+      harness never decides truth on its own opinion. Fails open with loud
+      feedback when no judge is available.
     """
 
     button: str | None = None
     hold_frames: int = 8
     wait_frames: int = 4
-    op: str | None = None  # "savestate" | "wait" | "keydown" | "keyup"
+    op: str | None = None  # "savestate" | "wait" | "keydown" | "keyup" | "verify"
+    expect: str | None = None  # verify: expected screen state, natural language
+    tripwire: dict | None = None  # verify: {field, equals} engine-bit accelerator
 
 
 @dataclass

@@ -15,6 +15,10 @@ Planning:
   unfamiliar menu, first battle).
 - EXPERIMENT, don't deliberate: moves are cheap and the game auto-saves; only
   yes/no confirmations are irreversible. When unsure, act and read the change.
+- Rules are not weighed against each other: the current goal's own text
+  outranks the Rules list, and the FIRST rule that fits the screen wins -
+  run its drill and stop thinking. A rule you cannot follow right now (item
+  not in bag=, move at 0 PP) does not apply - skip it without discussion.
 - Same behavior + no change on screen/position = NOT working. Break the loop:
   another direction, another button, a path not tried; get_unstuck last.
 
@@ -80,12 +84,16 @@ A yes/no CONFIRMING something (take/buy/learn/nickname): ONE press, never
 mash - a stray A commits irreversibly. A=YES, B=NO. "Choose a POKeMON"
 listing your OWN party is the party menu, not a gift - B closes it.
 
-Battle: cursor sits on FIGHT - mashing A attacks with the first move (wins
-most early fights). battle_hint= does the type math for you: who the enemy
-is, how hard your moves hit it, how hard it hits you. "(resisted)" both
-ways = a slow grind, fine if healthy; your moves "(resisted)" while its
-moves hit hard = consider RUN. RUN flees wild battles; never flee trainers
-(it fails).
+Battle: attack_N uses the move in slot N of party= (party= lists EMBER
+third -> attack_3) and plays the whole turn out, ending at the next battle
+menu - no manual cursor work, it finds FIGHT from anywhere in the battle
+menus. flee_battle escapes a wild battle the same way; its "[stopped at a
+choice]" feedback with in_battle still 1 means the escape failed - just
+call it again. Never flee trainers (it always fails). One battle turn =
+ONE behavior: pick attack_N or flee_battle and you are done deciding.
+battle_hint= does the type math for you: who the enemy is, how hard your
+moves hit it, how hard it hits you. "(resisted)" both ways = a slow grind,
+fine if healthy; your moves "(resisted)" while its moves hit hard = flee.
 
 Title screen: press START; CONTINUE resumes, NEW GAME restarts - goals say
 which; NEVER pick anything that deletes/overwrites a save. Naming screens:

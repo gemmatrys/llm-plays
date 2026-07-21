@@ -286,6 +286,76 @@ class LLMPolicy:
         self.last_done_goal = action.get("done_goal")
         return plan
 
+    # The JUDGE (tripwire-judge step validation, PLAN): one tiny screenshot-only
+    # query. Template is checkpoint-owned like everything model-facing —
+    # prompts/<game>/verify.md (hot, published) with an {expect} placeholder;
+    # this fallback only exists so a missing file degrades loud, not broken.
+    DEFAULT_VERIFY_TEMPLATE = """You are checking ONE thing on this game \
+screenshot. Expected: {expect}
+Answer from the screenshot only, immediately - do not deliberate. \
+"seen" = what the screen actually shows, one short sentence."""
+
+    def verify(self, frame, expect: str) -> tuple[bool, str]:
+        """Judge call: does the settled screen match `expect`? Returns
+        (matches, seen). Raises on transport/parse failure - the executor
+        fails open. Kept minimal: no goals, no ram, no history - the judge
+        rules on the screenshot alone so its verdict can't be argued into
+        agreement by stale context."""
+        vp = (self.prompt_path.parent / "verify.md"
+              if self.prompt_path is not None else None)
+        template = (vp.read_text(encoding="utf-8")
+                    if vp is not None and vp.is_file()
+                    else self.DEFAULT_VERIFY_TEMPLATE)
+        if "{expect}" not in template:
+            template = self.DEFAULT_VERIFY_TEMPLATE
+        img = frame.image
+        if max(img.size) > self.max_image_px:
+            scale = self.max_image_px / max(img.size)
+            img = img.resize((int(img.width * scale), int(img.height * scale)),
+                             resample=0)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        url = f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode()}"
+        payload = {
+            "model": self.model,
+            "messages": [{"role": "user", "content": [
+                {"type": "text", "text": template.replace("{expect}", expect)},
+                {"type": "image_url", "image_url": {"url": url}},
+            ]}],
+            # thinking stays ON when the server parser is on (vllm#39130:
+            # without it, structured output silently breaks) - the budget is
+            # sized so a binary look-and-answer finishes fast, and the
+            # template orders an immediate answer
+            "max_tokens": 1200 if self.reasoning != "none" else 120,
+            "temperature": 0.0,
+            "response_format": {"type": "json_schema", "json_schema": {
+                "name": "verify", "schema": {
+                    "type": "object",
+                    "properties": {
+                        "matches": {"type": "boolean"},
+                        "seen": {"type": "string", "maxLength": 120},
+                    },
+                    "required": ["matches", "seen"],
+                    "additionalProperties": False,
+                }}},
+        }
+        if self.reasoning != "none":
+            payload["chat_template_kwargs"] = {"enable_thinking": True}
+        r = requests.post(f"{self.endpoint}/v1/chat/completions", json=payload,
+                          timeout=min(60.0, self.timeout_s))
+        r.raise_for_status()
+        content = (r.json()["choices"][0]["message"].get("content") or "").strip()
+        if not content:
+            raise ValueError("judge reply empty (thinking ate the budget)")
+        try:
+            verdict = json.loads(content)
+        except json.JSONDecodeError:
+            i, j = content.find("{"), content.rfind("}")
+            if i == -1 or j == -1:
+                raise ValueError(f"judge reply not JSON: {content[:80]!r}")
+            verdict = json.loads(content[i:j + 1])
+        return bool(verdict.get("matches")), str(verdict.get("seen", ""))[:200]
+
     def _frame_data_url(self, obs: Observation) -> str:
         img = obs.frame.image
         if max(img.size) > self.max_image_px:

@@ -15,11 +15,17 @@ FRAME_S = 1 / 60
 
 class Executor:
     def __init__(self, hands: Hands, extras: Extras | None, savestate_slot: int = 1,
-                 dialog=None):
+                 dialog=None, eyes=None, ram_map: dict | None = None):
         self.hands = hands
         self.extras = extras
         self.savestate_slot = savestate_slot
         self.dialog = dialog  # TilemapConfig (font/cursor fields) or None
+        self.eyes = eyes  # for op "verify" screenshots; None = no judge calls
+        self.ram_map = ram_map or {}  # profile ram_map, for verify tripwires
+        # the JUDGE (op "verify"): callable(frame, expect) -> (matches, seen),
+        # wired by cli to LLMPolicy.verify when the llm policy runs
+        self.judge = None
+        self.on_verify = None  # callable(**kw), wired to runlog.log_metric
 
     def execute(self, behavior: Behavior) -> str | None:
         """Run the behavior. Returns an optional feedback string for the
@@ -38,6 +44,10 @@ class Executor:
                     self.savestate()
                 elif step.op == "advance_text":
                     feedback = self._advance_text()
+                elif step.op == "verify":
+                    v = self._verify(step)
+                    if v is not None:  # only failures speak; success is silent
+                        feedback = v
                 elif step.op == "keydown" and step.button is not None:
                     self.hands.key_down(step.button)
                     held.add(step.button)
@@ -98,6 +108,48 @@ class Executor:
             pressed += 1
             time.sleep((4 + 24) * FRAME_S)
         return f"[text still open after {pressed} presses]"
+
+    def _verify(self, step) -> str | None:
+        """Tripwire-judge step validation (op "verify"). The tripwire is a
+        cheap engine-bit read that decides WHETHER to ask - it never rules on
+        truth itself. The judge (the LLM, looking at the settled screen) is
+        the sole authority on what actually happened; the common success path
+        costs nothing. Returns None on pass, loud feedback on fail/unavailable
+        (fail open - a broken verify must not wedge the loop)."""
+        expect = step.expect or "the expected screen"
+        trip = step.tripwire
+        if trip and self.extras is not None:
+            addr = self.ram_map.get(trip.get("field"))
+            if addr is not None:
+                try:
+                    field = trip["field"]
+                    val = self.extras.read_ram({field: addr})[field]
+                    if val == trip.get("equals"):
+                        self._verify_metric(expect, verdict="tripwire_pass")
+                        return None  # engine bit confirms - no judgment needed
+                except Exception:  # noqa: BLE001 — tripwire down -> summon judge
+                    pass
+        if self.judge is None or self.eyes is None:
+            self._verify_metric(expect, verdict="no_judge")
+            return f"[verify: could not confirm - {expect}]"
+        time.sleep(step.wait_frames * FRAME_S)  # let the screen settle
+        try:
+            matches, seen = self.judge(self.eyes.get_frame(), expect)
+        except Exception as e:  # noqa: BLE001
+            self._verify_metric(expect, verdict="judge_error", detail=str(e)[:120])
+            return f"[verify unavailable - could not confirm: {expect}]"
+        self._verify_metric(expect, verdict="match" if matches else "mismatch",
+                            seen=seen)
+        if matches:
+            return None
+        return f"[verify FAILED: expected {expect}; the screen shows: {seen}]"
+
+    def _verify_metric(self, expect: str, **kw) -> None:
+        if self.on_verify is not None:
+            try:
+                self.on_verify(expect=expect, **kw)
+            except Exception:  # noqa: BLE001 — metrics must never break play
+                pass
 
     def savestate(self) -> bool:
         """Ratchet primitive. Returns False when the platform can't savestate
