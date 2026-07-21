@@ -7,3 +7,7 @@
 waypoints:
   mart_door: {map: 1, x: 29, y: 19}
   pokecenter_door: {map: 1, x: 23, y: 25}
+  # south exit to Route 1 — coords from the live 20:38 crossing (12->1
+  # landed at (21,35)); it is a map-edge connection, not a warp, so the
+  # map shows no D there
+  route1_south_gap: {map: 1, x: 21, y: 35}
