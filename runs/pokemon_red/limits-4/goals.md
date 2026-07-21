@@ -16,10 +16,14 @@
    the exit (the doormats are at the BOTTOM-LEFT of this room) and leave.
 
 5. Get OAK'S PARCEL from the real POKeMON MART - the BLUE-ROOF shop with
-   a MART sign. From this house's door, it is about 8 tiles EAST and 10
-   tiles SOUTH. Inside, the clerk stands behind a proper shop counter and
-   hands you a PARCEL for Professor Oak the moment you talk to him. If
-   someone only chats about school or coffee, wrong building - leave.
+   a MART sign. CORRECTION: the Mart is SOUTH-WEST of you, NOT east. You
+   are at the far EAST edge of town by the trees; the trees and ledges
+   block the direct line. The route: first walk WEST aggressively (several
+   calls), then walk SOUTH (v ledges hop automatically), then walk EAST
+   to the Mart's door (a D on your map). Inside, the clerk stands behind
+   a proper shop counter and hands you a PARCEL for Professor Oak when
+   you talk to him. If someone only chats about school or coffee, wrong
+   building - leave.
 
 6. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
    Pallet Town (retrace the route you came up). Enter Oak's lab (the big
