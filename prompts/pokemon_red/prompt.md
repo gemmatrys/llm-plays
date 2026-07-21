@@ -61,12 +61,13 @@ Movement:
   went 9, stopped at a wall; openings passed: east after 3]" means a gap
   in the side wall sat 3 tiles along - walk_south_6 returns to it from
   where you stand (9-3), or remember it for the way back. Openings are
-  how mazes continue; trust the report over squinting at the map.
-  Walking the same direction again after a stop just bumps the same wall. Counted variants walk a bearing EXACTLY: "3 south,
-  4 east" = ["walk_south_3","walk_east_4"]. When nothing is walkable that
-  way it still takes ONE step in that direction - which is exactly how
-  you cross town/route boundaries at a gap (map edges show nothing; just
-  keep walking the bearing). "[move blocked]" afterward = a real wall.
+  how mazes continue; the report is the truth about what you passed.
+  Walking the same direction again after a stop just bumps the same
+  wall. Counted variants walk a bearing EXACTLY: "3 south, 4 east" =
+  ["walk_south_3","walk_east_4"]. When nothing is walkable that way it
+  still takes ONE step in that direction - which is exactly how you
+  cross town/route boundaries at the area's edge (just keep walking
+  the bearing). "[move blocked]" afterward = a real wall.
 - walk_to_exit goes THROUGH the nearest D - entering or leaving, including
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
