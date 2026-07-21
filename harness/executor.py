@@ -132,6 +132,7 @@ class Executor:
         if self.judge is None or self.eyes is None:
             self._verify_metric(expect, verdict="no_judge")
             return f"[verify: could not confirm - {expect}]"
+        self._verify_metric(expect, verdict="judging")  # overlay-only beat
         time.sleep(step.wait_frames * FRAME_S)  # let the screen settle
         try:
             matches, seen = self.judge(self.eyes.get_frame(), expect)

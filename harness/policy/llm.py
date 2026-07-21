@@ -165,6 +165,12 @@ class LLMPolicy:
                      ". This reply MUST include a \"memory\" field rewriting "
                      "them: where you are NOW, what you are doing, what is "
                      "next. Do not repeat the old notes.")
+        # rung-1 confusion intervention (loop/slow-streak detectors): the
+        # harness saw a failing trajectory the model cannot see from inside
+        # one decision - hand it the trajectory, demand a change of approach
+        intervention = obs.extra.get("intervention")
+        if intervention:
+            text += "\n\nIMPORTANT: " + intervention
         payload = {
             "model": self.model,
             "messages": [

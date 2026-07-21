@@ -297,15 +297,10 @@ phases don't relearn them. Format: lesson → where it now lives.
 
 ## Doors & goal grounding — limits-4 Viridian session (2026-07-20 evening)
 
-- **An unharvested tileset makes every walk macro a silent no-op**
-  (`navigate.resolve` returns None on an empty walkable set): the model
-  wedged 5 decisions on a house doormat believing it was leaving the
-  Pokemon Center. Harvesting the tileset live unstuck it within one
-  decision. The slow-decision watcher (>90s) was the tell, before any
-  stuckness escalation. (Superseded 2026-07-21 after the gate-building
-  repeat: collision lists are now PRE-INGESTED from pokered and
-  directional walks fall back to one direct press in unmapped areas —
-  see the skills-thesis section.)
+- **An unharvested tileset makes every walk macro a silent no-op.**
+  (Trimmed 2026-07-21 — superseded: collision lists are PRE-INGESTED
+  from pokered and unmapped areas fall back to one direct press; see
+  the skills-thesis section.)
 - **Directional walks can never stop ON a door** — they take the farthest
   reachable block along the axis, so they route around or past buildings;
   the model orbited the Viridian Center for 8 decisions "aligning with the
@@ -407,14 +402,8 @@ stamped (instruction-style middle goals never stamp); checkpoint protocol
 rotation.
 
 ## NEXT GAP (user thesis, 2026-07-20) — RESOLVED 2026-07-21
-
-The thesis ("the gap is step rules between thought and buttons") was
-tested live the same night and landed differently than drafted: the
-errand-skill candidates (`hunt_encounter`, `heal_at_center`, `buy_item`)
-were built, worked, and were then deliberately replaced by positioning
-MACROS (walk_to_counter, walk_to_grass) + the choice-stop plan guard,
-with conversations kept as deliberate model presses. Full account in the
-next section.
+(Trimmed: the thesis landed as positioning macros + choice-stop guard,
+conversations kept with the model — full account in the next section.)
 
 ## The skills thesis, tested live — wire POSITIONING, not conversations
 ## (2026-07-21 overnight, Viridian→Forest stretch)
@@ -499,3 +488,98 @@ next section.
   gotcha bit again mid-incident: a backgrounded harness relaunch from the
   wrong cwd failed with "path not found"; the verify-every-step drill
   (harness_start + pids or it didn't happen) caught it in one cycle.
+
+## Conflict economics, battle geometry, tripwire-judge, trajectory
+## detectors (2026-07-21 day — limits-4 forest arc)
+
+- **Prompt conflicts have a measured price, and "inapplicable" is a
+  conflict too.** Same phase, same map: overworld decisions at <50% HP ran
+  median 45.5s vs 30.9s healthy (+47%) — the model re-litigating "Potion
+  early" against an empty bag every step; battles with EMBER at 0 PP ran
+  41.7s vs 30.5s (+37%). The extreme tail was worse than slow: 187-190s
+  "decisions" were fallback entries — deliberation ran past the reply
+  format and broke it. Fixes, each worth its cost the same hour: prompt
+  rule "the FIRST rule that fits wins; a rule you cannot follow right now
+  does not apply - skip it without discussion"; goals get RULE-SILENCING
+  lines when a stretch predictably disables a rule ("no POTIONs until
+  Pewter - Potion rules do not apply on this walk"). Post-fix: median
+  49.8→38.6, >90s events 7→1. → prompt.md Planning, goals convention.
+- **A rule that can co-trigger with a goal drill needs an explicit yield
+  clause.** Generic "Every fight: attack_3" vs goal-12 "flee or attack_1"
+  cost a 53s think on the very first skill use even WITH the precedence
+  rule in the prompt — precedence resolved it, but only after a full
+  deliberation lap. Rewrite the rule to defer itself: "a fight the
+  current goal does not say how to handle: ...". → goals Rules wording.
+- **Battle menus are GEOMETRY, not conversation** — the boundary that
+  retired heal_at_center leaves them wireable. Gen 1 remembers cursor
+  position across turns (move menu restores to the LAST-USED move,
+  pokered-verified), which is why the old manual drill "A, DOWN, DOWN"
+  only ever worked while EMBER sat in the bottom slot of a 3-move list
+  (no-wrap DOWNs pin the bottom). Skills attack_1..4/flee_battle do
+  reset-to-corner then navigate: advance_text in (reach the menu without
+  pressing into a cursor), B B collapse, UP LEFT pin FIGHT (both battle
+  menus have NO wrap — extra presses are no-ops), exact arrows, confirm,
+  advance_text out (play the turn to the next menu). One battle turn =
+  ONE behavior. 6/6 escapes on day one. → skills/pokemon_red/*.yaml.
+- **Prose multi-press drills execute as ONE press per decision.** The
+  first flee fix taught "press DOWN then RIGHT then A" as goal text; the
+  model issued single presses across separate decisions, drifted into the
+  bag menu mid-sequence, and burned 5 decisions per Weedle. Sequences the
+  harness can own must be WIRED (a skill), not taught (prose) — teaching
+  belongs only to genuinely one-press answers. → the skills above.
+- **Tripwire-judge step validation** (op verify; PLAN §2): the tripwire
+  (a profile ram_map read, e.g. in_battle==0 after flee) decides only
+  WHETHER to ask; the LLM judge on the settled screenshot rules
+  {matches, seen} as sole authority. Predicted-outcome asserts are
+  BANNED (harness world-model claims = the warp-table/0x55 class).
+  Fails open, every verdict metered. First live data: both judge calls
+  were false summons — in_battle LAGS the escape text, so the tripwire
+  read 1 on already-won escapes → a 90-frame settle wait before the
+  tripwire now answers most checks free. Watch item: both verdicts
+  described the frame as "glitched overworld" (dense forest tiles vs a
+  real capture problem — compare wording from open terrain). Portability
+  ladder for future games: RAM tripwire → pixel/phash tripwire →
+  always-ask floor; judge identical everywhere. → executor.py,
+  policy/llm.py verify(), prompts/<game>/verify.md, flee_battle.yaml.
+- **Bearing-chasing is a wedge class stuck detectors cannot see.** Two in
+  one morning, ~2h each: (1) a GHOST ITEM — the collected forest ball
+  kept advertising because object tables aren't filtered by the missable
+  flag, luring the model back into a dead-end pocket; (2) COMPASS-VS-MAZE
+  — "forest exit corner: 31 north" crosses tree walls; BFS's ~12-tile
+  horizon can't discover a detour that starts 20 tiles east, so
+  walk_north re-rolled the same 7-tile lap for hours. Positions kept
+  CHANGING, so position-stuck/phash detectors stayed silent (the naming-
+  grid blind spot again, movement flavor). And the "obvious" fix made a
+  THIRD wedge: routing the model to the Potion first — its alcove opens
+  from the far side; an item bearing 3 tiles away can be unreachable.
+  Fixes: ordered route-leg waypoints in natural language ("the path
+  north (east side)" → "the top corridor" → "the west lane"), goals text
+  "the forest is a MAZE - do not chase the exit bearing directly", and
+  items on a route are opportunistic pickups ("only if 1-2 tiles away
+  while ON the path"), never first-class stops. Backlog: filter
+  collected items from bearings; pathability-aware bearing rendering.
+  → run waypoints.yaml/goals.md pattern; harness backlog.
+- **The model cannot see its own trajectory — the harness must hand it
+  over** (user design). Confusion detectors in the loop: loop_detected
+  (16 recent overworld moves cover ≤9 distinct tiles, any tile revisited
+  4+, mostly walks, one map) and slow_streak (3 consecutive decisions
+  over max(60s, 3× rolling median) — self-calibrating, no fixed
+  constant). Ladder: rung 1 injects the evidence into the NEXT decision
+  via the stale_notes pattern ("16 moves cover only 6 tiles; (6,30)
+  visited 4 times. Walking there again will fail again. Do something
+  DIFFERENT") — self-diagnosis is impossible from inside one locally-
+  reasonable decision, trivial when the trajectory is in the prompt;
+  rung 2 escalates with the evidence payload if it persists 10+
+  decisions; 8 quiet decisions re-arm. Both fires metered for threshold
+  tuning. Deferred rung 0: adaptive thinking cap — only rung that can
+  hurt. → loop.py _watch_confusion/_ladder, llm.py intervention.
+- **Ops: Bash-tool background launches can die cleanly ~35s in** (console
+  control event → the loop's KeyboardInterrupt path; banner + one
+  decision logged, exit 0, no traceback — looked exactly like a code
+  bug). Foreground `timeout N` diagnostics lose buffered metrics on the
+  kill (missing harness_start ≠ never started). The reliable launch is
+  fully DETACHED: Start-Process cmd /c with -WorkingDirectory, then the
+  drill (pids + harness_start + a fresh decision + survive >60s).
+  Session-scoped cron proved unreliable under a busy session (a :07
+  hourly never fired in 90 min); watchers + explicit checks carried the
+  duty. → harness-machine-ops memory.

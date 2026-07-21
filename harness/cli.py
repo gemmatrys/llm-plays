@@ -88,7 +88,6 @@ def main() -> None:
         # tripwire-judge step validation: skills may carry op "verify" steps;
         # the LLM is the judge, the metric line is the audit trail
         executor.judge = policy.verify
-    executor.on_verify = lambda **kw: runlog.log_metric("verify", **kw)
     watchdog = Watchdog(policy, library, profile.ladder,
                         on_llm_failure=lambda why: runlog.log_metric(
                             "llm_failure", detail=str(why)[:300]))
@@ -121,6 +120,16 @@ def main() -> None:
             policy.on_stream = stream.stream_thinking  # live-stream reasoning
         print(f"[harness] overlay: http://127.0.0.1:{args.stream_port}/ "
               f"(add as OBS Browser Source)")
+
+    def _verify_event(**kw) -> None:
+        # "judging" is an overlay-only beat (the call is in flight); real
+        # verdicts get the metrics audit line AND the overlay JUDGE line
+        if kw.get("verdict") != "judging":
+            runlog.log_metric("verify", **kw)
+        if stream is not None:
+            stream.push_verify(kw.get("expect", ""), kw.get("verdict", ""),
+                               kw.get("seen", ""))
+    executor.on_verify = _verify_event
 
     sync = HotSync(base, profile.skills_dirs, library)
 

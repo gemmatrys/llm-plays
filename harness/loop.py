@@ -59,6 +59,16 @@ class GameLoop:
         self._nav_blocked = 0  # consecutive walk-attempts with zero movement
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
+        # confusion detectors (user design 2026-07-21): the model cannot see
+        # its own trajectory - the harness can. _traj = recent overworld
+        # (map,x,y) fixes; _durs = recent decision durations; _nudge = a
+        # rung-1 line injected into the NEXT decision's prompt (stale_notes
+        # pattern); _confusion = per-signal ladder state.
+        self._traj: list[tuple[int, int, int, bool]] = []  # (map,x,y,walked)
+        self._durs: list[float] = []
+        self._nudge: str | None = None
+        self._confusion: dict[str, dict] = {}
+        self._decision_n = 0
 
     def run(self, max_iterations: int | None = None) -> None:
         i = 0
@@ -300,10 +310,17 @@ class GameLoop:
             elif self._notes_age >= 15:
                 stale = f"unchanged for {self._notes_age} decisions"
 
+        extra: dict = {}
+        if stale:
+            extra["stale_notes"] = stale
+        if self._nudge:
+            # rung-1 confusion intervention, single-shot: the detector armed
+            # it last tick; the ladder re-arms or escalates if it persists
+            extra["intervention"] = self._nudge
+            self._nudge = None
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
-                          tilemap=self._read_tilemap(),
-                          extra={"stale_notes": stale} if stale else {})
+                          tilemap=self._read_tilemap(), extra=extra)
         decision = self.watchdog.decide(obs)
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
@@ -414,8 +431,8 @@ class GameLoop:
         move_tokens = ("UP", "DOWN", "LEFT", "RIGHT", "wander")
         self._last_moved = any(any(t in b.name for t in move_tokens)
                                for b in decision.behaviors[:executed])
-        self.runlog.log_decision(decision, fhash, ram_ctx, time.time() - started,
-                                 executed)
+        duration = time.time() - started
+        self.runlog.log_decision(decision, fhash, ram_ctx, duration, executed)
         if self.stream is not None:
             display = " → ".join(b.name for b in decision.behaviors[:executed])
             self.stream.push_decision(display, int(decision.rung),
@@ -425,6 +442,8 @@ class GameLoop:
 
         self._ratchet()
         self._watch_stuckness(frame, fhash, ram,
+                              [b.name for b in decision.behaviors[:executed]])
+        self._watch_confusion(ram_ctx, duration,
                               [b.name for b in decision.behaviors[:executed]])
         self._periodic_snapshot(frame)
 
@@ -819,6 +838,99 @@ class GameLoop:
             self.runlog.log_metric("escalation_suppressed", reason="stuck",
                                    signals=reasons)
         self.stuckness.reset()
+
+    def _watch_confusion(self, ram: dict | None, duration: float,
+                         executed: list[str]) -> None:
+        """Confusion detectors + intervention ladder (user design 2026-07-21).
+        Two signals the model cannot see from inside a single decision:
+
+        - loop_detected: the same few tiles re-visited while walking, no
+          battles - the compass-into-maze signature (positions keep CHANGING,
+          so the position-stuck detector never fires; cost 2h+ twice on
+          2026-07-21).
+        - slow_streak: consecutive decisions far above the rolling median -
+          conflict rumination (measured +47%/+37% under rule conflicts).
+
+        Ladder: rung 1 injects a hard line into the NEXT decision (the
+        stale_notes pattern - give the model its own trajectory); rung 2
+        escalates with the evidence payload if the signal persists a further
+        window after the nudge. Every fire is metered for threshold tuning."""
+        self._decision_n += 1
+        in_battle = bool((ram or {}).get("in_battle"))
+        walked = any(n.startswith("walk_") or n == "wander" for n in executed)
+        if ram is not None and not in_battle and "pos_x" in ram:
+            self._traj.append((ram.get("map_id", -1), ram["pos_x"],
+                               ram["pos_y"], walked))
+            del self._traj[:-24]
+        self._durs.append(duration)
+        del self._durs[:-30]
+
+        # -- signal: loop/revisit ------------------------------------------
+        loop_fire = False
+        loop_evidence = ""
+        window = self._traj[-16:]
+        if len(window) == 16 and len({m for m, _, _, _ in window}) == 1 \
+                and sum(1 for _, _, _, w in window if w) >= 8:
+            tiles = [(x, y) for _, x, y, _ in window]
+            distinct = len(set(tiles))
+            top_tile, top_n = max(((t, tiles.count(t)) for t in set(tiles)),
+                                  key=lambda p: p[1])
+            if distinct <= 9 and top_n >= 4:
+                loop_fire = True
+                loop_evidence = (f"{len(window)} recent moves cover only "
+                                 f"{distinct} tiles; {top_tile} visited "
+                                 f"{top_n} times")
+        self._ladder("loop_detected", loop_fire, loop_evidence,
+                     nudge=("the harness tracked your last moves: "
+                            + loop_evidence + ". Walking there again will "
+                            "fail again. Do something DIFFERENT this "
+                            "decision - a direction you have not tried, the "
+                            "next route bearing, or rewrite your notes with "
+                            "what is blocking you."))
+
+        # -- signal: slow streak -------------------------------------------
+        slow_fire = False
+        slow_evidence = ""
+        if len(self._durs) >= 10:
+            med = sorted(self._durs)[len(self._durs) // 2]
+            thresh = max(60.0, 3.0 * med)
+            last3 = self._durs[-3:]
+            if all(d > thresh for d in last3):
+                slow_fire = True
+                slow_evidence = (f"last 3 decisions took "
+                                 f"{', '.join(f'{d:.0f}s' for d in last3)} "
+                                 f"(rolling median {med:.0f}s)")
+        self._ladder("slow_streak", slow_fire, slow_evidence,
+                     nudge=("your last 3 decisions each took several times "
+                            "longer than normal. Stop weighing options: "
+                            "pick the FIRST drill or rule that fits the "
+                            "screen and act. If information is missing, act "
+                            "to reveal it instead of reasoning further."))
+
+    def _ladder(self, signal: str, firing: bool, evidence: str,
+                nudge: str) -> None:
+        """Per-signal intervention ladder: stage 0 -> nudge (rung 1) ->
+        escalate once if still firing 10+ decisions later (rung 2); a quiet
+        stretch of 8 decisions re-arms from the top."""
+        st = self._confusion.setdefault(signal,
+                                        {"stage": 0, "at": 0, "clear": 0})
+        if not firing:
+            st["clear"] += 1
+            if st["clear"] >= 8:
+                st["stage"] = 0
+            return
+        st["clear"] = 0
+        if st["stage"] == 0:
+            st["stage"], st["at"] = 1, self._decision_n
+            self._nudge = nudge
+            self.runlog.log_metric(signal, action="nudge", evidence=evidence)
+        elif st["stage"] == 1 and self._decision_n - st["at"] >= 10:
+            st["stage"] = 2
+            self.runlog.log_metric(signal, action="escalate", evidence=evidence)
+            self.runlog.escalate(signal,
+                                 f"nudge did not clear it - {evidence}")
+            if self.stream is not None:
+                self.stream.bump("escalations")
 
     def _periodic_snapshot(self, frame, every_s: float = 600.0) -> None:
         if time.time() - self._last_snapshot_ts > every_s:

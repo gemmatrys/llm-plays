@@ -70,9 +70,19 @@ class StreamState:
         with self._lock:
             self._d[counter] = self._d.get(counter, 0) + 1
 
+    def push_verify(self, expect: str, verdict: str, seen: str = "") -> None:
+        """Tripwire-judge event for the overlay's JUDGE line: "judging" while
+        the LLM call is in flight, then tripwire_pass/match/mismatch/..."""
+        with self._lock:
+            self._d["verify"] = {"ts": time.time(), "expect": expect,
+                                 "verdict": verdict, "seen": seen}
+
     def to_json(self) -> bytes:
         with self._lock:
             d = dict(self._d)
+        v = d.get("verify")
+        if v:
+            d["verify_age_s"] = round(time.time() - v["ts"], 1)
         d["uptime_s"] = round(time.time() - d["started_ts"])
         hours = max(d["uptime_s"] / 3600, 1e-9)
         d["decisions_per_hour"] = round(d["decisions"] / hours, 1)
@@ -141,6 +151,16 @@ OVERLAY_HTML = """<!DOCTYPE html>
               mask-image:linear-gradient(to bottom,transparent 0,#000 3em); }
   #thinking.offline { height:auto; color:var(--dim); font-style:italic;
               opacity:.7; -webkit-mask-image:none; mask-image:none; }
+  /* tripwire-judge line: gold while the judge looks, green tick on match,
+     red + what-it-saw on mismatch, dim blue when the tripwire settled it */
+  #judge { margin-top:8px; font-size:13px; display:none; padding-left:8px;
+           border-left:3px solid #f0c674; }
+  #judge::before { content:"JUDGE "; font-weight:700; font-size:11px;
+                   letter-spacing:.1em; color:#f0c674; }
+  #judge.pass { border-color:#7ee787; } #judge.pass::before { color:#7ee787; }
+  #judge.fail { border-color:#ff7b72; } #judge.fail::before { color:#ff7b72; }
+  #judge.trip { border-color:#79c0ff; opacity:.7; }
+  #judge.trip::before { content:"TRIPWIRE "; color:#79c0ff; }
   #why { font-size:14px; color:var(--fg); margin-top:2px; }
   #why:empty { display:none; }
   #why::before { content:"\\201C"; color:var(--dim); }
@@ -162,6 +182,7 @@ OVERLAY_HTML = """<!DOCTYPE html>
       <span id="behavior">…</span></div>
     <div id="why"></div>
   </div>
+  <div id="judge"></div>
   <div class="label">notes</div>
   <div id="notes">–</div>
   <div id="stats">
@@ -200,6 +221,27 @@ async function tick() {
     // plan executed); keep it hidden while the model is still generating.
     if (s.decisions !== curDecision) { curDecision = s.decisions; revealDecision(s); }
     else if (s.generating) { el("decision").classList.add("pending"); }
+    // JUDGE line: live while checking, lingers 10s on pass / 30s on fail so
+    // a viewer can actually read what the judge saw
+    const jd = el("judge"), v = s.verify;
+    if (v && s.verify_age_s != null) {
+      const linger = v.verdict === "judging" ? 999
+                   : v.verdict === "mismatch" ? 30
+                   : v.verdict === "tripwire_pass" ? 5 : 10;
+      if (s.verify_age_s < linger) {
+        jd.style.display = "block";
+        jd.className = v.verdict === "mismatch" ? "fail"
+                     : v.verdict === "match" ? "pass"
+                     : v.verdict === "tripwire_pass" ? "trip"
+                     : v.verdict === "judging" ? "" : "fail";
+        jd.textContent = v.verdict === "judging" ? "checking: " + v.expect
+                       : v.verdict === "tripwire_pass" ? "\\u2713 " + v.expect
+                       : v.verdict === "match" ? "\\u2713 " + v.expect
+                       : v.verdict === "mismatch" ? "\\u2717 expected " + v.expect
+                         + " \\u2014 saw: " + (v.seen || "")
+                       : v.verdict + ": " + v.expect;
+      } else { jd.style.display = "none"; }
+    } else { jd.style.display = "none"; }
     el("notes").textContent = s.memory || "–";
     el("n").textContent = s.decisions;
     el("dph").textContent = s.decisions_per_hour;
