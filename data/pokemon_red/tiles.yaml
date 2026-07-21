@@ -69,6 +69,24 @@ tilesets:
     # game's talk-across counter ids (pokered tileset headers; same trio as
     # the mart) — consumed by walk_to_counter
     counter: ["0x18", "0x19", "0x1e"]
+  "0x09":
+    name: forest_gate
+    # pokered Gate_Coll (ForestGate/Museum/Gate share it) — ingested
+    # 2026-07-21 while the model stood WEDGED in the south gate (map 50,
+    # unharvested tileset = walk macros dead). Counter ids from the
+    # tileset headers (the gate guard's desk).
+    walkable: ["0x01","0x12","0x14","0x1a","0x1c","0x37","0x38","0x3b","0x3c","0x5e"]
+    portal: []
+    counter: ["0x17", "0x32"]
+  "0x03":
+    name: forest
+    # pokered Forest_Coll, ingested 2026-07-21 ahead of goal 11 (the
+    # forest grind needs walk macros + grass from the first step).
+    # Grass id 0x20 from the tileset headers.
+    walkable: ["0x1e","0x20","0x2e","0x30","0x34","0x37","0x39","0x3a","0x40",
+               "0x51","0x52","0x5a","0x5c","0x5e","0x5f"]
+    portal: []
+    grass: ["0x20"]
   "0x08":
     name: house
     # generic house interior — harvested live 2026-07-20 in a Viridian home
