@@ -54,8 +54,9 @@
     ("[bag: +1 ...]") are the proof.
 
 Rules:
-- Every fight: attack_3 (EMBER). When party= shows EMBER at 0 PP,
-  attack_1 (SCRATCH) instead - same one call, nothing else to work out.
+- A fight the current goal does not say how to handle: attack_3
+  (EMBER); at 0 PP, attack_1 (SCRATCH). When the goal names a battle
+  drill, that drill IS the answer - use it without comparing.
 - Poke Balls only work on WILD Pokemon (in_battle: 1); in a trainer
   battle they are simply lost. Keep the last ball for a PIKACHU.
 - POISONED: START, ITEM, choose ANTIDOTE, A on USE, pick the Pokemon -
