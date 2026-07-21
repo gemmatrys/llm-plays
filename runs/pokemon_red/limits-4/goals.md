@@ -9,7 +9,7 @@
 
 17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
-18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
+18. [DONE] Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
     bearing). ENTERING: the gym's yard only opens from its WEST side -
     the poles east of the door and the bushes south cannot be crossed.
     (1) Use walk_to_the_doormat_below_the_gym_entrance, repeating it
