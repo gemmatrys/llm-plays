@@ -49,11 +49,14 @@ Screens:
   jumps to ED), press_A (confirms). Do not loop B/DOWN/A here.
 - Overworld: PREFER walk_north / walk_south / walk_east / walk_west - the
   harness computes the path around trees, ledges, and people for you (up to
-  ~12 tiles per call). walk_to_exit walks onto the nearest D. Do NOT plan
-  routes yourself tile by tile - pick the direction and go; if it answers
-  "[no path visible]" that way is truly walled, try another. Single
-  UP/DOWN/LEFT/RIGHT presses are for fine positioning; A talks to who/what
-  you face; walk onto doors/stairs to enter.
+  ~12 tiles per call). walk_to_exit walks onto the nearest D - use it to
+  ENTER buildings too, not just to leave rooms: it is the ONLY move that
+  stops ON a door. Directional walks aim as far as possible and will carry
+  you PAST a door, never onto it - if you keep circling a building, that is
+  why. Do NOT plan routes yourself tile by tile - pick the direction and go;
+  if it answers "[no path visible]" that way is truly walled, try another.
+  Single UP/DOWN/LEFT/RIGHT presses are for fine positioning; A talks to
+  who/what you face.
 - Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
 - Menus/shops: UP/DOWN move cursor, A confirms, B cancels/exits; START opens the
   main menu (close with B). Yes/no: A=YES, B=NO.

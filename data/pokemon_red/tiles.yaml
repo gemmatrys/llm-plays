@@ -33,3 +33,19 @@ tilesets:
     # Oak's lab; floor blocks uniform 0x11 — verified live 2026-07-20
     walkable: ["0x11"]
     portal: []
+  "0x06":
+    name: pokecenter_mart
+    # harvested live 2026-07-20 in the Viridian Poke Center (map 41): floor
+    # 0x11 open (uniform, like the lab); counter/console 0x34/0x3c/0x2a/0x1a,
+    # plants 0x30/0x32 blocked; 0x1c = entry doormat. More ids may need
+    # adding if a Mart/Center corner renders blocked that the screenshot
+    # shows open.
+    walkable: ["0x11", "0x1c"]
+    portal: ["0x1c"]
+  "0x08":
+    name: house
+    # generic house interior — harvested live 2026-07-20 in a Viridian home
+    # (map 44): floor 0x01 open; 0x10 void/wall, furniture 0x12/0x2f/0x36/
+    # 0x3a/0x3c, plants 0x08/0x18 blocked; 0x14 = exit doormat (bottom row).
+    walkable: ["0x01", "0x14"]
+    portal: ["0x14"]

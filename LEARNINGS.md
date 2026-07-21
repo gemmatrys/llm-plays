@@ -300,3 +300,34 @@ phases don't relearn them. Format: lesson → where it now lives.
   (map transitions, dialogue).
 - The fish's chaos has a long tail: it named the player "AA" and once walked
   INTO the game from the title screen in 10 seconds.
+
+## Doors & goal grounding — limits-4 Viridian session (2026-07-20 evening)
+
+- **An unharvested tileset makes every walk macro a silent no-op**
+  (`navigate.resolve` returns None on an empty walkable set): the model
+  wedged 5 decisions on a house doormat believing it was leaving the
+  Pokemon Center. Harvesting the tileset live unstuck it within one
+  decision. The slow-decision watcher (>90s) was the tell, before any
+  stuckness escalation. → tilesets 0x08 (house) and 0x06 (pokecenter/mart)
+  now in tiles.yaml; harvest-on-first-entry stays a checkpoint duty.
+- **Directional walks can never stop ON a door** — they take the farthest
+  reachable block along the axis, so they route around or past buildings;
+  the model orbited the Viridian Center for 8 decisions "aligning with the
+  door". walk_to_exit is the only door-stopper, but its NAME biased the
+  model against using it to ENTER. → prompt.md movement bullet now says so
+  explicitly; run-2 candidate: rename to walk_to_door.
+- **Map-edge doormats are invisible to BFS** (no off-map goal exists):
+  exiting a room needs a single raw press toward the edge, or entering the
+  mat block sideways. → goals rule; run-2 candidate: make walk_to_exit
+  issue the final edge-step itself.
+- **done_goal's first live firings were FALSE** — it stamped "healed at
+  the Pokemon Center" while wedged in a private house it had mistaken for
+  the Center. After a no-evidence-no-stamp rule was added to the run's
+  goals, the next stamp (the real heal, nurse goodbye observed) was
+  correct. → rule belongs in the base prompt for run-2; stronger option:
+  harness-side guard requiring a state change consistent with the goal.
+- **Checkpoint guidance works in natural language** — "walk to the exit",
+  "press A", "walk north" map fine; exact macro identifiers only need to
+  exist in prompt.md's allowed-behaviors contract (the parser is
+  exact-match, llm.py raises on unknown names). Run-2 candidate: a reply
+  normalizer (spaces→underscores + synonyms) to drop even that.
