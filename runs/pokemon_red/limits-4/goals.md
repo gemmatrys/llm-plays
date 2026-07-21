@@ -1,6 +1,6 @@
 # Goals
 
-8. Go back south into VIRIDIAN CITY - follow the "south gap back to
+8. [DONE] Go back south into VIRIDIAN CITY - follow the "south gap back to
    Viridian" bearing; the edge crossing is a single step south at the
    gap. Heal at the Pokemon Center (the "Pokemon Center door" bearing
    points at it): inside, use the walk-to-counter action - it walks
