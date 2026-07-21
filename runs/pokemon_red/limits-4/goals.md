@@ -38,10 +38,10 @@
     Use walk-to-grass over and over to pace the dark grass and start
     battles; EMBER
     roasts the bugs here in 1-2 hits. Grab the two free items where
-    the "free Potion" and "free Poke Ball" bearings point - a lone
-    ball on the ground is an item: face it, press A, watch for the
-    bag event. Three BUG CATCHERs stand on the paths; if one stops
-    you, beat him - trainer battles cannot be fled. If a rare PIKACHU
+    the "a dropped item" and "another dropped item" bearings point -
+    a lone ball on the ground is an item: face it, press A, and the
+    bag event tells you what you got. Three BUG CATCHERs stand on the
+    paths; if one stops you, beat him - trainer battles cannot be fled. If a rare PIKACHU
     appears and you still carry a ball, catch it - it wins the SECOND
     gym for you later. POISONED after a battle: cure it right away
     (Rules).
