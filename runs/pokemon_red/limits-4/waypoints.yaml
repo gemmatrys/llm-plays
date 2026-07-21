@@ -44,11 +44,13 @@ waypoints:
   # north across the room)
   doorway into the forest: {map: 50, x: 4, y: 0}
   # Free items on the forest's west path — VERIFIED (pokered object
-  # table). Ball sprites; face and press A. (A third item, an ANTIDOTE
-  # at (25,11), sits in a trainer's sight line — not waypointed on
-  # purpose.)
-  free Potion: {map: 51, x: 12, y: 29}
-  free Poke Ball: {map: 51, x: 1, y: 31}
+  # table): (12,29) is a POTION, (1,31) a POKE BALL. Keys deliberately
+  # DON'T say so — the player couldn't know contents before pickup, so
+  # the model learns them from the bag event like the game intends.
+  # (A third item, an ANTIDOTE at (25,11), sits in a trainer's sight
+  # line — not waypointed on purpose.)
+  a dropped item: {map: 51, x: 12, y: 29}
+  another dropped item: {map: 51, x: 1, y: 31}
   # Forest north exit doormats, top-left corner — VERIFIED (forest warp
   # table: (1,0)/(2,0) -> north gate)
   forest exit corner: {map: 51, x: 1, y: 0}
