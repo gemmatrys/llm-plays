@@ -9,29 +9,43 @@
 
 17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
-18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
-    bearing). ENTERING - the yard opens from the EAST, off the Mart's
-    street; the bushes south of the yard cannot be crossed, stop
-    trying from below. In order: (1) walk_to_pewter_mart_door until
-    you stand beside the Mart. (2) walk_to_the_doormat_below_the_gym_entrance
-    - from the Mart's street it walks the open row straight west to
-    the gym door; repeat until it reads "you are here". (3) ONE single
-    UP press steps into the door. Never walk_to_exit outdoors - it
-    walks you into the Mart. Inside, a JR TRAINER blocks the way - beat him, then if
-    you are below half HP step out, heal at the Center and come back
-    (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
-    and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
-    the "About this battle" note will say so - use EMBER anyway: their
-    special defense is terrible, it still wins, and everything else
-    you have is worse. When ONIX is "storing energy" that is BIDE - it
-    returns DOUBLE the damage it just took; that turn is the perfect
-    time for use_potion instead of attacking - it drinks a POTION and
-    plays the turn out, one behavior. Use it whenever you fall below
-    half HP. If you black
-    out you wake at the Center with half your money gone - heal and
-    march back; after TWO losses, grind the forest to level 16 first
-    (CHARMANDER evolves) and try again. The badge announcement and the
-    TM he hands over ("[bag: +1 ...]") are the proof - mark done then.
+18. Stand beside the Pewter Mart's door (the gym is entered from this
+    street): use walk_to_pewter_mart_door, repeating until the "Pewter
+    Mart door" bearing reads 2 tiles or less. Do NOT go inside. DONE
+    when that bearing reads 2 or less: mark it done then.
+
+19. Walk to the gym's doormat: use
+    walk_to_the_doormat_below_the_gym_entrance, repeating until "the
+    doormat below the Gym entrance" reads "you are here". It walks the
+    open row west from the Mart's street. The bushes SOUTH of the gym
+    cannot be crossed - if a walk report says "as close as the ground
+    allows", return to the Mart street (goal 18's spot) and repeat
+    from there. DONE when the doormat bearing reads "you are here":
+    mark it done then.
+
+20. Enter the gym: use enter_door_above - one behavior, it steps
+    through the door above you and checks you are inside. DONE when
+    your location reads Pewter Gym: mark it done then.
+
+21. Reach BROCK inside the gym: walk toward the "Brock" bearing; the
+    JR TRAINER who stops you must be beaten (trainer battles cannot be
+    fled - the battle drill in Rules answers every turn). If you are
+    below half HP after his fight, step out, heal at the Center, come
+    back (beaten trainers stay beaten). DONE when the "Brock" bearing
+    reads 2 tiles or less: mark it done then.
+
+22. Beat BROCK for the BOULDERBADGE: talk to him. His GEODUDE (L12)
+    and ONIX (L14) resist EMBER - the "About this battle" note will
+    say so - use EMBER (attack_3) anyway: their special defense is
+    terrible, it still wins, and everything else you have is worse.
+    When ONIX is "storing energy" that is BIDE - it returns DOUBLE the
+    damage it just took; that turn is the perfect time for use_potion
+    instead of attacking. Use use_potion whenever you fall below half
+    HP. If you black out you wake at the Center with half your money
+    gone - heal and march back; after TWO losses, grind the forest to
+    level 16 first (CHARMANDER evolves) and try again. DONE when the
+    badge announcement and the TM he hands over ("[bag: +1 ...]")
+    happened on screen: mark it done then.
 
 Rules:
 - A fight the current goal does not say how to handle: attack_3
