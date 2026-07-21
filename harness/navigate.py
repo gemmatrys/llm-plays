@@ -7,9 +7,11 @@ The library exposes navigation behaviors (walk_north/south/east/west,
 walk_to_exit) as stubs; when the model picks one, the loop swaps in a real
 path computed here over the SAME block-walkability grid the ASCII map is
 rendered from (terrain table + NPC blocks + off-map border, block bottom-left
-convention). walk_<dir> goes to the farthest reachable on-screen block in that
-direction, routing around trees/ledges/people; walk_to_exit goes to the
-nearest reachable warp. Paths are capped so the model re-reads the world every
+convention). A plain walk_<dir> is a STRAIGHT STRIDE: exactly that direction
+until a wall stops it (sidestepping lone single-block obstacles, hopping
+ledges downward) — predictable motion whose stopping point is information;
+counted variants (walk_east_3) stay BFS-exact for bearings; walk_to_* macros
+BFS to their targets. Paths are capped so the model re-reads the world every
 dozen tiles, and an unreachable direction degrades to explicit feedback
 ("[walk_north: no path visible]") instead of silent failure.
 """
@@ -369,15 +371,75 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     else:
         axis, sign = {"walk_north": (1, -1), "walk_south": (1, 1),
                       "walk_west": (0, -1), "walk_east": (0, 1)}[name]
-        cands = [b for b in dist
-                 if b != start and 0 < sign * (b[axis] - start[axis])
-                 and (count is None
-                      or sign * (b[axis] - start[axis]) <= count)]
-        if cands:
-            # farthest progress along the axis (capped at `count` tiles when
-            # the model asked for an exact distance), shortest path tiebreak
-            goal = min(cands, key=lambda b: (-sign * (b[axis] - start[axis]),
-                                             dist[b]))
+        if count is None:
+            # STRAIGHT STRIDE (user design 2026-07-21, after the forest maze
+            # laps): a plain walk_<dir> goes EXACTLY that way until a wall
+            # stops it — no BFS toward "farthest reachable", which routed
+            # around trees and landed the player south-east of a walk_north
+            # (the (1,30)->(6,34) confusion). The outcome now matches the
+            # ask, and where the stride STOPS is a boundary the model can
+            # reason about. Two faithful exceptions, both reported by the
+            # motion itself: a single-block obstacle is sidestepped when one
+            # lateral step reopens the ray (a lone tree must not end a
+            # stride), and striding DOWN over a hoppable ledge hops it.
+            btn_of = {(0, -1): "UP", (0, 1): "DOWN",
+                      (-1, 0): "LEFT", (1, 0): "RIGHT"}
+            dxy = (sign, 0) if axis == 0 else (0, sign)
+            fwd_btn = btn_of[dxy]
+            cols_b, rows_b = cfg.cols // 2, cfg.rows // 2
+
+            def _open(b: tuple[int, int]) -> bool:
+                return (0 <= b[0] < cols_b and 0 <= b[1] < rows_b
+                        and grid[b[1]][b[0]])
+
+            stride: list[str] = []
+            cur = start
+            while len(stride) < MAX_STEPS:
+                n = (cur[0] + dxy[0], cur[1] + dxy[1])
+                if _open(n):
+                    stride.append(fwd_btn)
+                    cur = n
+                    continue
+                if fwd_btn == "DOWN" and n in ledge_blocks:
+                    n2 = (cur[0], cur[1] + 2)
+                    if _open(n2):
+                        stride.append("DOWN*")
+                        cur = n2
+                        continue
+                stepped = False
+                if len(stride) + 2 <= MAX_STEPS:
+                    sides = [(-dxy[1], dxy[0]), (dxy[1], -dxy[0])]
+                    random.shuffle(sides)
+                    for sx, sy in sides:
+                        s = (cur[0] + sx, cur[1] + sy)
+                        s2 = (s[0] + dxy[0], s[1] + dxy[1])
+                        if _open(s) and _open(s2):
+                            stride.append(btn_of[(sx, sy)])
+                            stride.append(fwd_btn)
+                            cur = s2
+                            stepped = True
+                            break
+                if not stepped:
+                    break  # a real wall: the stride ends here, honestly
+            if stride:
+                return Behavior(name=orig, source="builtin",
+                                steps=[Step(button=d.rstrip("*"),
+                                            hold_frames=8,
+                                            wait_frames=30 if d.endswith("*")
+                                            else 8)
+                                       for d in stride])
+            # blocked on the very first block: fall through to the single
+            # direct press below (edge crossings + honest "[move blocked]")
+        else:
+            # counted variants stay BFS-exact: they pair with bearings
+            # ("3 south, 4 east"), where routed precision is the point
+            cands = [b for b in dist
+                     if b != start and 0 < sign * (b[axis] - start[axis])
+                     and sign * (b[axis] - start[axis]) <= count]
+            if cands:
+                goal = min(cands,
+                           key=lambda b: (-sign * (b[axis] - start[axis]),
+                                          dist[b]))
     if goal is None:
         if name not in ("walk_to_exit", "walk_to_counter"):
             # BFS sees nothing reachable that way, but the world continues
