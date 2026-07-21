@@ -18,8 +18,14 @@
     cave door east of the path - its Pokemon are ten levels above
     you. In Pewter, heal at the Center (the "Pewter Center door"
     bearing; inside, walk-to-counter puts you in front of the nurse -
-    talk, ONE press A on her yes/no, mash through the rest). Stamp
-    when the nurse heals you and place= says Pewter Pokemon Center.
+    talk, ONE press A on her yes/no, mash through the rest). EMBER is
+    out of PP until the nurse refills it, so do NOT hunt battles on
+    the way: skip the dark grass where the path allows, and FLEE any
+    wild battle that starts - press DOWN then RIGHT to put the arrow
+    on RUN, then A (repeat if it fails). SCRATCH only when fleeing
+    keeps failing. Trainers who stop you cannot be fled - SCRATCH.
+    Stamp when the nurse heals you and place= says Pewter Pokemon
+    Center.
 
 13. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
     inside, use walk-to-counter, then talk to the clerk, choose BUY,
