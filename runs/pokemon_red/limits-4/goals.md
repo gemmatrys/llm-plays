@@ -16,8 +16,11 @@
     finishes this goal, nothing before that. It is a MAZE: tree walls
     cross every straight line, so never chase the "forest exit corner"
     bearing directly. Walk these legs IN ORDER: "the path north (east
-    side)", then "the top corridor", then "the west lane to the exit",
-    then the "forest exit corner". The moment you reach a leg, WRITE it
+    side)", then "the top corridor", then "the top-west corner", then
+    "the west lane to the exit", then the "forest exit corner". The
+    tree wall west of you is SOLID everywhere except the top row: to
+    get west, first walk NORTH to the top, then west along it, then
+    south - never hunt a west opening in the middle of the forest. The moment you reach a leg, WRITE it
     into your notes ("forest legs done: ..."); a leg listed there is
     DONE FOREVER - work the first leg NOT on that list, and never walk
     back toward a done leg whatever its bearing reads. THE MAZE DRILL,
