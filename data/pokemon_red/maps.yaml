@@ -1,12 +1,33 @@
 # Map id -> place name, rendered as `place=` in the model's {ram} view.
-# HOT: reloaded on change. Checkpoint-curated, LIVE-VERIFIED ids only —
-# every entry here was confirmed by watching the run stand in it. An
-# unlisted id renders as "map 57 (unknown)" which is itself a harvest tag.
+# HOT: reloaded on change. An unlisted id renders as "map 57 (unknown)"
+# which is itself a harvest tag. Ids come from the canonical Gen 1 map
+# table (pokered map_constants) — pre-added ahead of the route per user
+# instruction 2026-07-20 (checkpoint provides map names, model never
+# navigates an unnamed map). Live observations (0/1/12/13/40/41/42/44 so
+# far) have matched the table exactly.
 maps:
   0: Pallet Town
   1: Viridian City
+  2: Pewter City
   12: Route 1
+  13: Route 2
   40: "Professor Oak's lab (NOT a Center or Mart)"
   41: Viridian Pokemon Center
   42: Viridian Poke Mart
+  43: Viridian school house
   44: a private house in Viridian
+  45: Viridian Gym (locked for now - leader absent)
+  46: Diglett's Cave entrance on Route 2
+  47: Viridian Forest north gate building
+  48: a trade house on Route 2
+  49: Route 2 east gate building
+  50: Viridian Forest south gate building
+  51: Viridian Forest
+  52: Pewter Museum 1F
+  53: Pewter Museum 2F
+  54: Pewter Gym
+  55: a private house in Pewter
+  56: Pewter Poke Mart
+  57: a private house in Pewter
+  58: Pewter Pokemon Center
+  59: Mt Moon
