@@ -138,6 +138,18 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         cands = [(dist[b], b) for b in warp_blocks if b in dist and b != start]
         if cands:
             goal = min(cands)[1]
+        elif warps and player is not None:
+            # no warp on screen (a small room's far corner puts its own
+            # doormat one row past the 20x18 window): head TOWARD the
+            # nearest warp by map coords — the next call sees it on screen
+            # and the edge-press logic finishes the exit
+            wx, wy = min(warps, key=lambda w: abs(w[0] - px) + abs(w[1] - py))
+            tb = ((cfg.player_col + (wx - px) * 2) // 2,
+                  (cfg.player_row + (wy - py) * 2) // 2)
+            toward = [b for b in dist if b != start]
+            if toward:
+                goal = min(toward, key=lambda b: (abs(b[0] - tb[0])
+                                                  + abs(b[1] - tb[1]), dist[b]))
     else:
         axis, sign = {"walk_north": (1, -1), "walk_south": (1, 1),
                       "walk_west": (0, -1), "walk_east": (0, 1)}[name]
