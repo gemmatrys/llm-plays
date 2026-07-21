@@ -1,1 +1,1 @@
-In Pewter City, walking to the Gym doormat (Goal 19). Next: walk_to_the_doormat_below_the_gym_entrance.
+In Pewter City, inside the Pokemon Center. Goal 19: Walk to the gym's doormat. Next: exit the center, then use walk_to_pewter_center_door.
