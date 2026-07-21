@@ -48,7 +48,8 @@ tilesets:
     walkable: ["0x11", "0x1a", "0x1c"]
     portal: ["0x1c"]
   "0x06":
-    name: pokecenter_mart
+    name: pokecenter
+    # (marts turned out to use tileset 0x02, not this one)
     # harvested live 2026-07-20 in the Viridian Poke Center (map 41): floor
     # 0x11 open (uniform, like the lab); counter/console 0x34/0x3c/0x2a/0x1a,
     # plants 0x30/0x32 blocked; 0x1c = entry doormat. More ids may need
