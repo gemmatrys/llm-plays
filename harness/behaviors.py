@@ -41,12 +41,17 @@ MOVES = ("UP", "DOWN", "LEFT", "RIGHT")
 def mash_dialogue_steps(rng: "random.Random | None" = None) -> list[Step]:
     """Randomized dialogue advance, generated fresh each invocation so a fixed
     pattern can't get wedged on a particular box, text speed, or yes/no prompt.
-    Mostly A (advance); an occasional B escapes a yes/no stuck on YES; count and
-    pacing vary. Only A/B here — directions could move/menu-cancel wrongly.
-    Short and bursty on purpose: quick taps in rapid succession advance text and
-    confirm menus/naming screens fastest, with no long wait between presses."""
+    ALWAYS leads with one B: it pre-empts whatever the previous action left
+    open — cancels a menu, answers NO to a yes/no sitting on YES — before any
+    A can commit to it, and in plain dialogue B advances text just like A, so
+    the pre-empt costs nothing. Then a mostly-A burst (an occasional B keeps
+    guarding mid-burst); count and pacing vary. Only A/B here — directions
+    could move/menu-cancel wrongly. Short and bursty on purpose: quick taps in
+    rapid succession advance text and confirm menus fastest."""
     r = rng or random
-    return [Step(button=("B" if r.random() < 0.25 else "A"),
+    return [Step(button="B", hold_frames=r.randint(3, 5),
+                 wait_frames=r.randint(4, 9))] + \
+           [Step(button=("B" if r.random() < 0.25 else "A"),
                  hold_frames=r.randint(3, 5), wait_frames=r.randint(4, 9))
             for _ in range(r.randint(4, 8))]
 
