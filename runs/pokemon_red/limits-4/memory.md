@@ -1,1 +1,1 @@
-In the Viridian Forest south gate building. Entering the forest to begin grinding Charmander to level 14.
+In Viridian Forest. Grinding Charmander to level 14. Next: leave forest for Pewter City.
