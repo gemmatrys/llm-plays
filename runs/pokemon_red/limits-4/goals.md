@@ -42,5 +42,11 @@ Rules:
 - In the little gate buildings the door you WANT is the far one, and
   walk_to_exit always picks the NEAR one - never use it inside a gate;
   cross the room with plain walks and step through the doorway ahead.
+- OUTDOORS in a town, never use walk_to_exit - outdoors it walks INTO
+  the nearest building door (this is how you re-entered the Center
+  four times and the Mart once). Between buildings use plain walks on
+  the door bearing, its bigger number first; a building's own door
+  swallows walks in the column above it, so clear the column sideways
+  first.
 - Do NOT mark a goal done unless its DONE line happened on screen. "I
   think I did it" is not evidence.
