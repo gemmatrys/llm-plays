@@ -3,11 +3,11 @@
 8. Go back south into VIRIDIAN CITY - follow the "south gap back to
    Viridian" bearing; the edge crossing is a single step south at the
    gap. Heal at the Pokemon Center (the "Pokemon Center door" bearing
-   points at it): walk in, stand at the counter FACING the nurse, then
-   use the heal skill from your action list - it talks to her, answers
-   YES and clears the whole dialogue for you. Do not improvise the
-   nurse conversation button by button. Full HP in party= is the
-   proof. Then at the MART (the "Mart door" bearing) buy 3
+   points at it): walk in the door and immediately use the heal skill
+   from your action list - it walks you to the counter, talks to the
+   nurse, answers YES and clears the whole dialogue for you. Do not
+   improvise the nurse conversation button by button. Full HP in
+   party= is the proof. Then at the MART (the "Mart door" bearing) buy 3
    POKE BALLs and 3 ANTIDOTEs: talk to the clerk, choose BUY, pick the
    item, press UP twice so the count reads x3, press A, then ONE press
    A on the price question. The "[bag: +3 POKE BALL]" and
