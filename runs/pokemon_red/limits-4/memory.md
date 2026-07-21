@@ -1,1 +1,1 @@
-I am in the Viridian City Poke Mart, talking to the clerk to get Oak's Parcel.
+I am in the Viridian City Poke Mart. I have Oak's Parcel. I need to return to Pallet Town and deliver it.
