@@ -32,12 +32,11 @@
     shows full HP: mark it done then.
 
 17. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
-    inside, use walk-to-counter, then talk to the clerk, choose BUY,
-    POTION is the SECOND item (press DOWN once), press UP four times
-    so the count reads x5, press A, then ONE press A on the price
-    question. 300 each, 1500 total. A "[bag: +N POTION]" event is the
-    proof - mark done when you see it. If you cannot afford it, move
-    on without buying. Skip the MUSEUM - it only costs money.
+    inside, use walk_to_counter, then buy_potion_x5 - it holds the
+    whole conversation and purchase, one behavior, 1500 total. A
+    "[bag: +5 POTION]" event is the proof - mark done when you see it.
+    If you cannot afford it, move on without buying. Skip the MUSEUM -
+    it only costs money.
 
 18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
     bearing). Inside, a JR TRAINER blocks the way - beat him, then if
