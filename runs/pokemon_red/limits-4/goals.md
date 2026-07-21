@@ -27,7 +27,7 @@
    event is your proof you have it. If someone only chats about school
    or coffee, wrong building - leave.
 
-6. Deliver the parcel to PROFESSOR OAK. You are INSIDE his lab now - the
+6. [DONE] Deliver the parcel to PROFESSOR OAK. You are INSIDE his lab now - the
    room with rows of bookshelves and machines along the top, white-coat
    aides walking around, and OAK HIMSELF standing at the TOP of the room.
    This building is the LAB, not a Pokemon Center and not a Mart - there

@@ -1,1 +1,1 @@
-I am inside Professor Oak's lab in Pallet Town. I have the parcel and am delivering it to Professor Oak.
+I have delivered the parcel and received the POKEDEX. Now I need to leave the lab and head north to Route 2.
