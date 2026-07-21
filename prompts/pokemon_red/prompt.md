@@ -9,7 +9,9 @@ Planning:
   Travel = ONE reply: ["walk_south","walk_south","walk_east","walk_to_exit"].
   Known errands chain too: ["walk_to_exit","press_A","mash_through_dialogue",
   "walk_to_exit"]. An unexpected screen change auto-cancels the rest, so long
-  plans are safe. Keep 1-2 steps only on new/risky screens (unread yes/no,
+  plans are safe. A dialogue stopping at a choice also cancels the rest —
+  UNLESS your next planned step is the single press_A/press_B answering it,
+  which still runs. Keep 1-2 steps only on new/risky screens (unread yes/no,
   unfamiliar menu, first battle).
 - EXPERIMENT, don't deliberate: moves are cheap and the game auto-saves; only
   yes/no confirmations are irreversible. When unsure, act and read the change.
