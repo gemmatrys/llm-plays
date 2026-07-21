@@ -4,6 +4,7 @@ and logging together. This is invariants I1–I3 in motion.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from pathlib import Path
 
 from .behaviors import random_mash_steps
@@ -152,6 +153,12 @@ class GameLoop:
         if tm is None or self.extras is None or not hasattr(self.extras, "read_block"):
             return ""
         try:
+            tileset = None
+            if tm.walkable_by_tileset:
+                # walkability is per-tileset: pick the set for the CURRENT
+                # tileset; an unconfigured one degrades to the raw-id dump
+                tileset = self.extras.read_block(tm.tileset_addr, 1)[0]
+                tm = replace(tm, walkable=tm.walkable_by_tileset.get(tileset, []))
             raw = self.extras.read_block(tm.addr, tm.cols * tm.rows)
             px, py = self._last_ram.get("pos_x"), self._last_ram.get("pos_y")
             player = (px, py) if px is not None and py is not None else None
@@ -166,7 +173,8 @@ class GameLoop:
             if n:
                 wb = self.extras.read_block(tm.warp_entry_addr, 4 * min(n, 32))
                 warps = [(wb[4 * i + 1], wb[4 * i]) for i in range(min(n, 32))]
-            return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps)
+            return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
+                                tileset=tileset)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
             return ""
 

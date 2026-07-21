@@ -51,9 +51,14 @@ class EscalationConfig:
 class TilemapConfig:
     """On-screen tile grid -> ASCII walkability map for the model. addr/cols/rows
     are solid (Gen 1 wTileMap is a 20x18 WRAM buffer at 0xC3A0). player_col/row
-    and `walkable` are GAME-SPECIFIC and must be confirmed against a LIVE
-    overworld screen — they're seeded with best-known Gen 1 values, not verified.
-    An empty `walkable` list makes the renderer fall back to raw tile ids."""
+    are GAME-SPECIFIC and must be confirmed against a LIVE overworld screen.
+
+    Walkability is PER-TILESET (indoor rooms reuse ids the overworld treats as
+    open — floor 0x01 vs wall 0x00 collide exactly backwards): populate
+    `walkable_by_tileset` keyed by the tileset id read from `tileset_addr`. A
+    tileset with no entry (or an empty `walkable` when no by-tileset table is
+    configured) makes the renderer fall back to raw tile ids — which is also
+    how you harvest the ids for a new tileset's entry."""
     addr: int                      # wTileMap start (0xC3A0 for Gen 1)
     cols: int = 20
     rows: int = 18
@@ -61,7 +66,10 @@ class TilemapConfig:
     player_row: int = 8            # player's on-screen tile row
     scale: int = 2                 # screen tiles per map tile (Gen 1 blocks are 2x2)
     window: int = 4                # render a (2*window+1) box around player; 0 = full
-    walkable: list[int] = field(default_factory=list)  # passable tile ids (per tileset)
+    walkable: list[int] = field(default_factory=list)  # legacy single set (all tilesets)
+    tileset_addr: int = 0xD367     # wCurMapTileset
+    # tileset id -> passable tile ids; missing tileset = raw-id dump
+    walkable_by_tileset: dict[int, list[int]] = field(default_factory=dict)
     # map dimensions (blocks; x2 = tiles) so off-map tiles render blocked
     height_addr: int = 0xD368      # wCurMapHeight
     width_addr: int = 0xD369       # wCurMapWidth
@@ -104,5 +112,10 @@ class GameProfile:
             _hex = lambda v: int(v, 0) if isinstance(v, str) else v  # noqa: E731
             tm["addr"] = _hex(tm["addr"])
             tm["walkable"] = [_hex(v) for v in tm.get("walkable", [])]
+            if "tileset_addr" in tm:
+                tm["tileset_addr"] = _hex(tm["tileset_addr"])
+            tm["walkable_by_tileset"] = {
+                _hex(k): [_hex(v) for v in vs]
+                for k, vs in tm.get("walkable_by_tileset", {}).items()}
             raw["tilemap"] = TilemapConfig(**tm)
         return cls(**raw)

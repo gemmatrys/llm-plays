@@ -37,10 +37,13 @@ def _exit_dir(dx: int, dy: int) -> str:
 
 def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
                  map_wh: tuple[int, int] | None = None,
-                 warps: list[tuple[int, int]] | None = None) -> str:
+                 warps: list[tuple[int, int]] | None = None,
+                 tileset: int | None = None) -> str:
     """Format `tiles` as an ASCII map windowed around the player. `player` is the
     map (x,y); `map_wh` the map (width,height) in tiles; `warps` a list of map
-    (x,y) portal tiles. Never raises on shape mismatch."""
+    (x,y) portal tiles; `tileset` the current tileset id, shown in the raw-dump
+    header so logged dumps are attributable when harvesting a new tileset's
+    walkable ids. Never raises on shape mismatch."""
     cols, rows = cfg.cols, cfg.rows
     if len(tiles) < cols * rows:
         return "(tilemap unavailable)"
@@ -72,7 +75,10 @@ def render_ascii(tiles: bytes, cfg, player: tuple[int, int] | None = None,
         lines.append(("" if walkable else " ").join(cells))
 
     head = ("Map around you - P=you, D=door/exit, .=open, #=blocked (north up):"
-            if walkable else "On-screen tile ids (walkable set not configured):")
+            if walkable else
+            "On-screen tile ids (no walkable set"
+            + (f" for tileset {tileset}" if tileset is not None else " configured")
+            + "):")
     out = [head, "\n".join(lines)]
     if warps and have_map:
         on_exit = (px, py) in warpset

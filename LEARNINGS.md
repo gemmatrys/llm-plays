@@ -76,10 +76,14 @@ phases don't relearn them. Format: lesson → where it now lives.
   no live-reload API exists.
 - **Walkable tile-ID sets are per-TILESET, not universal** — the seeded
   overworld set rendered an interior room's floor as blocked and its walls as
-  open (exactly inverted). Not yet fixed: needs the current tileset id +
-  a small per-tileset table. The renderer degrades to a raw hex-id dump when
-  the configured set doesn't apply, which is what you'd use to reverse-engineer
-  the right set for a new tileset.
+  open (exactly inverted: indoor floor 0x01 isn't in the overworld set, indoor
+  wall 0x00 is). FIXED 2026-07-20: `walkable_by_tileset` in the profile, keyed
+  by wCurMapTileset (0xD367, one extra READBLOCK per tick); tileset 0
+  (overworld) and 1 (Red's house — floor 0x01 only) verified live. A tileset
+  with no entry degrades to the raw-id dump WITH the tileset id in the header,
+  so a logged dump is attributable — the harvesting workflow for each new
+  tileset is: stand in the room, read the dump, mark open tiles against the
+  screenshot, add the entry.
 - **Warp/portal coordinates are Gen 1's `(y, x, destWarp, destMap)`, NOT
   `(x, y, ...)`** — got this backwards once and it put the door marker on the
   bed instead of the stairs. Confirmed by walking the player onto the real

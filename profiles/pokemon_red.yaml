@@ -55,21 +55,28 @@ ram_map:
   party_count: "0xD163"
 
 # On-screen tile grid -> ASCII walkability map (harness/tilemap.py). addr/cols/
-# rows are SOLID (Gen 1 wTileMap = 20x18 WRAM buffer). player_col/row and the
-# `walkable` id set are SEEDED, NOT VERIFIED — confirm against a live overworld
-# screen (drive to the overworld, read the block, check P sits on the player and
-# open tiles read '.'), then tune. `walkable` here is the Gen 1 OVERWORLD set;
-# interiors/caves use other tilesets and will need their own ids. Empty walkable
-# -> renderer dumps raw tile ids (still useful for figuring the right set out).
+# rows are SOLID (Gen 1 wTileMap = 20x18 WRAM buffer). player_col/row verified
+# live 2026-07-20 (screen/map alignment confirmed against a screenshot).
+# Walkability is PER-TILESET (wCurMapTileset, 0xD367): indoor rooms reuse ids
+# the overworld treats as open — house floor 0x01 vs wall 0x00 collide exactly
+# backwards. A tileset with no entry renders the raw tile ids, which is how you
+# harvest a new tileset's set: stand in the room, read the dump, mark what the
+# screenshot shows as open. Tileset 1 (Red's house) verified live 2026-07-20.
 tilemap:
   addr: "0xC3A0"
   cols: 20
   rows: 18
-  player_col: 8       # VERIFY LIVE
-  player_row: 8       # VERIFY LIVE
+  player_col: 8
+  player_row: 8
   window: 4           # 9x9 box around the player
-  walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
+  tileset_addr: "0xD367"
+  walkable_by_tileset:
+    # 0 = OVERWORLD (seeded set, in live use since the shakeout runs)
+    "0x00": ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
              "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
+    # 1 = REDS_HOUSE (both floors): floor 0x01 only; walls/windows/furniture
+    # (0x00, 0x24/25/34/35, TV, PC, plant ids) all observed blocked
+    "0x01": ["0x01"]
 
 driver_opts:
   host: 127.0.0.1
