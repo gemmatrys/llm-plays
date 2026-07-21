@@ -1,1 +1,1 @@
-In Viridian Forest. Grinding Charmander to level 14. Next: leave forest for Pewter City.
+In Viridian Forest, grinding Charmander to level 14. Next: leave for Pewter City.
