@@ -15,7 +15,7 @@
    is not a clerk and has NO parcel. You have been here before. Walk to
    the exit (the doormats are at the BOTTOM-LEFT of this room) and leave.
 
-5. Get OAK'S PARCEL from the real POKeMON MART - the BLUE-ROOF shop with
+5. [DONE] Get OAK'S PARCEL from the real POKeMON MART - the BLUE-ROOF shop with
    a MART sign. Your game state now shows a LIVE COMPASS, e.g.
    "mart_door: 5 east, 7 south" - it recomputes from your true position
    every decision. TRUST IT over any direction you remember; remembered
