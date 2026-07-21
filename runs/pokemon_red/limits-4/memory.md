@@ -1,1 +1,1 @@
-In Viridian Forest. Heading to 'the path north (east side)' (3N, 4E), then to 'the top corridor'.
+In Viridian Forest. Moving to 'the top corridor' (21N, 6W).
