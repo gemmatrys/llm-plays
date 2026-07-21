@@ -113,10 +113,11 @@ phases don't relearn them. Format: lesson → where it now lives.
 
 - **A fixed-sequence "mash" behavior can get wedged** on a specific text
   speed or a yes/no prompt stuck on YES. Added `Behavior.step_factory`
-  (executor calls it fresh each run instead of using static `.steps`) so
-  `mash_through_dialogue` regenerates a randomized A/B sequence every
-  invocation — this alone let a run escape a state that looked wedged across
-  16 decisions in the previous (fixed-sequence) build.
+  (executor calls it fresh each run instead of using static `.steps`) for
+  randomized-per-invocation behaviors. (2026-07-21: mash_through_dialogue
+  no longer uses this — it became the RAM-grounded advance_text op; the
+  randomized burst survives only in the fish/rung-4 repertoire, where
+  step_factory still applies.)
 - **Fish/rung-4 jittering one random button is nearly useless** — it doesn't
   explore. Replaced with `fish_move`, a random dispatcher over a REAL
   repertoire (`wander`, `mash_through_dialogue`, mash-a-direction, mash-B,
@@ -141,16 +142,9 @@ phases don't relearn them. Format: lesson → where it now lives.
   time + `chat_template_kwargs {"enable_thinking": true}` per request
   (`reasoning_effort` is ignored by llm-scaler 0.21.0-b1). Thinking coexists
   with JSON-schema guided decoding. → llm.py `reasoning` option, default low.
-- **The thinking transcript is recovered from logprobs** (2026-07-20). On the
-  llm-scaler XPU build `reasoning_content` comes back empty because the
-  detokenizer strips the `<|channel>…<channel|>` markers regardless of
-  skip_special_tokens (vllm#38855) — BUT the per-token `logprobs` stream keeps
-  them verbatim. So `llm.py` requests `logprobs:true` when thinking is on and
-  rebuilds the transcript by splitting on the delimiters
-  (`_thinking_from_logprobs`); the answer JSON still arrives clean in `content`,
-  so plan parsing is untouched. The overlay/runlog pipeline that was "wired and
-  waiting" now shows real chain-of-thought. Verified end-to-end through
-  LLMPolicy against the live 31B.
+- (Pruned 2026-07-21: the logprobs-based thinking recovery that lived here
+  is superseded — streaming `delta.reasoning` ships instead; see "Thinking
+  transcript" above, which keeps the logprobs trick as documented fallback.)
 - **Thinking starves under a tight token cap exactly when confused** — long
   reasoning eats max_tokens and `content` comes back None, so the hardest
   states produced no decision. → generous budget (1100), explicit error text,
@@ -308,8 +302,10 @@ phases don't relearn them. Format: lesson → where it now lives.
   wedged 5 decisions on a house doormat believing it was leaving the
   Pokemon Center. Harvesting the tileset live unstuck it within one
   decision. The slow-decision watcher (>90s) was the tell, before any
-  stuckness escalation. → tilesets 0x08 (house) and 0x06 (pokecenter/mart)
-  now in tiles.yaml; harvest-on-first-entry stays a checkpoint duty.
+  stuckness escalation. (Superseded 2026-07-21 after the gate-building
+  repeat: collision lists are now PRE-INGESTED from pokered and
+  directional walks fall back to one direct press in unmapped areas —
+  see the skills-thesis section.)
 - **Directional walks can never stop ON a door** — they take the farthest
   reachable block along the axis, so they route around or past buildings;
   the model orbited the Viridian Center for 8 decisions "aligning with the
@@ -318,8 +314,8 @@ phases don't relearn them. Format: lesson → where it now lives.
   explicitly; run-2 candidate: rename to walk_to_door.
 - **Map-edge doormats are invisible to BFS** (no off-map goal exists):
   exiting a room needs a single raw press toward the edge, or entering the
-  mat block sideways. → goals rule; run-2 candidate: make walk_to_exit
-  issue the final edge-step itself.
+  mat block sideways. → goals rule; DONE since: walk_to_exit appends the
+  final edge-press itself when the route reaches an edge warp.
 - **done_goal's first live firings were FALSE** — it stamped "healed at
   the Pokemon Center" while wedged in a private house it had mistaken for
   the Center. After a no-evidence-no-stamp rule was added to the run's
@@ -347,8 +343,10 @@ phases don't relearn them. Format: lesson → where it now lives.
   wFontLoaded is OVERWORLD-ONLY: battles never set it (live-verified —
   font=0 with EXP text on screen), so battle text needs its own gate:
   in battle, press A until the menu cursor appears or in_battle drops.
-  Still to verify live: 0xED presence during an actual menu (first battle
-  or shop will show it). The old blind burst survives only in the fish.
+  0xED cursor detection VERIFIED live 2026-07-21 — advance_text stopped
+  exactly at the nurse's yes/no (the remaining hole was the plan runner
+  continuing past the stop; see the skills-thesis section). The old
+  blind burst survives only in the fish.
 - **The model cannot identify repeated structures or verify its own event
   claims — the harness must count and attest**: it believed "I have the
   parcel" (never obtained), "I healed" (never healed), and re-entered the
@@ -408,21 +406,15 @@ stamped (instruction-style middle goals never stamp); checkpoint protocol
 = strategy subagents with full context packages + self-initiated session
 rotation.
 
-## NEXT GAP (user thesis, 2026-07-20): step rules between thought and buttons
+## NEXT GAP (user thesis, 2026-07-20) — RESOLVED 2026-07-21
 
-The model now knows WHERE it is, WHAT it has, and HOW HARD it hits — but
-"grind A to level 12" still decomposes into button-level know-how it does
-not have: walk INTO grass and pace until an encounter fires, re-enter
-grass after each battle, break off to heal at (LOW!), buy Potions/Balls
-as a menu sequence. These are STEP RULES / skills, not context. Direction
-for the next stretch: grow the skills library (skills/pokemon_red/*.yaml
-and nav-level behaviors) with composable errand skills — first candidates:
-`hunt_encounter` (BFS to nearest grass, pace two adjacent grass tiles
-until in_battle flips), `buy_item` (shop menu sequence with ONE-press
-discipline), `heal_at_center` (enter, talk, wait for jingle, leave).
-Grass tile ids are already in tiles.yaml (0x52 overworld); in_battle is
-already read every tick — the primitives exist, the skills just need
-writing and testing on the live run before Brock demands grinding.
+The thesis ("the gap is step rules between thought and buttons") was
+tested live the same night and landed differently than drafted: the
+errand-skill candidates (`hunt_encounter`, `heal_at_center`, `buy_item`)
+were built, worked, and were then deliberately replaced by positioning
+MACROS (walk_to_counter, walk_to_grass) + the choice-stop plan guard,
+with conversations kept as deliberate model presses. Full account in the
+next section.
 
 ## The skills thesis, tested live — wire POSITIONING, not conversations
 ## (2026-07-21 overnight, Viridian→Forest stretch)
