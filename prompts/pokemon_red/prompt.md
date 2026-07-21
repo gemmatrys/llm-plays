@@ -49,13 +49,15 @@ from below it is solid, never push up into it. The line under the grid lists
 exits. Ignore the map during menus/battles/transitions.
 
 Movement:
-- PREFER walk_north/south/east/west - the harness routes around obstacles
-  (~12 tiles/call). Counted variants walk a bearing EXACTLY: "3 south, 4
-  east" = ["walk_south_3","walk_east_4"]; plain walk_south goes as far as
-  it can. When nothing is routable that way it still takes ONE step in
-  that direction - which is exactly how you cross town/route boundaries
-  at a gap (map edges show nothing; just keep walking the bearing).
-  "[move blocked]" afterward = a real wall, try another way.
+- PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
+  way until a wall stops it (~12 tiles max; it steps around a lone tree
+  and hops ledges going down). Where it stops IS the wall - read the map
+  there and pick the way around; walking the same direction again just
+  bumps the same wall. Counted variants walk a bearing EXACTLY: "3 south,
+  4 east" = ["walk_south_3","walk_east_4"]. When nothing is walkable that
+  way it still takes ONE step in that direction - which is exactly how
+  you cross town/route boundaries at a gap (map edges show nothing; just
+  keep walking the bearing). "[move blocked]" afterward = a real wall.
 - walk_to_exit goes THROUGH the nearest D - entering or leaving, including
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
