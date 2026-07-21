@@ -246,6 +246,19 @@ class GameLoop:
             ram_ctx["place"] = names.get(
                 ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
 
+        # money = the third resource goals reason about (buying, the
+        # blackout halving) — 3-byte BCD; goals said "if money is short"
+        # to a model that could not see money (2026-07-21 audit)
+        if ram_ctx is not None and self.profile.party is not None \
+                and self.profile.party.money_addr is not None \
+                and self.extras is not None:
+            try:
+                mb = self.extras.read_block(self.profile.party.money_addr, 3)
+                ram_ctx = dict(ram_ctx)
+                ram_ctx["money"] = int("".join(f"{b:02x}" for b in mb))
+            except Exception:  # noqa: BLE001 — money context is optional
+                pass
+
         # party = the team's REAL state (nick, species, level, HP, status):
         # the model must see "HP 4/24" and "POISONED" to decide to heal —
         # asking it to remember battle outcomes is how false beliefs start

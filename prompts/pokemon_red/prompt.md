@@ -9,7 +9,9 @@ Planning:
   Travel = ONE reply: ["walk_south","walk_south","walk_east","walk_to_exit"].
   Known errands chain too: ["walk_to_exit","press_A","mash_through_dialogue",
   "walk_to_exit"]. An unexpected screen change auto-cancels the rest, so long
-  plans are safe. Keep 1-2 steps only on new/risky screens (unread yes/no,
+  plans are safe. A dialogue stopping at a choice also cancels the rest —
+  UNLESS your next planned step is the single press_A/press_B answering it,
+  which still runs. Keep 1-2 steps only on new/risky screens (unread yes/no,
   unfamiliar menu, first battle).
 - EXPERIMENT, don't deliberate: moves are cheap and the game auto-saves; only
   yes/no confirmations are irreversible. When unsure, act and read the change.
@@ -26,11 +28,14 @@ Truth signals (these beat your memory AND the screenshot):
   every decision. When it disagrees with a remembered direction, it is right.
 - "[you have entered this map N times]": believe the counter - you are
   looping and your belief about this place is wrong.
-- party= is your team's REAL state (level, HP, status). "(LOW!)" or a
+- party= is your team's REAL state (level, HP, status), and each mon's
+  moves IN MENU ORDER with PP - the slot number is how many DOWNs from
+  the top of the move list; 0 PP = unusable, pick another. "(LOW!)" or a
   status like POISONED means heal soon: a Pokemon Center cures everything
   free; POISONED also drains HP as you walk. Whiting out (all HP gone)
   teleports you to the last Center - if you wake up somewhere you did not
   walk to, that is what happened; re-read place= and your bearings.
+- money= is your cash. Buying fails without enough; whiting out HALVES it.
 - pos_x/pos_y = your tile; unchanged after walking = blocked, turn. RAM can
   be stale on menu/naming screens - there, trust the screenshot.
 
@@ -51,6 +56,13 @@ Movement:
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
   circling a building, use it.
+- walk_to_counter walks to the person behind a counter (nurse, shop clerk)
+  and leaves you FACING them - use it inside Centers/Marts/gyms instead of
+  hand-navigating. If they were not on screen it only walks a few steps:
+  just use it again.
+- walk_to_grass enters the nearest tall grass (" on the map) and paces
+  inside it - wild battles start while pacing, so repeat it to hunt
+  encounters. Its no-grass message means this map has none in sight.
 - Single UP/DOWN/LEFT/RIGHT = fine positioning; A talks to what you face.
 - Bouncing between two maps = walking in/out a door: step away, go around.
 - Walking into a wall changes nothing - turn. Black screens: wait.

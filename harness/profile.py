@@ -138,6 +138,7 @@ class PartyConfig:
     moves_off: int = 8             # 4 move ids (0 = empty slot)
     pp_off: int = 29               # 4 PP bytes; top 2 bits are PP-Up count
     moves_file: str | None = None  # id -> display name (data/<game>/moves.yaml)
+    money_addr: int | None = 0xD347  # wPlayerMoney: 3 bytes BCD
     names_file: str | None = None  # data/<game>/species.yaml
 
 
