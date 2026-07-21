@@ -1,0 +1,23 @@
+# One Mart purchase as a deterministic sequence - see buy_3_pokeballs
+# for the design notes. Precondition: standing at the Mart counter
+# FACING the clerk. Pewter stock order (pokered marts.asm): POKE_BALL,
+# POTION, ESCAPE_ROPE, ... - POTION is SECOND, one DOWN from the top.
+# 5x300 = 1500; goals cover the short-money case (buy what you can).
+# VERIFY via the [bag: +5 POTION] event at first live use.
+name: buy_5_potions
+description: Facing the Mart clerk, buy exactly 5 Potions and close the menus.
+steps:
+  - {op: advance_text}                             # talk -> BUY/SELL/QUIT menu
+  - {button: A, hold_frames: 6, wait_frames: 60}   # BUY
+  - {button: DOWN, hold_frames: 4, wait_frames: 16} # to POTION (2nd)
+  - {button: A, hold_frames: 6, wait_frames: 40}   # select it
+  - {button: UP, hold_frames: 4, wait_frames: 16}  # qty x2
+  - {button: UP, hold_frames: 4, wait_frames: 16}  # qty x3
+  - {button: UP, hold_frames: 4, wait_frames: 16}  # qty x4
+  - {button: UP, hold_frames: 4, wait_frames: 16}  # qty x5
+  - {button: A, hold_frames: 6, wait_frames: 60}   # confirm qty -> price yes/no
+  - {button: A, hold_frames: 6, wait_frames: 120}  # YES - pay
+  - {button: A, hold_frames: 6, wait_frames: 60}   # clear "Here you are!"
+  - {button: B, hold_frames: 6, wait_frames: 40}   # leave the item list
+  - {button: B, hold_frames: 6, wait_frames: 40}   # leave BUY/SELL/QUIT
+  - {op: advance_text}                             # clerk's parting line, if any
