@@ -11,13 +11,19 @@
     carry a ball, catch it - it wins the SECOND gym for you later.
     POISONED after a battle: cure it right away (Rules).
 
-12. [DONE] Leave the forest - it is a MAZE: tree walls cross every straight
-    line, so never chase the "forest exit corner" bearing directly.
-    Walk these legs IN ORDER: "the path north (east side)", then "the
-    top corridor", then "the west lane to the exit", then the "forest
-    exit corner". THE MAZE DRILL, every decision: read the CURRENT
-    leg's bearing and walk the direction with the BIGGER number of
-    tiles left ("12 north, 5 west" = walk_north). Your walk goes
+12. Leave the forest - you are STILL IN IT while your location reads
+    Viridian Forest; only Pewter Pokemon Center after the nurse's heal
+    finishes this goal, nothing before that. It is a MAZE: tree walls
+    cross every straight line, so never chase the "forest exit corner"
+    bearing directly. Walk these legs IN ORDER: "the path north (east
+    side)", then "the top corridor", then "the west lane to the exit",
+    then the "forest exit corner". The moment you reach a leg, WRITE it
+    into your notes ("forest legs done: ..."); a leg listed there is
+    DONE FOREVER - work the first leg NOT on that list, and never walk
+    back toward a done leg whatever its bearing reads. THE MAZE DRILL,
+    every decision: read the CURRENT leg's bearing and walk the
+    direction with the BIGGER number of tiles left ("12 north, 5 west"
+    = walk_north). Your walk goes
     straight and stops when trees block it - that stop is the maze
     talking. When the walk's report lists an opening toward your
     bearing's OTHER direction, that gap IS the path: walk the counted
