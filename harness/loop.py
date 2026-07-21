@@ -229,20 +229,21 @@ class GameLoop:
                 self._recent.append(f"[goal {decision.done_goal} marked DONE]")
 
         # out of objectives: ALARM once (toast + checkpoint wake), don't
-        # silently idle — the model wanders on a finished list. Latched so a
-        # goals.md rewrite with fresh goals re-arms it; catches both the
-        # model stamping the last goal AND a checkpoint writing an all-done
-        # file.
-        if self.runlog.all_goals_done():
+        # silently idle — the model wanders on a finished list. Trigger is
+        # the LAST numbered goal being stamped (instruction-style middle
+        # goals never earn stamps). Latched; a rewrite with a fresh final
+        # goal re-arms it. Catches both the model stamping it AND a
+        # checkpoint writing a finished file.
+        if self.runlog.goals_finished():
             if not self._goals_alarmed:
                 self._goals_alarmed = True
-                self.runlog.log_metric("all_goals_done")
+                self.runlog.log_metric("goals_finished")
                 self.runlog.escalate(
                     "goals_complete",
-                    "every numbered goal is stamped [DONE] - write the next "
-                    "goals; the model is idling on a finished list")
+                    "the last numbered goal is stamped [DONE] - write the "
+                    "next goals; the model is idling on a finished list")
                 self._recent.append(
-                    "[ALL GOALS DONE - new goals are being written; stay "
+                    "[GOALS COMPLETE - new goals are being written; stay "
                     "where you are, do not wander]")
         else:
             self._goals_alarmed = False

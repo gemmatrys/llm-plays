@@ -71,18 +71,21 @@ class RunLog:
             return self.learnings_path.read_text(encoding="utf-8")
         return ""
 
-    def all_goals_done(self) -> bool:
-        """True when every numbered goal line in goals.md carries [DONE] —
-        the run has exhausted its objectives and a checkpoint must write
-        the next stretch."""
-        found = False
+    def goals_finished(self) -> bool:
+        """True when the HIGHEST-numbered goal in goals.md carries [DONE].
+        Not all-stamped: instruction-style middle goals ("stop talking to
+        the old man") never earn a stamp, so the last goal is the reliable
+        end-of-objectives signal — reaching it means the run needs its next
+        stretch written."""
+        last: str | None = None
+        last_n = -1
         for line in self.goals().splitlines():
             s = line.lstrip()
             if s and s[0].isdigit() and "." in s[:4]:
-                found = True
-                if "[DONE]" not in line:
-                    return False
-        return found
+                n = int(s.split(".", 1)[0])
+                if n >= last_n:
+                    last_n, last = n, line
+        return last is not None and "[DONE]" in last
 
     def mark_goal_done(self, n: int) -> bool:
         """Stamp [DONE] on numbered goal `n` in goals.md (the model's only
