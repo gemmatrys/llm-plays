@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutTimeout
 
+from . import items
 from .behaviors import BehaviorLibrary, fish_move
 from .interfaces import Policy
 from .profile import LadderConfig
@@ -61,6 +62,11 @@ class Watchdog:
         resolved = []
         for b in plan:
             known = self.library.get(b.name)
+            if known is None and items.is_item(b.name):
+                # dynamic item intent (use_<item>/buy_<item>_x<n>): valid by
+                # construction, resolved into real steps by the loop at
+                # execution time when bag/shop context is known
+                known = b
             if known is None:
                 return self._llm_failed(f"unknown behavior {b.name!r}")
             resolved.append(known)
