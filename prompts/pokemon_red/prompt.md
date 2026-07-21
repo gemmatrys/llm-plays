@@ -54,11 +54,6 @@ Truth signals (these beat your memory AND the screenshot):
   or step around. A ledge crosses ONE way - hop down it going south,
   never push against it from below.
 
-Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
-.=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
-from below it is solid, never push up into it. The line under the grid lists
-exits. Ignore the map during menus/battles/transitions.
-
 Movement:
 - PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
   way until a wall stops it (~12 tiles max; it steps around a lone tree
