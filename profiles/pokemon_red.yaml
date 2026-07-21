@@ -63,6 +63,8 @@ ram_map:
 # shown to the MODEL (its {ram} view + logs) but never milestone-tracked:
 context_ram_map:
   in_battle: "0xD057"   # 0=none, 1=wild, 2=trainer - kills battle-vs-menu misreads
+  map_h: "0xD368"       # current map height/width in 2x2 blocks (pret
+  map_w: "0xD369"       # wCurMapHeight/Width) - feeds the edge-awareness line
 
 # Natural-language state rendering (user rule: no technical jargon anywhere
 # the model reads). Sentence template with {v}, value->sentence map for
@@ -79,6 +81,10 @@ state_lines:
   bag: "Your bag holds: {v}."
   bearings: "Landmarks from where you stand: {v}."
   battle_hint: "About this battle: {v}"
+  map_h: ~             # block dims feed the edges line; raw numbers are jargon
+  map_w: ~
+  edges: "{v}"         # already a full sentence from the harness
+  can_move: "{v}"      # already a full sentence from the harness
   in_battle:
     0: "You are NOT in a battle."
     1: "You are IN a battle with a WILD Pokemon."

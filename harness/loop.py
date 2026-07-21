@@ -256,6 +256,35 @@ class GameLoop:
             ram_ctx["place"] = names.get(
                 ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
 
+        # edge awareness (user 2026-07-21): the model cannot tell a map edge
+        # from an ordinary wall — say plainly when it stands at or near one.
+        # Dimensions come from context RAM in 2x2-tile blocks (Gen 1); player
+        # coords are tiles, so the far edge sits at 2*blocks-1. States a fact
+        # a player sees (the ground ends); never claims the edge is crossable.
+        if ram_ctx is not None and {"map_w", "map_h", "pos_x", "pos_y"} \
+                <= ram_ctx.keys():
+            try:
+                max_x = 2 * int(ram_ctx["map_w"]) - 1
+                max_y = 2 * int(ram_ctx["map_h"]) - 1
+                x, y = int(ram_ctx["pos_x"]), int(ram_ctx["pos_y"])
+                parts = []
+                for dist, side, word in ((y, "northern", "north"),
+                                         (max_y - y, "southern", "south"),
+                                         (x, "western", "west"),
+                                         (max_x - x, "eastern", "east")):
+                    if dist == 0:
+                        parts.append(f"You are ON the {side} edge of "
+                                     "this area.")
+                    elif dist <= 2:
+                        parts.append(f"The {side} edge of this area is "
+                                     f"{dist} tile{'s' if dist > 1 else ''} "
+                                     f"{word} of you.")
+                if parts:
+                    ram_ctx = dict(ram_ctx)
+                    ram_ctx["edges"] = " ".join(parts)
+            except Exception:  # noqa: BLE001 — edge context is optional
+                pass
+
         # money = the third resource goals reason about (buying, the
         # blackout halving) — 3-byte BCD; goals said "if money is short"
         # to a model that could not see money (2026-07-21 audit)
@@ -318,9 +347,20 @@ class GameLoop:
             # it last tick; the ladder re-arms or escalates if it persists
             extra["intervention"] = self._nudge
             self._nudge = None
+        tilemap = self._read_tilemap()
+        # blocked-directions line (user 2026-07-21): the model should not
+        # have to read the map to know its immediate options — say outright
+        # which neighbor tiles it can step onto and what blocks the rest.
+        # Derived from the same walkability grid the map renders; skipped in
+        # battle (position frozen, screen is not the overworld).
+        if ram_ctx is not None and not ram_ctx.get("in_battle"):
+            cm = self._can_move_line()
+            if cm:
+                ram_ctx = dict(ram_ctx)
+                ram_ctx["can_move"] = cm
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
-                          tilemap=self._read_tilemap(), extra=extra)
+                          tilemap=tilemap, extra=extra)
         decision = self.watchdog.decide(obs)
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
@@ -688,6 +728,61 @@ class GameLoop:
             return names
         except Exception:  # noqa: BLE001 — names are context, never fatal
             return self._maps_cache[1] if self._maps_cache else {}
+
+    def _can_move_line(self) -> str | None:
+        """One sentence on the four adjacent tiles, from this tick's nav
+        state: which ways are open, what blocks the others (obstacle /
+        person / ledge). The player-visible counterpart of the map grid —
+        never a claim about where a step LEADS, only whether it is possible."""
+        nav = self._nav
+        if nav is None or nav.get("player") is None:
+            return None
+        tiles, cfg, walkable = nav["tiles"], nav["cfg"], nav["walkable"]
+        npc_blocks = {(c // 2, r // 2) for c, r in nav["npcs"]}
+        ledges = nav["ledges"]
+        px, py = nav["player"]
+        w_tiles, h_tiles = nav["map_wh"]
+        pc, pr = cfg.player_col // 2, cfg.player_row // 2
+        open_dirs, blocked = [], []
+        for word, dc, dr in (("north", 0, -1), ("south", 0, 1),
+                             ("west", -1, 0), ("east", 1, 0)):
+            mx, my = px + dc, py + dr
+            if not (0 <= mx < w_tiles and 0 <= my < h_tiles):
+                blocked.append(f"{word} (the area ends there)")
+                continue
+            bc, br = pc + dc, pr + dr
+            if not (0 <= bc < cfg.cols // 2 and 0 <= br < cfg.rows // 2):
+                continue  # off-screen neighbor: say nothing rather than guess
+            if (bc, br) in npc_blocks:
+                blocked.append(f"{word} (a person is standing there)")
+                continue
+            if (mx, my) in {tuple(wp) for wp in nav["warps"]}:
+                open_dirs.append(f"{word} (through a doorway)")
+                continue
+            tid = tiles[(br * 2 + 1) * cfg.cols + bc * 2]
+            if tid in ledges:
+                # Gen 1 ledges hop DOWN only: stepping south onto one works
+                if word == "south":
+                    open_dirs.append("south (hopping down a ledge)")
+                else:
+                    blocked.append(f"{word} (a ledge you cannot climb)")
+            elif tid in nav["grasses"]:
+                open_dirs.append(f"{word} (into tall grass)")
+            elif tid in nav["counters"]:
+                blocked.append(f"{word} (a counter - talk across it)")
+            elif tid in walkable:
+                open_dirs.append(word)
+            else:
+                blocked.append(f"{word} (an obstacle)")
+        if not open_dirs and not blocked:
+            return None
+        parts = []
+        if open_dirs:
+            parts.append("From this tile you can step: "
+                         + ", ".join(open_dirs) + ".")
+        if blocked:
+            parts.append("You cannot step: " + ", ".join(blocked) + ".")
+        return " ".join(parts)
 
     def _read_tilemap(self) -> str:
         """Bulk-read the screen tilemap + map dims + warps and render an ASCII

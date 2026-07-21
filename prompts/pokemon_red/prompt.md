@@ -48,6 +48,9 @@ Truth signals (these beat your memory AND the screenshot):
 - Your map position is your tile; unchanged after walking = blocked,
   turn. It can be stale on menu/naming screens - there, trust the
   screenshot.
+- "From this tile you can step" is your true immediate options, and
+  "You cannot step" names what blocks each other way - believe both
+  over the map and the screenshot.
 
 Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
 .=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
