@@ -10,7 +10,7 @@
    what you say. The road to Route 2 is closed until you finish goals 4-7.
    Step away from him and stop pressing A at him.
 
-4. YOU ARE IN THE WRONG BUILDING. This room - the one with the lady, the
+4. [DONE] YOU ARE IN THE WRONG BUILDING. This room - the one with the lady, the
    TV and the potted plants - is a private HOUSE, not the Mart. The lady
    is not a clerk and has NO parcel. You have been here before. Walk to
    the exit (the doormats are at the BOTTOM-LEFT of this room) and leave.
