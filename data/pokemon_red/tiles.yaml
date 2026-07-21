@@ -47,6 +47,10 @@ tilesets:
     # 0x54/0x55/0x10) blocked. 0x1e unverified — add if a wedge shows it open.
     walkable: ["0x11", "0x1a", "0x1c"]
     portal: ["0x1c"]
+    # `counter` = the game's own talk-across-the-counter tile ids, from the
+    # pokered tileset headers (authoritative) — consumed by walk_to_counter's
+    # [person][counter][space] pattern search.
+    counter: ["0x18", "0x19", "0x1e"]
   "0x06":
     name: pokecenter
     # (marts turned out to use tileset 0x02, not this one)
