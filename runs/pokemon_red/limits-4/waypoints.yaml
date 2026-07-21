@@ -64,6 +64,8 @@ waypoints:
   # possible, and it orbited the unsatisfiable bearing for ~40min.
   # (31,30) is the standable path tile.
   the path north (east side): {map: 51, x: 31, y: 30}
+  # top corridor VERIFIED 2026-07-21 live: model crossed at (25,12) with
+  # the bearing reading 1 north - (25,11) is satisfiable, no correction.
   the top corridor: {map: 51, x: 25, y: 11}
   the west lane to the exit: {map: 51, x: 2, y: 18}
   # Forest north exit doormats, top-left corner — VERIFIED (forest warp
