@@ -1,1 +1,1 @@
-In Pewter City, walking around the gym's fence (south then west) to reach the doormat on the west side to enter.
+In Pewter City, leaving a house to head towards the Gym's west entrance.
