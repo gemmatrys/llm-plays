@@ -1,1 +1,1 @@
-In Viridian Forest, grabbing a Potion, then following the path to the exit to reach Pewter City. Charmander L14, Ember 0 PP.
+In Viridian Forest. Goal 12: grabbing Potion (3N), then following the path north and west to the exit. Charmander L14, HP low, Ember 0PP.
