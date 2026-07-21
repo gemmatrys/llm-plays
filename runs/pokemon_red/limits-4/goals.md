@@ -51,11 +51,11 @@
     place= says Pewter Pokemon Center.
 
 13. Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing):
-    stand at the counter FACING the clerk and use the buy-5-potions
-    skill from your action list - it runs the whole shop conversation
-    (1500 total). A "[bag: +N POTION]" event is the stamp. If the
-    clerk says you cannot afford it, move on without buying - do not
-    improvise the menus. Skip the MUSEUM - it only costs money.
+    inside, use the walk-to-counter action, then buy - same drill as
+    goal 8, but POTION is the SECOND item on the list (press DOWN
+    once) and the count must read x5 (press UP four times). 300 each,
+    1500 total. A "[bag: +N POTION]" event is the stamp. Skip the
+    MUSEUM - it only costs money.
 
 14. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
     bearing). Inside, a JR TRAINER blocks the way - beat him, then if
