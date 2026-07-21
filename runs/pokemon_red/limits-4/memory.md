@@ -1,1 +1,1 @@
-On Route 1, heading north to Viridian City. Next: head north out of Viridian City to Route 2.
+On Route 2, heading north towards Cerulean City.

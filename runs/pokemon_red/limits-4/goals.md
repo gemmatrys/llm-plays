@@ -37,7 +37,7 @@
    the "[bag: -1 OAK'S PARCEL]" event, that is the delivery proof) and
    gives you the POKEDEX.
 
-7. Walk north through Route 1 to Viridian City again, then head north out
+7. [DONE] Walk north through Route 1 to Viridian City again, then head north out
    of the city. The old man now lets you pass. Continue to Route 2.
 
 Rules:
