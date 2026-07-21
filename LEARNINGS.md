@@ -220,6 +220,13 @@ phases don't relearn them. Format: lesson → where it now lives.
   `done_goal` (the model stamps finished goals [DONE] itself), goals under
   the 200-word budget, checkpoints prune at rewrite, and a >90s
   slow-decision watcher because long thinking IS the confusion alarm.
+- **Never make the model do spatial search** — route "calculation" in
+  thinking was 90-124s per decision; navigation macros (walk_<dir> /
+  walk_to_exit, BFS on the map grid, harness/navigate.py) dropped the same
+  situations to 14-18s with four tiles of progress per decision. The pattern
+  generalizes: any deterministic computation the model performs in tokens is
+  a behavior the harness should perform in code — the model picks WHAT, the
+  harness computes HOW.
 - **Prompt philosophy: encourage trial and error.** The game is
   fish-beatable and the ratchet makes mistakes cheap — so the prompt now
   says EXPERIMENT, don't deliberate; break loops on purpose. Prescriptive
