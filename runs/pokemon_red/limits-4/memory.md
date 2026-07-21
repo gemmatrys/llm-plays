@@ -1,1 +1,1 @@
-On Route 2, walking north to Pewter City (Goal 15) to heal CHARMANDER (Goal 16) and buy potions (Goal 17).
+In Pewter City. Healing Charmander at the Pokemon Center (Goal 16), then buying potions (Goal 17).
