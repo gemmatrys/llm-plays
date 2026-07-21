@@ -195,6 +195,19 @@ class GameLoop:
             ram_ctx["place"] = names.get(
                 ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
 
+        # party = the team's REAL state (nick, species, level, HP, status):
+        # the model must see "HP 4/24" and "POISONED" to decide to heal —
+        # asking it to remember battle outcomes is how false beliefs start
+        if ram_ctx is not None and self.profile.party is not None \
+                and self.extras is not None:
+            try:
+                p = self._read_party()
+                if p:
+                    ram_ctx = dict(ram_ctx)
+                    ram_ctx["party"] = p
+            except Exception:  # noqa: BLE001 — party context is optional
+                pass
+
         # stale notes: the model keeps acting on a world description it wrote
         # rooms ago (this repeatedly cost progress). When its notes predate a
         # map change or sit unchanged too long, tell the policy to FORCE a
@@ -351,6 +364,64 @@ class GameLoop:
             return "; ".join(parts) or None
         except Exception:  # noqa: BLE001 — bearings are optional context
             return None
+
+    _GEN1_STATUS = ((0x08, "POISONED"), (0x10, "BURNED"), (0x20, "FROZEN"),
+                    (0x40, "PARALYZED"))
+
+    @staticmethod
+    def _gen1_text(bs: bytes) -> str:
+        out = []
+        for b in bs:
+            if b == 0x50:
+                break
+            if 0x80 <= b <= 0x99:
+                out.append(chr(ord("A") + b - 0x80))
+            elif 0xA0 <= b <= 0xB9:
+                out.append(chr(ord("a") + b - 0xA0))
+            elif 0xF6 <= b <= 0xFF:
+                out.append(str(b - 0xF6))
+            else:
+                out.append("?")
+        return "".join(out)
+
+    def _read_party(self) -> str:
+        """Render party state: 'A (CHARMANDER) lv8 HP 16/24' per mon, plus
+        status words and a LOW! tag under quarter HP. Species names come
+        from HOT data/<game>/species.yaml (live-verified ids only; unknown
+        ids self-tag for harvest)."""
+        pc = self.profile.party
+        n = min(self.extras.read_block(pc.count_addr, 1)[0], 6)
+        if not n:
+            return ""
+        names: dict[int, str] = {}
+        if pc.names_file:
+            try:
+                raw = yaml.safe_load(
+                    (self.base / pc.names_file).read_text(encoding="utf-8"))
+                names = {int(k, 0) if isinstance(k, str) else int(k): str(v)
+                         for k, v in ((raw or {}).get("species") or {}).items()}
+            except Exception:  # noqa: BLE001 — cosmetic
+                pass
+        out = []
+        for i in range(n):
+            mon = self.extras.read_block(pc.mons_addr + i * pc.mon_size,
+                                         pc.mon_size)
+            nick = self._gen1_text(
+                self.extras.read_block(pc.nicks_addr + i * pc.nick_size,
+                                       pc.nick_size))
+            sp = names.get(mon[0], f"SPECIES_0x{mon[0]:02x}")
+            hp = (mon[pc.hp_off] << 8) | mon[pc.hp_off + 1]
+            mx = (mon[pc.maxhp_off] << 8) | mon[pc.maxhp_off + 1]
+            s = f"{nick} ({sp}) lv{mon[pc.level_off]} HP {hp}/{mx}"
+            for bit, word in self._GEN1_STATUS:
+                if mon[pc.status_off] & bit:
+                    s += f" {word}"
+            if mon[pc.status_off] & 0x07:
+                s += " ASLEEP"
+            if mx and hp * 4 <= mx:
+                s += " (LOW!)"
+            out.append(s)
+        return "; ".join(out)
 
     def _map_names(self) -> dict[int, str]:
         """HOT map-id -> place-name table (data/<game>/maps.yaml)."""

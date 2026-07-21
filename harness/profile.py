@@ -120,6 +120,25 @@ class BagConfig:
 
 
 @dataclass
+class PartyConfig:
+    """Party state for the model's {ram} view (`party=`): nickname, species,
+    level, HP, status per mon — the model must SEE low HP and poison to
+    decide to heal. Gen 1 layout, offsets live-verified 2026-07-20
+    (species 0xB0 lv8 HP16/24 nick 'A' read back correctly)."""
+    count_addr: int = 0xD163       # wPartyCount
+    species_addr: int = 0xD164     # wPartySpecies (0xFF-terminated)
+    mons_addr: int = 0xD16B        # wPartyMons: 44-byte structs
+    mon_size: int = 44
+    hp_off: int = 1                # current HP, 2 bytes big-endian
+    status_off: int = 4
+    level_off: int = 33
+    maxhp_off: int = 34            # 2 bytes big-endian
+    nicks_addr: int = 0xD2B5       # wPartyMonNicks: 11 bytes each
+    nick_size: int = 11
+    names_file: str | None = None  # data/<game>/species.yaml
+
+
+@dataclass
 class GameProfile:
     name: str
     platform: str  # gba | gb | nds | switch ...
@@ -136,6 +155,7 @@ class GameProfile:
     context_ram_map: dict[str, int] = field(default_factory=dict)
     tilemap: TilemapConfig | None = None
     bag: BagConfig | None = None
+    party: PartyConfig | None = None
     driver_opts: dict = field(default_factory=dict)
     # Gemma-facing prompts are NOT part of the profile — see harness/prompts.py.
     # Profiles are COLD config: loaded once at startup; changing one requires
@@ -156,6 +176,12 @@ class GameProfile:
                 if k in bg:
                     bg[k] = _hex(bg[k])
             raw["bag"] = BagConfig(**bg)
+        if raw.get("party"):
+            pt = dict(raw["party"])
+            for k in ("count_addr", "species_addr", "mons_addr", "nicks_addr"):
+                if k in pt:
+                    pt[k] = _hex(pt[k])
+            raw["party"] = PartyConfig(**pt)
         # RAM addresses in YAML may be hex strings
         raw["ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
                           for k, v in raw.get("ram_map", {}).items()}

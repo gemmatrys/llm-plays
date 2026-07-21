@@ -26,6 +26,11 @@ Truth signals (these beat your memory AND the screenshot):
   every decision. When it disagrees with a remembered direction, it is right.
 - "[you have entered this map N times]": believe the counter - you are
   looping and your belief about this place is wrong.
+- party= is your team's REAL state (level, HP, status). "(LOW!)" or a
+  status like POISONED means heal soon: a Pokemon Center cures everything
+  free; POISONED also drains HP as you walk. Whiting out (all HP gone)
+  teleports you to the last Center - if you wake up somewhere you did not
+  walk to, that is what happened; re-read place= and your bearings.
 - pos_x/pos_y = your tile; unchanged after walking = blocked, turn. RAM can
   be stale on menu/naming screens - there, trust the screenshot.
 

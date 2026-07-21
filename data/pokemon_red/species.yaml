@@ -1,0 +1,6 @@
+# Gen 1 INTERNAL species id -> name (NOT dex order) for the party= view.
+# HOT: reloaded per read. LIVE-VERIFIED ids only — an unknown id renders
+# SPECIES_0xXX (a harvest tag: name it once the screenshot confirms).
+# Do not bulk-import recalled tables (the 0x55 "ledge" was a fence).
+species:
+  "0xb0": CHARMANDER   # verified 2026-07-20: the starter, nick "A"

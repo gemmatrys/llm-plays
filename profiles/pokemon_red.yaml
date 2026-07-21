@@ -91,6 +91,10 @@ bag:
   items_addr: "0xD31E"   # wBagItems: (id, qty) pairs
   names_file: data/pokemon_red/items.yaml
 
+# party= view: nick/species/level/HP/status per mon (offsets live-verified)
+party:
+  names_file: data/pokemon_red/species.yaml
+
 driver_opts:
   host: 127.0.0.1
   port: 8765
