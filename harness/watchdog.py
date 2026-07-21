@@ -69,6 +69,7 @@ class Watchdog:
         return Decision(behaviors=resolved, rung=Rung.LLM, reason=reason,
                         prompt_hash=getattr(self.policy, "last_prompt_hash", ""),
                         memory_update=getattr(self.policy, "last_memory", None),
+                        done_goal=getattr(self.policy, "last_done_goal", None),
                         thinking=getattr(self.policy, "last_thinking", ""))
 
     def _llm_failed(self, why: str) -> None:

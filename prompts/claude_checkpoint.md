@@ -55,6 +55,10 @@ advice.
      ("walk NORTH out of the city, then EAST on Route 9"), no ambiguity, no
      motivation, no history.
    - One "Current objective" with numbered steps, then at most 5 general rules.
+   - NUMBER the objectives ("0.", "1.", ...): Gemma reports completion via its
+     done_goal field and the harness stamps that number [DONE]. At rewrite
+     time, PRUNE stamped goals (they're recorded in the git history) and
+     renumber — stale finished goals were a repeated confusion source.
    - Include warnings born from the log ("do NOT re-enter the Pokemon Center
      unless HP is low").
 4. **Author skills** for patterns you saw fail or repeat. A skill is a YAML file

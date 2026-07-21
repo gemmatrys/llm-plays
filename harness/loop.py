@@ -133,6 +133,12 @@ class GameLoop:
         if decision.memory_update is not None:
             # the model rewrote its own notes; store verbatim, never interpret
             self.runlog.set_memory(decision.memory_update)
+        if decision.done_goal is not None:
+            # the model reports a numbered goal finished; the harness stamps
+            # it [DONE] so finished objectives stop being re-chased
+            if self.runlog.mark_goal_done(decision.done_goal):
+                self.runlog.log_metric("goal_done", goal=decision.done_goal)
+                self._recent.append(f"[goal {decision.done_goal} marked DONE]")
 
         # Execute the plan; abort remaining steps if the screen changes more than
         # expected between steps (wild encounter, dialogue popup, scene change).

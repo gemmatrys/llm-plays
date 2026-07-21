@@ -111,6 +111,7 @@ class LLMPolicy:
         self.last_reason = ""  # the model's "why" — logged and shown on stream
         self.last_thinking = ""  # thinking transcript (logprobs-recovered), logged
         self.last_memory = None  # notes rewrite from the last decision, if any
+        self.last_done_goal = None  # numbered goal the model reports finished
         self.last_prompt_hash = ""  # logged per decision for attribution
         self._last_good = DEFAULT_TEMPLATE
         self._last_bad: str | None = None
@@ -137,6 +138,7 @@ class LLMPolicy:
 
     def decide(self, obs: Observation) -> list[Behavior]:
         self.last_memory = None  # reset: only a fresh "memory" field counts
+        self.last_done_goal = None
         template = self._template()
         self.last_prompt_hash = hashlib.sha256(template.encode()).hexdigest()[:12]
         text = render_prompt(template, self.library.names(),
@@ -181,6 +183,10 @@ class LLMPolicy:
                             # the model's own notes; omitted = unchanged, so it
                             # only costs decode tokens when something changed
                             "memory": {"type": "string", "maxLength": 400},
+                            # "goal N is finished" — the harness stamps [DONE]
+                            # on that numbered goal so it stops being re-chased
+                            "done_goal": {"type": "integer",
+                                          "minimum": 0, "maximum": 50},
                         },
                         "required": ["plan"],
                         "additionalProperties": False,
@@ -249,6 +255,7 @@ class LLMPolicy:
             plan.append(behavior)
         self.last_reason = action.get("why", "")
         self.last_memory = action.get("memory")  # None = keep previous notes
+        self.last_done_goal = action.get("done_goal")
         return plan
 
     def _frame_data_url(self, obs: Observation) -> str:

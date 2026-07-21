@@ -32,6 +32,9 @@ Planning:
   floor you are in. When your location or task changes, add a "memory" field that
   REWRITES the notes (<=60 words: where you are, what you are doing, what is
   next); omit it to keep them. Fix notes the moment the screen contradicts them.
+- When you FINISH a numbered goal, add "done_goal": <its number> to that reply -
+  it gets stamped [DONE] in your goals. Skip goals already marked [DONE]; your
+  current objective is the lowest-numbered goal without the stamp.
 
 Screens:
 - Title / "Press Start" (also after a reset): press START or boot_mash. Main

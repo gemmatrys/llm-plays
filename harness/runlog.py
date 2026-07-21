@@ -71,6 +71,23 @@ class RunLog:
             return self.learnings_path.read_text(encoding="utf-8")
         return ""
 
+    def mark_goal_done(self, n: int) -> bool:
+        """Stamp [DONE] on numbered goal `n` in goals.md (the model's only
+        write access to its goals — via the done_goal schema field). Marking
+        only, never deletion; checkpoints prune stamped goals at rewrite.
+        Returns False (no-op) if goal `n` isn't found or is already stamped."""
+        lines = self.goals().splitlines()
+        for i, line in enumerate(lines):
+            stripped = line.lstrip()
+            if stripped.startswith(f"{n}.") and "[DONE]" not in line:
+                indent = line[:len(line) - len(stripped)]
+                lines[i] = f"{indent}{n}. [DONE] " + \
+                    stripped[len(f"{n}."):].lstrip()
+                self.goals_path.write_text("\n".join(lines) + "\n",
+                                           encoding="utf-8")
+                return True
+        return False
+
     def log_decision(self, d: Decision, frame_hash: str, ram: dict | None,
                      duration_s: float, executed: int | None = None) -> None:
         names = [b.name for b in d.behaviors]
@@ -86,6 +103,8 @@ class RunLog:
             entry["prompt"] = d.prompt_hash  # segment metrics by prompt version
         if d.memory_update is not None:
             entry["memory"] = d.memory_update  # notes rewrite, for replay/debug
+        if d.done_goal is not None:
+            entry["done_goal"] = d.done_goal
         if d.thinking:
             entry["thinking"] = d.thinking  # chain-of-thought, for the record
         self._write(self._log, entry)
