@@ -18,6 +18,7 @@ import base64
 import hashlib
 import io
 import json
+import re
 from pathlib import Path
 
 import requests
@@ -57,6 +58,18 @@ location or task changes: where you are, what you are doing, what comes next.
 {recent}"""
 
 
+def _collapse_counted(behaviors: list[str]) -> list[str]:
+    """Display the 36 counted walk variants as one legend entry — the schema
+    enum still carries every exact name; this only tidies the listing."""
+    counted = re.compile(r"walk_(north|south|west|east)_[1-9]$")
+    out = [n for n in behaviors if not counted.fullmatch(n)]
+    if len(out) != len(behaviors):
+        out.append("walk_north_<1-9> / walk_south_<1-9> / walk_west_<1-9> / "
+                   "walk_east_<1-9> (walk EXACTLY that many tiles - e.g. a "
+                   "'3 south, 4 east' bearing = walk_south_3, walk_east_4)")
+    return out
+
+
 def render_prompt(template: str, behaviors: list[str], goals: str,
                   ram: dict | None, recent: list[str], max_plan: int = 8,
                   memory: str = "", tilemap: str = "") -> str:
@@ -65,7 +78,7 @@ def render_prompt(template: str, behaviors: list[str], goals: str,
                 if ram else "(unknown)")
     recent_text = ", ".join(recent[-15:]) if recent else "(none)"
     return (template
-            .replace("{behaviors}", ", ".join(behaviors))
+            .replace("{behaviors}", ", ".join(_collapse_counted(behaviors)))
             .replace("{goals}", goals.strip())
             .replace("{ram}", ram_text)
             .replace("{recent}", recent_text)

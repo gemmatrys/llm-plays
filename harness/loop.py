@@ -206,7 +206,7 @@ class GameLoop:
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
         for i, b in enumerate(decision.behaviors):
-            if b.name in navigate.NAV_BEHAVIORS:
+            if navigate.is_nav(b.name):
                 nb = navigate.resolve(b.name, **self._nav) \
                     if self._nav is not None else None
                 if nb is not None:

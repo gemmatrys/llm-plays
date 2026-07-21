@@ -24,6 +24,21 @@ NAV_BEHAVIORS = ("walk_north", "walk_south", "walk_west", "walk_east",
                  "walk_to_exit")
 MAX_STEPS = 12  # re-decide after ~a screen's worth of walking
 
+
+def parse(name: str) -> tuple[str, int | None]:
+    """Split an optional tile count off a nav name: "walk_east_3" ->
+    ("walk_east", 3); plain names -> (name, None). Lets the model walk an
+    exact bearing distance instead of always going as far as possible."""
+    base, _, tail = name.rpartition("_")
+    if base in ("walk_north", "walk_south", "walk_west", "walk_east") \
+            and tail.isdigit() and 1 <= int(tail) <= 9:
+        return base, int(tail)
+    return name, None
+
+
+def is_nav(name: str) -> bool:
+    return parse(name)[0] in NAV_BEHAVIORS
+
 _DIRS = (("UP", 0, -1), ("DOWN", 0, 1), ("LEFT", -1, 0), ("RIGHT", 1, 0))
 
 
@@ -119,6 +134,8 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             ledges: set[int] = frozenset()) -> Behavior | None:
     """Turn a navigation behavior name into a concrete button path, or None
     when no on-screen path exists (caller reports that to the model)."""
+    orig = name
+    name, count = parse(name)
     if name not in NAV_BEHAVIORS or not walkable:
         return None
     start = (cfg.player_col // 2, cfg.player_row // 2)
@@ -139,7 +156,7 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         press = _edge_press(px, py, map_wh)
         if press is not None:
             # hold long enough to turn AND walk (a short tap only turns)
-            return Behavior(name=name, source="builtin",
+            return Behavior(name=orig, source="builtin",
                             steps=[Step(button=press, hold_frames=16,
                                         wait_frames=8)])
 
@@ -174,9 +191,12 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         axis, sign = {"walk_north": (1, -1), "walk_south": (1, 1),
                       "walk_west": (0, -1), "walk_east": (0, 1)}[name]
         cands = [b for b in dist
-                 if b != start and sign * (b[axis] - start[axis]) > 0]
+                 if b != start and 0 < sign * (b[axis] - start[axis])
+                 and (count is None
+                      or sign * (b[axis] - start[axis]) <= count)]
         if cands:
-            # farthest progress along the axis, shortest path as tiebreak
+            # farthest progress along the axis (capped at `count` tiles when
+            # the model asked for an exact distance), shortest path tiebreak
             goal = min(cands, key=lambda b: (-sign * (b[axis] - start[axis]),
                                              dist[b]))
     if goal is None:
@@ -196,4 +216,4 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         press = _edge_press(*warp_at[goal], map_wh)
         if press is not None:
             steps.append(Step(button=press, hold_frames=16, wait_frames=8))
-    return Behavior(name=name, source="builtin", steps=steps)
+    return Behavior(name=orig, source="builtin", steps=steps)

@@ -148,10 +148,16 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
     }
     # navigation macros: registered as stubs so the schema enum knows them;
     # the LOOP swaps in a real BFS path at decision time (harness/navigate.py).
-    # The wait stub only runs if no map is available that tick.
+    # The wait stub only runs if no map is available that tick. Counted
+    # variants (walk_east_3 = exactly up to 3 tiles east) let the model walk
+    # a bearing distance instead of always going as far as possible.
     for nav in ("walk_north", "walk_south", "walk_west", "walk_east",
                 "walk_to_exit"):
         lib[nav] = _builtin(nav, [Step(op="wait", wait_frames=8)])
+        if nav != "walk_to_exit":
+            for n in range(1, 10):
+                lib[f"{nav}_{n}"] = _builtin(f"{nav}_{n}",
+                                             [Step(op="wait", wait_frames=8)])
     for b in buttons:
         lib[f"press_{b}"] = _builtin(f"press_{b}", [Step(button=b)])
     return lib
