@@ -1,1 +1,1 @@
-In Viridian Forest, following the 'west side path' leg (walking south). Once a west opening is reported, I will take it and then head north to the forest exit corner.
+In Viridian Forest, moving to the west edge (x=1) and walking north to reach the forest exit corner.
