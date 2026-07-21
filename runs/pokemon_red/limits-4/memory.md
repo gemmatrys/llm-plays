@@ -1,1 +1,1 @@
-In Viridian Forest, heading to the top-left exit to reach Pewter City. Ember is unusable; will flee wild battles. Next: reach Pewter City and heal at the Pokemon Center.
+In Viridian Forest, heading to the top-left exit to reach Pewter City. Charmander is L14, but Ember is out of PP. Next: exit forest and head to Pewter City Center to heal.
