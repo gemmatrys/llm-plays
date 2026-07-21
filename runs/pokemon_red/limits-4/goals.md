@@ -11,12 +11,19 @@
     carry a ball, catch it - it wins the SECOND gym for you later.
     POISONED after a battle: cure it right away (Rules).
 
-12. Leave the forest at its far top-left corner (the "forest exit
-    corner" bearing), walk north through the gate building (the
-    "doorway out to Route 2" bearing), and continue north on Route 2
-    into PEWTER CITY (the "gap to Pewter" bearing). Do NOT enter the
-    cave door east of the path - its Pokemon are ten levels above
-    you. In Pewter, heal at the Center (the "Pewter Center door"
+12. Leave the forest - but the forest is a MAZE: tree walls cross the
+    straight line to the exit, so do NOT chase the "forest exit
+    corner" bearing directly. Walk the path IN THIS ORDER, one leg at
+    a time: first "a dropped item" (a Potion - grab it), then "the
+    path north (east side)", then "the top corridor", then "the west
+    lane to the exit", and only then the "forest exit corner". Each
+    bearing is the next stop; when one reads "you are here", switch
+    to the next. The south-west corner ball is already in your bag -
+    there is nothing left down there. Then walk north through the
+    gate building (the "doorway out to Route 2" bearing) and continue
+    north on Route 2 into PEWTER CITY (the "gap to Pewter" bearing).
+    Do NOT enter the cave door east of the path - its Pokemon are ten
+    levels above you. In Pewter, heal at the Center (the "Pewter Center door"
     bearing; inside, walk-to-counter puts you in front of the nurse -
     talk, ONE press A on her yes/no, mash through the rest). EMBER is
     out of PP until the nurse refills it - skip the dark grass where
