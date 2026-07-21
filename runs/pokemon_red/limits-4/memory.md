@@ -1,1 +1,1 @@
-In Viridian Forest, grinding Charmander to level 14. Next: leave for Pewter City.
+In Viridian Forest, grinding Charmander to L14. Currently L10, HP low. Heading to collect dropped items to find potions before continuing.
