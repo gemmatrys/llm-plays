@@ -94,6 +94,9 @@ waypoints:
   Pewter Center door: {map: 2, x: 13, y: 25}
   Pewter Mart door: {map: 2, x: 23, y: 17}
   Pewter Gym door: {map: 2, x: 16, y: 17}
+  # street tile directly south of the gym door - approach target; from
+  # it ONE UP press enters (door tiles are not walkable to walks/BFS)
+  the doormat below the Gym entrance: {map: 2, x: 16, y: 18}
   # Brock inside the gym — VERIFIED (object table (4,1)). Stand south,
   # press A; adjacent works. Entrance mats (4,13)/(5,13); JR TRAINER at
   # (3,6) facing right — his fight is effectively mandatory.
