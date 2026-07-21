@@ -144,6 +144,14 @@ class LLMPolicy:
         text = render_prompt(template, self.library.names(),
                              obs.goals, obs.ram, obs.recent, self.max_plan,
                              memory=obs.memory, tilemap=obs.tilemap)
+        # forced notes refresh: the loop flags stale notes (map change / age);
+        # "memory" becomes schema-REQUIRED so the decoder cannot omit it
+        stale_notes = obs.extra.get("stale_notes")
+        if stale_notes:
+            text += ("\n\nIMPORTANT: your notes are STALE - " + stale_notes +
+                     ". This reply MUST include a \"memory\" field rewriting "
+                     "them: where you are NOW, what you are doing, what is "
+                     "next. Do not repeat the old notes.")
         payload = {
             "model": self.model,
             "messages": [
@@ -188,7 +196,8 @@ class LLMPolicy:
                             "done_goal": {"type": "integer",
                                           "minimum": 0, "maximum": 50},
                         },
-                        "required": ["plan"],
+                        "required": (["plan", "memory"] if stale_notes
+                                     else ["plan"]),
                         "additionalProperties": False,
                     },
                 },

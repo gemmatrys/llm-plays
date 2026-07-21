@@ -346,3 +346,12 @@ phases don't relearn them. Format: lesson → where it now lives.
   as an open-menu signal; the on-screen cursor glyph is the honest one.
   Still to verify live: 0xED presence during an actual menu (first battle
   or shop will show it). The old blind burst survives only in the fish.
+- **Stale notes don't fix themselves — force the rewrite at the decoder**:
+  the model happily acts for rooms on notes it wrote in another building
+  ("healed at the Center" written inside a random house). Asking nicely in
+  the prompt is optional-by-construction when "memory" is an optional
+  schema field. → the loop tracks the map notes were written on + decisions
+  since; when notes predate a map change or go 15 decisions unchanged
+  (and not in battle), "memory" flips to schema-REQUIRED for that call and
+  the prompt says why — the decoder cannot omit the rewrite. Structured
+  output as enforcement, not suggestion.

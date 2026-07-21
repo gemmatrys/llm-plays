@@ -40,6 +40,10 @@ class GameLoop:
         self._recent: list[str] = []
         self._last_ram: dict[str, int] = {}
         self._last_moved = False  # last decision tried to walk somewhere
+        # notes-staleness tracking: map the notes were last rewritten on and
+        # decisions since — feeds the forced-"memory" schema (policy/llm.py)
+        self._notes_map: int | None = None
+        self._notes_age = 0
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
@@ -128,9 +132,25 @@ class GameLoop:
             except Exception:  # noqa: BLE001 — context extras are optional
                 pass
 
+        # stale notes: the model keeps acting on a world description it wrote
+        # rooms ago (this repeatedly cost progress). When its notes predate a
+        # map change or sit unchanged too long, tell the policy to FORCE a
+        # rewrite (the "memory" field becomes schema-required). Never mid-
+        # battle — battle screens are the wrong moment to describe the world.
+        map_now = (ram or {}).get("map_id")
+        if self._notes_map is None:
+            self._notes_map = map_now
+        stale = None
+        if map_now is not None and not (ram_ctx or {}).get("in_battle"):
+            if map_now != self._notes_map:
+                stale = "you have moved to a different map since writing them"
+            elif self._notes_age >= 15:
+                stale = f"unchanged for {self._notes_age} decisions"
+
         obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
                           recent=self._recent, memory=self.runlog.memory(),
-                          tilemap=self._read_tilemap())
+                          tilemap=self._read_tilemap(),
+                          extra={"stale_notes": stale} if stale else {})
         decision = self.watchdog.decide(obs)
         # navigation macros: swap the stub for a real BFS path computed on
         # this tick's map — the model chose a destination, the harness walks
@@ -145,6 +165,10 @@ class GameLoop:
         if decision.memory_update is not None:
             # the model rewrote its own notes; store verbatim, never interpret
             self.runlog.set_memory(decision.memory_update)
+            self._notes_map = map_now
+            self._notes_age = 0
+        else:
+            self._notes_age += 1
         if decision.done_goal is not None:
             # the model reports a numbered goal finished; the harness stamps
             # it [DONE] so finished objectives stop being re-chased
