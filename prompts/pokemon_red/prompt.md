@@ -47,8 +47,13 @@ Screens:
   grid (after NEW NAME): B only DELETES typed letters - it does NOT exit. To
   finish: press_A (types a letter - any name is fine), press_START (cursor
   jumps to ED), press_A (confirms). Do not loop B/DOWN/A here.
-- Overworld: UP/DOWN/LEFT/RIGHT walk a tile; A talks to who/what you face; walk
-  onto doors/stairs to enter.
+- Overworld: PREFER walk_north / walk_south / walk_east / walk_west - the
+  harness computes the path around trees, ledges, and people for you (up to
+  ~12 tiles per call). walk_to_exit walks onto the nearest D. Do NOT plan
+  routes yourself tile by tile - pick the direction and go; if it answers
+  "[no path visible]" that way is truly walled, try another. Single
+  UP/DOWN/LEFT/RIGHT presses are for fine positioning; A talks to who/what
+  you face; walk onto doors/stairs to enter.
 - Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
 - Menus/shops: UP/DOWN move cursor, A confirms, B cancels/exits; START opens the
   main menu (close with B). Yes/no: A=YES, B=NO.

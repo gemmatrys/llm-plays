@@ -142,6 +142,12 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
                                 step_factory=lambda: random_mash_steps(buttons)),
         "savestate": _builtin("savestate", [Step(op="savestate")]),
     }
+    # navigation macros: registered as stubs so the schema enum knows them;
+    # the LOOP swaps in a real BFS path at decision time (harness/navigate.py).
+    # The wait stub only runs if no map is available that tick.
+    for nav in ("walk_north", "walk_south", "walk_west", "walk_east",
+                "walk_to_exit"):
+        lib[nav] = _builtin(nav, [Step(op="wait", wait_frames=8)])
     for b in buttons:
         lib[f"press_{b}"] = _builtin(f"press_{b}", [Step(button=b)])
     return lib

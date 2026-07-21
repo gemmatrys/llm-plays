@@ -7,6 +7,7 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
+from . import navigate
 from .behaviors import random_mash_steps
 from .executor import Executor
 from .interfaces import Extras, Eyes, Unsupported
@@ -39,6 +40,7 @@ class GameLoop:
         self._recent: list[str] = []
         self._last_ram: dict[str, int] = {}
         self._last_moved = False  # last decision tried to walk somewhere
+        self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
 
@@ -130,6 +132,16 @@ class GameLoop:
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=self._read_tilemap())
         decision = self.watchdog.decide(obs)
+        # navigation macros: swap the stub for a real BFS path computed on
+        # this tick's map — the model chose a destination, the harness walks
+        for i, b in enumerate(decision.behaviors):
+            if b.name in navigate.NAV_BEHAVIORS:
+                nb = navigate.resolve(b.name, **self._nav) \
+                    if self._nav is not None else None
+                if nb is not None:
+                    decision.behaviors[i] = nb
+                else:
+                    self._recent.append(f"[{b.name}: no path visible]")
         if decision.memory_update is not None:
             # the model rewrote its own notes; store verbatim, never interpret
             self.runlog.set_memory(decision.memory_update)
@@ -239,9 +251,15 @@ class GameLoop:
                         npcs.append((col, row))
             except Exception:  # noqa: BLE001 — NPC overlay is a nice-to-have
                 npcs = []
+            # this tick's pathfinding inputs, consumed if the model picks a
+            # navigation macro (walk_north etc.)
+            self._nav = {"tiles": raw, "cfg": tm, "walkable": set(tm.walkable),
+                         "npcs": npcs, "map_wh": map_wh, "player": player,
+                         "warps": warps} if tm.walkable else None
             return render_ascii(raw, tm, player=player, map_wh=map_wh, warps=warps,
                                 tileset=tileset, portal_ids=portals, npcs=npcs)
         except Exception:  # noqa: BLE001 — tilemap is a nice-to-have, never fatal
+            self._nav = None
             return ""
 
     # -- invariant I2: progress ratchet --------------------------------------
