@@ -1,1 +1,1 @@
-I am on Route 1, heading south back to Pallet Town to deliver Oak's Parcel to Professor Oak. Next: Enter Pallet Town and then Oak's lab.
+I am in Pallet Town, delivering Oak's Parcel to Professor Oak. Next: Enter Oak's lab and talk to him.
