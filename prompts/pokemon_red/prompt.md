@@ -51,9 +51,12 @@ exits. Ignore the map during menus/battles/transitions.
 Movement:
 - PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
   way until a wall stops it (~12 tiles max; it steps around a lone tree
-  and hops ledges going down). Where it stops IS the wall - read the map
-  there and pick the way around; walking the same direction again just
-  bumps the same wall. Counted variants walk a bearing EXACTLY: "3 south,
+  and hops ledges going down), then REPORTS what it passed: "[walk_north:
+  went 9, stopped at a wall; openings passed: east after 3]" means a gap
+  in the side wall sat 3 tiles along - walk_south_6 returns to it from
+  where you stand (9-3), or remember it for the way back. Openings are
+  how mazes continue; trust the report over squinting at the map.
+  Walking the same direction again after a stop just bumps the same wall. Counted variants walk a bearing EXACTLY: "3 south,
   4 east" = ["walk_south_3","walk_east_4"]. When nothing is walkable that
   way it still takes ONE step in that direction - which is exactly how
   you cross town/route boundaries at a gap (map edges show nothing; just
