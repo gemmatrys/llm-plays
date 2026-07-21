@@ -2,7 +2,7 @@
 
 11. [DONE] Grind until CHARMANDER is LEVEL 14 or higher - your team line is the proof.
 
-12. Get to the WEST SIDE of the forest. Follow "the west side path"
+12. [DONE] Get to the WEST SIDE of the forest. Follow "the west side path"
     bearing: walk the direction with the bigger number of tiles left;
     when a walk stops, read its report - the FIRST opening WEST is the
     way (walk the counted steps back to it, then turn west). The

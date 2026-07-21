@@ -1,1 +1,1 @@
-In Viridian Forest, moving to the west edge (x=1) and walking north to reach the forest exit corner.
+In Viridian Forest at x=1, y=18. Goal 12 is done. Now curing poison before walking north to the forest exit corner (Goal 13).
