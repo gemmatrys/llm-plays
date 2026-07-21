@@ -1,1 +1,1 @@
-In the Viridian Forest north gate building. Crossing to Route 2 (Goal 14), then heading to Pewter City (Goal 15) to heal CHARMANDER (Goal 16).
+On Route 2, walking north to Pewter City (Goal 15) to heal CHARMANDER (Goal 16) and buy potions (Goal 17).
