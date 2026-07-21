@@ -15,3 +15,6 @@ waypoints:
   pallet_gap: {map: 12, x: 10, y: 35}
   # Oak's lab door (live 18:24 exit landed on (12,12); door is one north)
   oak_lab_door: {map: 0, x: 12, y: 11}
+  # Oak inside the lab — GUESS from the starter-choice logs (model stood
+  # at (5,3) facing the desk row); ±1 tile is fine, talking works adjacent
+  oak: {map: 40, x: 5, y: 2}
