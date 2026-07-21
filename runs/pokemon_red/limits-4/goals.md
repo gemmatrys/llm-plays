@@ -80,9 +80,11 @@
     ("[bag: +1 ...]") are the proof.
 
 Rules:
-- Battles, once CHARMANDER knows EMBER: pick it every fight - press A
-  (the move list opens), DOWN until the arrow sits on EMBER, A. Until
-  EMBER is learned, mashing A (SCRATCH) is fine.
+- Battles, once CHARMANDER knows EMBER: pick it every fight. party=
+  lists your moves in MENU ORDER with PP - the arrow starts on slot 1,
+  so press A (the move list opens), then DOWN once per slot below 1 to
+  reach EMBER, then A. A move at 0 PP says UNUSABLE - pick another.
+  Until EMBER is learned, mashing A (SCRATCH) is fine.
 - Wild battles only start IN grass - pace back and forth inside it.
   Poke Balls only work on WILD Pokemon; thrown in a trainer battle
   they are simply lost.
