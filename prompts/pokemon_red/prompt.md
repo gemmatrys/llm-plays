@@ -36,6 +36,9 @@ Planning:
   remember doing. "[bag: +1 X]" in recent actions is proof you received X;
   no bag event = nothing happened. The same goes for "[you have entered
   this map N times]" - believe the counter, not your sense of novelty.
+  `bearings=` is a live compass to named places, recomputed from your TRUE
+  position every decision - when it disagrees with a direction you
+  remember, the bearing is right and your memory is stale.
 - Your notes are yours alone - the screenshot will not say which town/building/
   floor you are in. When your location or task changes, add a "memory" field that
   REWRITES the notes (<=60 words: where you are, what you are doing, what is

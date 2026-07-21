@@ -50,6 +50,7 @@ class GameLoop:
         self._last_bag: dict[int, int] | None = None
         self._map_visits: dict[int, int] = {}
         self._items_cache: tuple[float, dict[int, str]] | None = None
+        self._wp_cache: tuple[float, dict] | None = None
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
@@ -172,6 +173,16 @@ class GameLoop:
             except Exception:  # noqa: BLE001 — bag context is optional
                 pass
 
+        # live compass: bearings to checkpoint-curated waypoints (HOT file in
+        # the run dir), recomputed from the true position every decision — so
+        # goal text never carries compass directions that rot as the player
+        # moves (a "the Mart is west of you" note is wrong three walks later)
+        if ram_ctx is not None and {"map_id", "pos_x", "pos_y"} <= ram_ctx.keys():
+            b = self._bearings(ram_ctx)
+            if b:
+                ram_ctx = dict(ram_ctx)
+                ram_ctx["bearings"] = b
+
         # stale notes: the model keeps acting on a world description it wrote
         # rooms ago (this repeatedly cost progress). When its notes predate a
         # map change or sit unchanged too long, tell the policy to FORCE a
@@ -281,6 +292,33 @@ class GameLoop:
             return names
         except Exception:  # noqa: BLE001 — names are cosmetic, never fatal
             return self._items_cache[1] if self._items_cache else {}
+
+    def _bearings(self, ram: dict) -> str | None:
+        """Render live bearings to waypoints on the current map, from the run
+        dir's HOT waypoints.yaml. Missing/empty/broken file -> None."""
+        path = self.runlog.dir / "waypoints.yaml"
+        try:
+            mtime = path.stat().st_mtime
+            if self._wp_cache is None or self._wp_cache[0] != mtime:
+                raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+                self._wp_cache = (mtime, raw.get("waypoints") or {})
+            parts = []
+            for name, wp in self._wp_cache[1].items():
+                if wp.get("map") != ram["map_id"]:
+                    continue
+                dx, dy = wp["x"] - ram["pos_x"], wp["y"] - ram["pos_y"]
+                if not dx and not dy:
+                    parts.append(f"{name}: you are here")
+                    continue
+                d = []
+                if dy:
+                    d.append(f"{abs(dy)} {'south' if dy > 0 else 'north'}")
+                if dx:
+                    d.append(f"{abs(dx)} {'east' if dx > 0 else 'west'}")
+                parts.append(f"{name}: " + ", ".join(d))
+            return "; ".join(parts) or None
+        except Exception:  # noqa: BLE001 — bearings are optional context
+            return None
 
     def _read_tilemap(self) -> str:
         """Bulk-read the screen tilemap + map dims + warps and render an ASCII
