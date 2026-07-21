@@ -18,9 +18,9 @@
 
 9. Leave Viridian through the north edge - follow the "gap to Route 2"
    bearing; the old man lets you pass now - onto ROUTE 2. Tall grass
-   shows as " on your map; the walk-to-grass action takes you to the
-   nearest patch, and using it again inside the grass paces you to the
-   next patch - repeat until a battle starts. Battle in
+   shows as " on your map; the walk-to-grass action walks you into the
+   nearest patch and paces several steps inside it - use it again and
+   again until a battle starts. Battle in
    the grass until CHARMANDER reaches level 9 and learns EMBER - the
    game announces it; that announcement is the stamp. While you are
    here, spend up to TWO Poke Balls catching one backup Pokemon
