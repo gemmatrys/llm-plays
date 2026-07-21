@@ -44,8 +44,9 @@ def main() -> None:
                     help="port for the OBS overlay / state.json (0 = off); note "
                          "Windows reserves 8563-8662 for Hyper-V on some machines")
     ap.add_argument("--publish", action="store_true",
-                    help="live-stream goals/memory to the git remote: an async "
-                         "watcher types changes into live/ a chunk per commit")
+                    help="publish the run's state to a live/<run-id> branch "
+                         "forked from main: run goals/memory/learnings plus "
+                         "on-disk prompt/skill edits, one commit per change")
     args = ap.parse_args()
 
     base = Path.cwd()
@@ -119,10 +120,11 @@ def main() -> None:
     publisher = None
     if args.publish:
         from .publish import LivePublisher
-        publisher = LivePublisher(base, runlog)
+        publisher = LivePublisher(base, runlog, profile=profile)
         publisher.start()
-        print("[harness] live-publishing goals/memory to the 'live' branch "
-              "on the git remote (main stays code-only)")
+        print(f"[harness] live-publishing run state + prompt/skill edits to "
+              f"branch live/{runlog.dir.name} (forked from main; main stays "
+              f"the clean base for the next run)")
 
     print(f"[harness] game={profile.name} driver={profile.driver} "
           f"policy={args.policy} run={runlog.dir}")

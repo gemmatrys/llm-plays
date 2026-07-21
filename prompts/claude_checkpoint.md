@@ -22,8 +22,8 @@ advice.
 - `snapshots/` — periodic and stuck/milestone screenshots
 - `progress.md` — your own running summary from previous checkpoints
 - `learnings.md` — run-scoped lessons you record for THIS run (what this run
-  taught, incidents, notable moments). Published to the `live` branch under
-  `<run-id>/` when publishing is on — part of the public progression record
+  taught, incidents, notable moments). Published on the run's `live/<run-id>`
+  branch when publishing is on — part of the public progression record
 - `goals.md` — the strategy file Gemma reads on EVERY decision
 - `memory.md` — Gemma's SELF-maintained notes (where it thinks it is, what it
   thinks it is doing). A false belief here is a classic stuckness cause:
@@ -80,6 +80,12 @@ advice.
    - Each game's prompt.md is fully self-contained BY DESIGN. Do not assume
      other games' prompts share your edits; a fix that applies to every game
      should be noted in progress.md so the human can migrate it.
+   - Your on-disk prompt/skill edits are auto-published to the run's
+     `live/<run-id>` branch (the record of what ran). If an edit is durable —
+     the NEXT clean run needs it, not just this one — ALSO commit those repo
+     files to `main` and push, with a message saying what run taught it.
+     Run-scoped state (the run's goals/memory/learnings) never goes to main;
+     main is the clean base every future run forks from.
 6. **Prune / clean up storage.** Logs you have summarized into progress.md can
    be noted as consumed; stale snapshots can go. Remove skills that the log
    shows are never selected or misfire.
