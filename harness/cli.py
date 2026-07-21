@@ -76,7 +76,8 @@ def main() -> None:
                            timeout_s=profile.ladder.llm_timeout_s,
                            max_plan=profile.ladder.max_plan_len,
                            on_prompt_invalid=_prompt_alarm,
-                           reasoning=args.reasoning)
+                           reasoning=args.reasoning,
+                           state_lines=profile.state_lines)
     else:
         policy = None
 

@@ -64,6 +64,26 @@ ram_map:
 context_ram_map:
   in_battle: "0xD057"   # 0=none, 1=wild, 2=trainer - kills battle-vs-menu misreads
 
+# Natural-language state rendering (user rule: no technical jargon anywhere
+# the model reads). Sentence template with {v}, value->sentence map for
+# enums, ~ hides the field; unlisted keys keep the raw "- key: value" line.
+state_lines:
+  place: "You are in {v}."
+  map_id: ~            # pure jargon; "place" already names the area
+  pos_x: "Your map position, west-east: x = {v}."
+  pos_y: "Your map position, north-south: y = {v} (walking north makes it smaller)."
+  badges: "You have {v} gym badges."
+  money: "You are carrying ¥{v}."
+  party_count: ~       # the team line below already shows every Pokemon
+  party: "Your team: {v}"
+  bag: "Your bag holds: {v}."
+  bearings: "Landmarks from where you stand: {v}."
+  battle_hint: "About this battle: {v}"
+  in_battle:
+    0: "You are NOT in a battle."
+    1: "You are IN a battle with a WILD Pokemon."
+    2: "You are IN a battle with a TRAINER's Pokemon."
+
 # On-screen tile grid -> ASCII walkability map (harness/tilemap.py). addr/cols/
 # rows are SOLID (Gen 1 wTileMap = 20x18 WRAM buffer). player_col/row verified
 # live 2026-07-20 (screen/map alignment confirmed against a screenshot).

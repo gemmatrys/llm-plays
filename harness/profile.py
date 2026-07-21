@@ -169,6 +169,11 @@ class GameProfile:
     ratchet: RatchetConfig = field(default_factory=RatchetConfig)
     escalation: EscalationConfig = field(default_factory=EscalationConfig)
     ram_map: dict[str, int] = field(default_factory=dict)
+    # natural-language rendering of state fields in the model prompt (the
+    # model never sees raw field names): key -> sentence template with {v},
+    # or value->sentence map for enums, or null to hide the field entirely.
+    # Keys with no entry fall back to the raw "- key: value" line.
+    state_lines: dict = field(default_factory=dict)
     # extra RAM shown to the MODEL only (merged into its {ram} view) but NOT
     # milestone-tracked — e.g. in_battle, whose flapping must not spam metrics
     context_ram_map: dict[str, int] = field(default_factory=dict)

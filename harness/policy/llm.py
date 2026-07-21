@@ -70,12 +70,34 @@ def _collapse_counted(behaviors: list[str]) -> list[str]:
     return out
 
 
+def _state_line(key: str, value, spec) -> str | None:
+    """One state field -> the sentence the model reads. spec comes from the
+    profile's state_lines: a {v} template, a value->sentence map (enums), or
+    None to hide the field. Unknown values / absent specs fall back to the
+    raw line rather than dropping information."""
+    if spec is None:
+        return None
+    if isinstance(spec, dict):
+        line = spec.get(value, spec.get(str(value)))
+        return line if line is not None else f"- {key}: {value}"
+    if isinstance(spec, str):
+        return spec.replace("{v}", str(value))
+    return f"- {key}: {value}"
+
+
 def render_prompt(template: str, behaviors: list[str], goals: str,
                   ram: dict | None, recent: list[str], max_plan: int = 8,
-                  memory: str = "", tilemap: str = "") -> str:
+                  memory: str = "", tilemap: str = "",
+                  state_lines: dict | None = None) -> str:
     """Plain string substitution — no logic, no formatting surprises."""
-    ram_text = ("\n".join(f"- {k}: {v}" for k, v in ram.items())
-                if ram else "(unknown)")
+    if ram and state_lines:
+        rendered = (_state_line(k, v, state_lines[k]) if k in state_lines
+                    else f"- {k}: {v}" for k, v in ram.items())
+        ram_text = "\n".join(s for s in rendered if s is not None)
+    elif ram:
+        ram_text = "\n".join(f"- {k}: {v}" for k, v in ram.items())
+    else:
+        ram_text = "(unknown)"
     recent_text = ", ".join(recent[-15:]) if recent else "(none)"
     return (template
             .replace("{behaviors}", ", ".join(_collapse_counted(behaviors)))
@@ -103,7 +125,7 @@ class LLMPolicy:
                  prompt_path: str | Path | None = None,
                  timeout_s: float = 30.0, max_image_px: int = 480,
                  max_plan: int = 8, on_prompt_invalid=None,
-                 reasoning: str = "none"):
+                 reasoning: str = "none", state_lines: dict | None = None):
         self.endpoint = endpoint.rstrip("/")
         self.model = model
         self.library = library
@@ -121,6 +143,7 @@ class LLMPolicy:
         # parser enabled, requests WITHOUT thinking silently lose structured
         # output (vllm#39130) — so keep reasoning on when the server has it on.
         self.reasoning = reasoning
+        self.state_lines = state_lines or {}
         self.last_reason = ""  # the model's "why" — logged and shown on stream
         self.last_thinking = ""  # thinking transcript (logprobs-recovered), logged
         self.last_memory = None  # notes rewrite from the last decision, if any
@@ -156,7 +179,8 @@ class LLMPolicy:
         self.last_prompt_hash = hashlib.sha256(template.encode()).hexdigest()[:12]
         text = render_prompt(template, self.library.names(),
                              obs.goals, obs.ram, obs.recent, self.max_plan,
-                             memory=obs.memory, tilemap=obs.tilemap)
+                             memory=obs.memory, tilemap=obs.tilemap,
+                             state_lines=self.state_lines)
         # forced notes refresh: the loop flags stale notes (map change / age);
         # "memory" becomes schema-REQUIRED so the decoder cannot omit it
         stale_notes = obs.extra.get("stale_notes")

@@ -18,30 +18,36 @@ Planning:
 - Rules are not weighed against each other: the current goal's own text
   outranks the Rules list, and the FIRST rule that fits the screen wins -
   run its drill and stop thinking. A rule you cannot follow right now (item
-  not in bag=, move at 0 PP) does not apply - skip it without discussion.
+  not in your bag, a move at 0 PP) does not apply - skip it without discussion.
 - Same behavior + no change on screen/position = NOT working. Break the loop:
   another direction, another button, a path not tried; get_unstuck last.
 
 Truth signals (these beat your memory AND the screenshot):
-- place= names the building/area you are ACTUALLY in (from the game's map
-  id). Believe it over what the room looks like - interiors look alike.
-- in_battle: 0 = no battle (any menu is a normal menu), 1 wild, 2 trainer.
-- bag= is what you ACTUALLY carry; not listed = you do NOT have it.
-  "[bag: +1 X]" is the only proof you received X; no event = nothing happened.
-- bearings= live compass to named places, recomputed from your true position
-  every decision. When it disagrees with a remembered direction, it is right.
+- "You are in ..." names the building/area you are ACTUALLY in. Believe
+  it over what the room looks like - interiors look alike.
+- The battle line says whether you are in a battle and against what -
+  when it says you are NOT in a battle, any menu on screen is a normal
+  menu, not a battle menu.
+- "Your bag holds" is what you ACTUALLY carry; not listed = you do NOT
+  have it. "[bag: +1 X]" is the only proof you received X; no event =
+  nothing happened.
+- Landmarks are a live compass to named places, recomputed from your true
+  position every decision. When one disagrees with a remembered
+  direction, the landmark is right.
 - "[you have entered this map N times]": believe the counter - you are
   looping and your belief about this place is wrong.
-- party= is your team's REAL state (level, HP, status), and each mon's
+- "Your team" is its REAL state (level, HP, status), and each mon's
   moves IN MENU ORDER with PP - the slot number is how many DOWNs from
   the top of the move list; 0 PP = unusable, pick another. "(LOW!)" or a
   status like POISONED means heal soon: a Pokemon Center cures everything
   free; POISONED also drains HP as you walk. Whiting out (all HP gone)
   teleports you to the last Center - if you wake up somewhere you did not
-  walk to, that is what happened; re-read place= and your bearings.
-- money= is your cash. Buying fails without enough; whiting out HALVES it.
-- pos_x/pos_y = your tile; unchanged after walking = blocked, turn. RAM can
-  be stale on menu/naming screens - there, trust the screenshot.
+  walk to, that is what happened; re-read where you are and your
+  landmarks.
+- Buying fails without enough money; whiting out HALVES what you carry.
+- Your map position is your tile; unchanged after walking = blocked,
+  turn. It can be stale on menu/naming screens - there, trust the
+  screenshot.
 
 Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
 .=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
@@ -89,16 +95,17 @@ A yes/no CONFIRMING something (take/buy/learn/nickname): ONE press, never
 mash - a stray A commits irreversibly. A=YES, B=NO. "Choose a POKeMON"
 listing your OWN party is the party menu, not a gift - B closes it.
 
-Battle: attack_N uses the move in slot N of party= (party= lists EMBER
-third -> attack_3) and plays the whole turn out, ending at the next battle
-menu - no manual cursor work, it finds FIGHT from anywhere in the battle
-menus. flee_battle escapes a wild battle the same way; its "[stopped at a
-choice]" feedback with in_battle still 1 means the escape failed - just
-call it again. Never flee trainers (it always fails). One battle turn =
-ONE behavior: pick attack_N or flee_battle and you are done deciding.
-battle_hint= does the type math for you: who the enemy is, how hard your
-moves hit it, how hard it hits you. "(resisted)" both ways = a slow grind,
-fine if healthy; your moves "(resisted)" while its moves hit hard = flee.
+Battle: attack_N uses the move in slot N of your team line (it lists
+EMBER third -> attack_3) and plays the whole turn out, ending at the next
+battle menu - no manual cursor work, it finds FIGHT from anywhere in the
+battle menus. flee_battle escapes a wild battle the same way; its
+"[stopped at a choice]" feedback while the battle line still says you are
+IN a battle means the escape failed - just call it again. Never flee
+trainers (it always fails). One battle turn = ONE behavior: pick attack_N
+or flee_battle and you are done deciding. "About this battle" does the
+type math for you: who the enemy is, how hard your moves hit it, how hard
+it hits you. "(resisted)" both ways = a slow grind, fine if healthy; your
+moves "(resisted)" while its moves hit hard = flee.
 
 Title screen: press START; CONTINUE resumes, NEW GAME restarts - goals say
 which; NEVER pick anything that deletes/overwrites a save. Naming screens:
