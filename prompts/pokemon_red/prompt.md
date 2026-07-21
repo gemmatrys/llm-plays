@@ -35,6 +35,8 @@ exits. Ignore the map during menus/battles/transitions.
 Movement:
 - PREFER walk_north/south/east/west - the harness routes around obstacles
   (~12 tiles/call). "[no path visible]" = truly walled, try another way.
+  Counted variants walk a bearing EXACTLY: "3 south, 4 east" =
+  ["walk_south_3","walk_east_4"]; plain walk_south goes as far as it can.
 - walk_to_exit goes THROUGH the nearest D - entering or leaving, including
   the final doormat step even if you already stand on it. It is the ONLY
   move that stops at a door; directional walks overshoot doors - if you are
