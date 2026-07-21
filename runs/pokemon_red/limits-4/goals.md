@@ -17,11 +17,14 @@
 19. Walk to the gym's doormat: use
     walk_to_the_doormat_below_the_gym_entrance, repeating until "the
     doormat below the Gym entrance" reads "you are here". It walks the
-    open row west from the Mart's street. The bushes SOUTH of the gym
-    cannot be crossed - if a walk report says "as close as the ground
-    allows", return to the Mart street (goal 18's spot) and repeat
-    from there. DONE when the doormat bearing reads "you are here":
-    mark it done then.
+    open row west from the Mart's street. A CITIZEN strolls this
+    street: when a walk stops early because someone stands in the way,
+    do NOT reroute - people wander off; simply call
+    walk_to_the_doormat_below_the_gym_entrance again, as many times as
+    it takes. Never walk NORTH around the gym (dead end), and do not
+    use walk_to_pewter_mart_door again - goal 18 is finished. The
+    bushes SOUTH cannot be crossed. DONE when the doormat bearing
+    reads "you are here": mark it done then.
 
 20. Enter the gym: use enter_door_above - one behavior, it steps
     through the door above you and checks you are inside. DONE when
