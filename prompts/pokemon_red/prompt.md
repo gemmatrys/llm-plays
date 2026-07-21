@@ -17,6 +17,8 @@ Planning:
   another direction, another button, a path not tried; get_unstuck last.
 
 Truth signals (these beat your memory AND the screenshot):
+- place= names the building/area you are ACTUALLY in (from the game's map
+  id). Believe it over what the room looks like - interiors look alike.
 - in_battle: 0 = no battle (any menu is a normal menu), 1 wild, 2 trainer.
 - bag= is what you ACTUALLY carry; not listed = you do NOT have it.
   "[bag: +1 X]" is the only proof you received X; no event = nothing happened.
