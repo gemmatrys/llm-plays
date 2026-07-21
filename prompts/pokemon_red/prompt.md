@@ -49,8 +49,10 @@ Truth signals (these beat your memory AND the screenshot):
   turn. It can be stale on menu/naming screens - there, trust the
   screenshot.
 - "From this tile you can step" is your true immediate options, and
-  "You cannot step" names what blocks each other way - believe both
-  over the map and the screenshot.
+  "You cannot step" names what blocks each other way - believe them
+  over the screenshot. A person blocking a tile wanders: wait a turn
+  or step around. A ledge crosses ONE way - hop down it going south,
+  never push against it from below.
 
 Map (north up): P=you, D=door/exit, N=person (wanders; wait or go around),
 .=open, #=blocked, v=ledge - ONE-WAY: walking DOWN crosses it (auto-hop),
