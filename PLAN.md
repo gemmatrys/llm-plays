@@ -117,6 +117,22 @@ authority (user), the common success path costs zero LLM calls, and every
 anomaly gets model eyes. Pilot: flee_battle escape confirmation; next:
 done_goal grounding.
 
+**Intent vocabulary (sharpened 2026-07-21, user directive).** The model's
+allowed-behaviors list is a vocabulary of INTENTS, not inputs: the harness
+executes what the model means; the model never hand-drives geometry. The
+boundary test: anything whose button sequence is deterministic once the
+intent is known (menus, shops, item use, battle turns) gets wired as a
+skill the moment its geometry is understood; raw single presses remain
+only for genuinely one-press answers (a yes/no the model must read) and
+novel screens. Evidence: curing one poison via raw presses cost 8
+decisions and a Pokedex detour; the same intent is one `use_antidote`
+call. Conversations stay with the model (knowledge boundary) but a skill
+may CARRY one (`buy_potion_x5` holds the clerk dialogue) when every answer
+is fixed by the intent itself. This-run item skills pin bag slots
+statically (append-order assumption, documented per skill); run-2 makes
+them parameterized — an executor op that resolves an item's bag slot from
+RAM at execution time, so one `use_item` survives bag churn.
+
 ## 3. Interfaces (the seams that make platform/game swaps config, not rewrites)
 
 ```python
