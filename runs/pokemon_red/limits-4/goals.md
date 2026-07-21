@@ -1,6 +1,6 @@
 # Goals
 
-11. Grind until CHARMANDER is LEVEL 14 or higher - party= is the proof.
+11. [DONE] Grind until CHARMANDER is LEVEL 14 or higher - party= is the proof.
     Use walk-to-grass over and over to pace the dark grass and start
     battles; EMBER roasts the bugs here in 1-2 hits. Grab the two free
     items where the "a dropped item" and "another dropped item"
