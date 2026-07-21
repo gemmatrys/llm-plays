@@ -370,3 +370,56 @@ phases don't relearn them. Format: lesson → where it now lives.
   (and not in battle), "memory" flips to schema-REQUIRED for that call and
   the prompt says why — the decoder cannot omit the rewrite. Structured
   output as enforcement, not suggestion.
+
+
+## Grounded context beats taught rules — the attestation suite (2026-07-20 late)
+
+The evening's arc: every wedge traced to the model ACTING ON BELIEF where
+the harness could have supplied truth. The fix each time was another
+attested field in the {ram} view, not more prose rules. The suite as it
+now stands (all HOT data, all live-verified or user-authorized):
+- `place=` (maps.yaml) — three interior misidentifications (house-as-
+  Center, house-as-Mart, lab-as-both) ended the day the map id got a name.
+- `bag=` + "[bag: +/-N X]" events (items.yaml) — killed phantom-parcel
+  beliefs; the model itself now cites "verified by the bag event".
+- `party=` (species.yaml) — nick/species/level/HP/status + (LOW!); heal
+  decisions need visible HP, not remembered battle outcomes.
+- `bearings=` (run waypoints.yaml) — compass directions in goal text rot
+  as the player moves (wrote "Mart is east", model walked west, then the
+  text was wrong); live-computed bearings cannot rot. Map-edge gaps
+  (connections, not warps) each need a waypoint until connection headers
+  are read (run-2 item).
+- `battle_hint=` (types.yaml + species types) — full Gen 1 type math per
+  battle, both directions, worded verdicts. User authorized BULK game
+  knowledge here (internal ids fetched from pret/pokered, chart with Gen 1
+  quirks: BUG<->POISON 2x, GHOST 0x vs PSYCHIC, ICE neutral vs FIRE).
+- Repetition counters ("entered this map N times") because a 20-item
+  recent list can't show recurrence to the model.
+Navigation macro completions from the same arc: counted walks
+(walk_south_3 pairs with bearings), walk_to_exit goes THROUGH doors
+(edge-press + off-screen approach + standing-on-mat), directional walks
+fall back to ONE direct step when BFS has no goal (crosses map-edge
+connections; the fix that finally made town boundaries walkable).
+mash_through_dialogue final form: ALWAYS at least one A (user rule -
+text-state flags keep having per-mode blind spots, wFontLoaded is
+overworld-only), gated follow-through, never presses into a visible
+choice cursor. Ops: goals_complete alarm fires on the LAST-numbered goal
+stamped (instruction-style middle goals never stamp); checkpoint protocol
+= strategy subagents with full context packages + self-initiated session
+rotation.
+
+## NEXT GAP (user thesis, 2026-07-20): step rules between thought and buttons
+
+The model now knows WHERE it is, WHAT it has, and HOW HARD it hits — but
+"grind A to level 12" still decomposes into button-level know-how it does
+not have: walk INTO grass and pace until an encounter fires, re-enter
+grass after each battle, break off to heal at (LOW!), buy Potions/Balls
+as a menu sequence. These are STEP RULES / skills, not context. Direction
+for the next stretch: grow the skills library (skills/pokemon_red/*.yaml
+and nav-level behaviors) with composable errand skills — first candidates:
+`hunt_encounter` (BFS to nearest grass, pace two adjacent grass tiles
+until in_battle flips), `buy_item` (shop menu sequence with ONE-press
+discipline), `heal_at_center` (enter, talk, wait for jingle, leave).
+Grass tile ids are already in tiles.yaml (0x52 overworld); in_battle is
+already read every tick — the primitives exist, the skills just need
+writing and testing on the live run before Brock demands grinding.
