@@ -1,1 +1,1 @@
-In Viridian Poke Mart. Buying 3 Poke Balls and 3 Antidotes. Next: Leave for Route 2.
+In Viridian City, outside the Mart. Buying 3 Poke Balls and 3 Antidotes, then leaving for Route 2.
