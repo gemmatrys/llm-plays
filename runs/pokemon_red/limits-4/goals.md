@@ -10,13 +10,16 @@
    what you say. The road to Route 2 is closed until you finish goals 4-6.
    Step away from him and stop pressing A at him.
 
-4. Get OAK'S PARCEL from the POKeMON MART - the BLUE-ROOF shop with a
-   MART sign, on the EAST side of town, lower half (from the old man:
-   about 8 tiles east and 10 tiles south). It is NOT the small house near
-   the old man - that house has a lady and potted plants and nothing
-   useful; if you are inside it, step onto the doormat and press down to
-   leave, and do not go back in. At the Mart, talk to the clerk behind
-   the counter - he hands you a PARCEL for Professor Oak. Then leave.
+4. YOU ARE IN THE WRONG BUILDING. This room - the one with the lady, the
+   TV and the potted plants - is a private HOUSE, not the Mart. The lady
+   is not a clerk and has NO parcel. You have been here before. Walk to
+   the exit (the doormats are at the BOTTOM-LEFT of this room) and leave.
+
+5. Get OAK'S PARCEL from the real POKeMON MART - the BLUE-ROOF shop with
+   a MART sign. From this house's door, it is about 8 tiles EAST and 10
+   tiles SOUTH. Inside, the clerk stands behind a proper shop counter and
+   hands you a PARCEL for Professor Oak the moment you talk to him. If
+   someone only chats about school or coffee, wrong building - leave.
 
 5. Deliver it: walk SOUTH out of Viridian City and back down Route 1 to
    Pallet Town (retrace the route you came up). Enter Oak's lab (the big
