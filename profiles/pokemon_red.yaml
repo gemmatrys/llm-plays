@@ -83,6 +83,14 @@ tilemap:
   # this HOT file — checkpoints extend it live, no restart needed:
   tiles_file: data/pokemon_red/tiles.yaml
 
+# game-verified inventory: rendered as `bag=` in the model's {ram} view and
+# diffed into "[bag: +1 X]" events; names in the HOT items.yaml (checkpoint
+# harvests unknown ITEM_0xXX ids as they appear)
+bag:
+  count_addr: "0xD31D"   # wNumBagItems
+  items_addr: "0xD31E"   # wBagItems: (id, qty) pairs
+  names_file: data/pokemon_red/items.yaml
+
 driver_opts:
   host: 127.0.0.1
   port: 8765

@@ -346,6 +346,18 @@ phases don't relearn them. Format: lesson → where it now lives.
   as an open-menu signal; the on-screen cursor glyph is the honest one.
   Still to verify live: 0xED presence during an actual menu (first battle
   or shop will show it). The old blind burst survives only in the fish.
+- **The model cannot identify repeated structures or verify its own event
+  claims — the harness must count and attest**: it believed "I have the
+  parcel" (never obtained), "I healed" (never healed), and re-entered the
+  same wrong building without recognizing it. Fix has two halves. (1)
+  GROUND-TRUTH ATTESTATION: the bag (wNumBagItems/wBagItems) renders into
+  the {ram} view as `bag=` and diffs into "[bag: +1 OAK'S PARCEL
+  (game-verified)]" events — prompt teaches "no bag event = it did not
+  happen"; item names in HOT data/pokemon_red/items.yaml (unknown ids
+  self-tag as ITEM_0xXX for checkpoint harvest, same pattern as tiles).
+  (2) REPETITION COUNTERS: per-map visit counts injected at >=3 ("[you
+  have entered this map N times...]") — a 31B model uses an explicit
+  counter far better than it infers recurrence from a 20-item recent list.
 - **Stale notes don't fix themselves — force the rewrite at the decoder**:
   the model happily acts for rooms on notes it wrote in another building
   ("healed at the Center" written inside a random house). Asking nicely in

@@ -7,6 +7,8 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
+import yaml
+
 from . import navigate
 from .behaviors import random_mash_steps
 from .executor import Executor
@@ -44,6 +46,10 @@ class GameLoop:
         # decisions since — feeds the forced-"memory" schema (policy/llm.py)
         self._notes_map: int | None = None
         self._notes_age = 0
+        # verified-inventory + repeated-structure state
+        self._last_bag: dict[int, int] | None = None
+        self._map_visits: dict[int, int] = {}
+        self._items_cache: tuple[float, dict[int, str]] | None = None
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._last_save_ts = 0.0
         self._last_snapshot_ts = 0.0
@@ -112,6 +118,15 @@ class GameLoop:
                 # visible in the model's recent-actions context: bouncing
                 # between two maps = walking into a door, and now it can see it
                 self._recent.append(f"[entered map {ram['map_id']}]")
+                # repeated-structure counter: the model cannot infer "I keep
+                # coming back here" from a 20-item action list, so count for it
+                n = self._map_visits.get(ram["map_id"], 0) + 1
+                self._map_visits[ram["map_id"]] = n
+                if n >= 3:
+                    self._recent.append(
+                        f"[you have entered this map {n} times - if you are "
+                        "not making progress here, your belief about this "
+                        "place is probably wrong]")
             if any(k not in ("pos_x", "pos_y") for k in changed):
                 # milestone events (badge gained, map changed, ...) — raw
                 # material for the progress curves; position isn't a milestone
@@ -130,6 +145,31 @@ class GameLoop:
                 ram_ctx = {**ram,
                            **self.extras.read_ram(self.profile.context_ram_map)}
             except Exception:  # noqa: BLE001 — context extras are optional
+                pass
+
+        # bag = game-VERIFIED inventory in the model's {ram} view, plus delta
+        # events. Beliefs like "I should have the parcel now" die against a
+        # displayed "bag=(empty)"; item gains/losses are the ground-truth
+        # spine that self-narrated events ("I healed", "I delivered") lack.
+        if ram_ctx is not None and self.profile.bag is not None \
+                and self.extras is not None:
+            try:
+                bag = self._read_bag()
+                names = self._item_names()
+                ram_ctx = dict(ram_ctx)
+                ram_ctx["bag"] = ", ".join(
+                    f"{names.get(i, f'ITEM_0x{i:02x}')} x{q}"
+                    for i, q in bag.items()) or "(empty)"
+                if self._last_bag is not None and bag != self._last_bag:
+                    for i in set(bag) | set(self._last_bag):
+                        d = bag.get(i, 0) - self._last_bag.get(i, 0)
+                        if d:
+                            nm = names.get(i, f"ITEM_0x{i:02x}")
+                            self._recent.append(
+                                f"[bag: {'+' if d > 0 else ''}{d} {nm} "
+                                "(game-verified)]")
+                self._last_bag = bag
+            except Exception:  # noqa: BLE001 — bag context is optional
                 pass
 
         # stale notes: the model keeps acting on a world description it wrote
@@ -211,6 +251,36 @@ class GameLoop:
         self._watch_stuckness(frame, fhash, ram,
                               [b.name for b in decision.behaviors[:executed]])
         self._periodic_snapshot(frame)
+
+    def _read_bag(self) -> dict[int, int]:
+        """Read the bag as {item_id: qty} (Gen 1: count byte + (id,qty)
+        pairs). Caller guards profile.bag/extras and catches errors."""
+        bc = self.profile.bag
+        n = min(self.extras.read_block(bc.count_addr, 1)[0], bc.max_items)
+        if not n:
+            return {}
+        raw = self.extras.read_block(bc.items_addr, 2 * n)
+        return {raw[2 * i]: raw[2 * i + 1] for i in range(n)}
+
+    def _item_names(self) -> dict[int, str]:
+        """HOT id->name table (data/<game>/items.yaml, same checkpoint-harvest
+        pattern as tiles.yaml). Unknown ids display as ITEM_0xXX — a tag the
+        checkpoint sees in logs and names once identified."""
+        bc = self.profile.bag
+        if bc.names_file is None:
+            return {}
+        path = self.base / bc.names_file
+        try:
+            mtime = path.stat().st_mtime
+            if self._items_cache is not None and self._items_cache[0] == mtime:
+                return self._items_cache[1]
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+            names = {(int(k, 0) if isinstance(k, str) else int(k)): str(v)
+                     for k, v in (raw.get("items") or {}).items()}
+            self._items_cache = (mtime, names)
+            return names
+        except Exception:  # noqa: BLE001 — names are cosmetic, never fatal
+            return self._items_cache[1] if self._items_cache else {}
 
     def _read_tilemap(self) -> str:
         """Bulk-read the screen tilemap + map dims + warps and render an ASCII

@@ -1,0 +1,11 @@
+# Item id -> display name for the model's game-verified `bag=` view.
+# HOT FILE: reloaded on change, no harness restart. Checkpoints append
+# entries as items appear (an unknown id renders as ITEM_0xXX in the bag
+# view and in "[bag: +1 ITEM_0xXX]" events — name it here once identified
+# from the screenshot/shop context). Only LIVE-OBSERVED or high-confidence
+# Gen 1 ids; do not bulk-import unverified tables.
+items:
+  "0x04": POKE BALL
+  "0x05": TOWN MAP
+  "0x14": POTION
+  "0x46": OAK'S PARCEL

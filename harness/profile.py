@@ -90,6 +90,7 @@ class TilemapConfig:
     # warps = doors/stairs/holes; count then 4-byte entries (y, x, destWarp, destMap)
     warp_count_addr: int = 0xD3AE  # wNumberOfWarps
     warp_entry_addr: int = 0xD3AF  # wWarpEntries
+    # (bag lives in its own config on GameProfile — see BagConfig)
     # dialogue state, for the executor's closed-loop text advance
     # (op "advance_text"): font_addr bit 0 is set while a text box is open
     # (wFontLoaded — verified live 2026-07-20: 1 through the whole nurse
@@ -99,6 +100,19 @@ class TilemapConfig:
     font_addr: int = 0xCFC4        # wFontLoaded
     menu_cursor_tile: int = 0xED   # ▶
     max_text_presses: int = 12
+
+
+@dataclass
+class BagConfig:
+    """Game-verified inventory: count byte + (id, qty) pairs (Gen 1 layout).
+    Rendered into the model's {ram} view as `bag=` and diffed into
+    "[bag: +N ITEM]" events — the ground-truth spine that self-narrated
+    events ("I delivered it") lack. Names come from a HOT yaml harvested by
+    checkpoints (unknown ids show as ITEM_0xXX)."""
+    count_addr: int = 0xD31D       # wNumBagItems
+    items_addr: int = 0xD31E       # wBagItems
+    max_items: int = 20
+    names_file: str | None = None  # data/<game>/items.yaml
 
 
 @dataclass
@@ -117,6 +131,7 @@ class GameProfile:
     # milestone-tracked — e.g. in_battle, whose flapping must not spam metrics
     context_ram_map: dict[str, int] = field(default_factory=dict)
     tilemap: TilemapConfig | None = None
+    bag: BagConfig | None = None
     driver_opts: dict = field(default_factory=dict)
     # Gemma-facing prompts are NOT part of the profile — see harness/prompts.py.
     # Profiles are COLD config: loaded once at startup; changing one requires
@@ -126,10 +141,17 @@ class GameProfile:
     @classmethod
     def load(cls, path: str | Path) -> "GameProfile":
         raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+        _hex = lambda v: int(v, 0) if isinstance(v, str) else v  # noqa: E731
         for key, sub in (("ladder", LadderConfig), ("ratchet", RatchetConfig),
                          ("escalation", EscalationConfig)):
             if key in raw:
                 raw[key] = sub(**raw[key])
+        if raw.get("bag"):
+            bg = dict(raw["bag"])
+            for k in ("count_addr", "items_addr"):
+                if k in bg:
+                    bg[k] = _hex(bg[k])
+            raw["bag"] = BagConfig(**bg)
         # RAM addresses in YAML may be hex strings
         raw["ram_map"] = {k: int(v, 0) if isinstance(v, str) else v
                           for k, v in raw.get("ram_map", {}).items()}
@@ -137,7 +159,6 @@ class GameProfile:
                                   for k, v in raw.get("context_ram_map", {}).items()}
         if raw.get("tilemap"):
             tm = dict(raw["tilemap"])
-            _hex = lambda v: int(v, 0) if isinstance(v, str) else v  # noqa: E731
             tm["addr"] = _hex(tm["addr"])
             tm["walkable"] = [_hex(v) for v in tm.get("walkable", [])]
             if "tileset_addr" in tm:
