@@ -10,7 +10,10 @@
 17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
 18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
-    bearing). Inside, a JR TRAINER blocks the way - beat him, then if
+    bearing). ENTERING: walks stop BESIDE a door, never on it - get
+    the door bearing down to 1 tile, then ONE single arrow press
+    (UP/LEFT/RIGHT toward it) steps onto the mat and inside. Do NOT
+    use walk_to_exit out here - it keeps walking you into the Mart. Inside, a JR TRAINER blocks the way - beat him, then if
     you are below half HP step out, heal at the Center and come back
     (beaten trainers stay beaten). Walk to BROCK (the "Brock" bearing)
     and talk to him. His GEODUDE (L12) and ONIX (L14) resist EMBER -
