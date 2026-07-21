@@ -170,10 +170,23 @@ phases don't relearn them. Format: lesson → where it now lives.
   own prompt.md over-corrected on this (called the naming screen a "TRAP",
   told the model never to mash A there) which CONTRADICTED goals.md's
   original, correct instruction and likely caused indecision rather than
-  helping. Corrected 2026-07-20: prompt.md now says mash_a is fine there; B
-  still backs out of the letter grid if the model lands inside it; the
+  helping. Corrected 2026-07-20: prompt.md now says mash_a is fine there; the
   scripted_fallback rotation keeps press_B (generically useful for menus, not
-  naming-specific) so a brain outage still has an escape option. Lesson: when
+  naming-specific) so a brain outage still has an escape option.
+- **B does NOT exit the Gen 1 letter grid** — it only deletes typed letters
+  (with none typed it does nothing). The earlier prompt.md claim "B backs out
+  to the preset list" was wrong and wedged `limits-4` in a B/DOWN/A loop on
+  the naming grid for ~15 min (model dutifully followed the false fact every
+  decision; rung 1 healthy throughout, so no alarm fired — and the stagnation
+  monitor was NOT closing in: each cycle typed/deleted different letters at
+  drifting cursor positions, minting novel phash variants that kept resetting
+  the 20-min novelty timer. Progress-free novelty is a stuckness-detector
+  blind spot; see the stuckness callouts). Correct escape:
+  A (type any letter), START (cursor jumps to ED), A (confirm) — verified
+  live, the wedged run escaped within two decisions of the hot prompt/goals
+  edit. Lesson: game-mechanics claims in prompt.md are load-bearing; ground
+  them like the warp coordinates (produce the actual transition once) instead
+  of asserting from memory. → prompt.md Screens bullet + goals seed. Lesson: when
   a rare bad outcome is actually harmless (name doesn't matter), don't build
   prompt rules around avoiding it — check what the goal actually cares about
   before treating a symptom as a problem.

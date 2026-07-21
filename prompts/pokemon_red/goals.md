@@ -3,7 +3,9 @@
 0. Boot: at the title screen press START (or boot_mash). Main menu: this is a
    FRESH run, choose NEW GAME. (Once this run has saved, choose CONTINUE.)
    Mash A through Professor Oak's intro. Naming screens: DOWN to a preset
-   name then A - never NEW NAME.
+   name then A - never NEW NAME. If you are IN the letter grid: B cannot
+   exit it. Press A (types a letter), then START (jumps to ED), then A
+   (confirms). Any name is fine.
 
 Default: when text or menus are on screen, mash A. It advances dialogue,
 picks the first option, and in battle fights with the first move.

@@ -33,10 +33,11 @@ Screens:
 - Title / "Press Start" (also after a reset): press START or boot_mash. Main
   menu: CONTINUE resumes a save, NEW GAME restarts - goals say which. NEVER pick
   anything that deletes or overwrites a save.
-- Naming screen (letter grid, or presets like RED/ASH): mash_a is fine here -
-  it picks the highlighted preset name and confirms; the exact name does not
-  matter. If you end up inside the letter grid instead, B backs out to the
-  preset list. Cannot exit at all: get_unstuck.
+- Naming screen, preset list (RED/ASH/JACK): mash_a is fine here - it picks
+  the highlighted preset and confirms; the exact name does not matter. Letter
+  grid (after NEW NAME): B only DELETES typed letters - it does NOT exit. To
+  finish: press_A (types a letter - any name is fine), press_START (cursor
+  jumps to ED), press_A (confirms). Do not loop B/DOWN/A here.
 - Overworld: UP/DOWN/LEFT/RIGHT walk a tile; A talks to who/what you face; walk
   onto doors/stairs to enter.
 - Dialogue (text at bottom): A advances; mash_through_dialogue for long speeches.
