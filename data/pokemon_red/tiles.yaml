@@ -23,6 +23,11 @@ tilesets:
     walkable: ["0x00","0x10","0x1b","0x20","0x21","0x23","0x2c","0x2d","0x2e",
                "0x30","0x31","0x33","0x39","0x3c","0x3e","0x52","0x54","0x58","0x5b"]
     portal: []
+    # `grass` = the tileset's wild-encounter grass tile, from the pokered
+    # tileset headers (authoritative, one per tileset). Renders " on the
+    # map; walk_to_grass BFS-walks to the nearest patch. When the FOREST
+    # tileset (0x03) gets harvested, its grass id is 0x20 (same source).
+    grass: ["0x52"]
     # one-way: hop DOWN across from above (renders v; BFS jumps them), solid
     # from below. LIVE-VERIFIED ONLY — 0x55 was added from recalled pokered
     # data and turned out to be a FENCE (hard obstacle, user-confirmed
