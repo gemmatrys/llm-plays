@@ -1,1 +1,1 @@
-In Pewter City, leaving a house to head towards the Gym's west entrance.
+In Pewter City, heading to the Pewter Gym's west entrance to challenge Brock.
