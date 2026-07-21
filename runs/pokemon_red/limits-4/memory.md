@@ -1,1 +1,1 @@
-In Viridian Forest, heading to the top-left exit to reach Pewter City. Charmander is L14, but Ember is out of PP. Next: exit forest and head to Pewter City Center to heal.
+In Viridian Forest, heading to the top-left exit to reach Pewter City. Charmander is L14, Ember is 0 PP. Next: exit forest, go through the gate, and head to Pewter Pokemon Center to heal.
