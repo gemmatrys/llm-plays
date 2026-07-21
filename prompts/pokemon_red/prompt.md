@@ -49,9 +49,10 @@ Screens:
   jumps to ED), press_A (confirms). Do not loop B/DOWN/A here.
 - Overworld: PREFER walk_north / walk_south / walk_east / walk_west - the
   harness computes the path around trees, ledges, and people for you (up to
-  ~12 tiles per call). walk_to_exit walks onto the nearest D - use it to
-  ENTER buildings too, not just to leave rooms: it is the ONLY move that
-  stops ON a door. Directional walks aim as far as possible and will carry
+  ~12 tiles per call). walk_to_exit goes all the way THROUGH the nearest D -
+  entering a building or leaving a room; it handles the final step off a
+  doormat by itself, even when you are already standing on one. It is the
+  ONLY move that targets a door. Directional walks aim as far as possible and will carry
   you PAST a door, never onto it - if you keep circling a building, that is
   why. Do NOT plan routes yourself tile by tile - pick the direction and go;
   if it answers "[no path visible]" that way is truly walled, try another.

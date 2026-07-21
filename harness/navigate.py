@@ -78,6 +78,26 @@ def _route(parents, goal) -> list[str]:
     return list(reversed(seq))
 
 
+def _edge_press(wx: int, wy: int, map_wh: tuple[int, int] | None) -> str | None:
+    """The outward button for a warp sitting on a map edge, or None for an
+    interior warp. Edge doormats (e.g. the Poke Center's) don't fire on
+    step-on — the player must walk OFF the edge from the mat; instant warps
+    (house mats, stairs) fire during the transition anyway, so an extra
+    outward press after them is harmless (buttons are ignored mid-warp)."""
+    if map_wh is None:
+        return None
+    mw, mh = map_wh
+    if wy >= mh - 1:
+        return "DOWN"
+    if wy <= 0:
+        return "UP"
+    if wx <= 0:
+        return "LEFT"
+    if wx >= mw - 1:
+        return "RIGHT"
+    return None
+
+
 def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             npcs: list[tuple[int, int]],
             map_wh: tuple[int, int] | None,
@@ -89,12 +109,26 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         return None
     start = (cfg.player_col // 2, cfg.player_row // 2)
     warp_blocks: set[tuple[int, int]] = set()
+    warp_at: dict[tuple[int, int], tuple[int, int]] = {}
     if player is not None:
         px, py = player
         for wx, wy in warps:
             sc, sr = cfg.player_col + (wx - px) * 2, cfg.player_row + (wy - py) * 2
             if 0 <= sc < cfg.cols and 0 <= sr < cfg.rows:
                 warp_blocks.add((sc // 2, sr // 2))
+                warp_at[(sc // 2, sr // 2)] = (wx, wy)
+
+    # already STANDING on a warp (walk_to_exit used to answer "no path" here,
+    # wedging the model on doormats): the exit is one outward press away
+    if (name == "walk_to_exit" and player is not None
+            and (px, py) in set(warps)):
+        press = _edge_press(px, py, map_wh)
+        if press is not None:
+            # hold long enough to turn AND walk (a short tap only turns)
+            return Behavior(name=name, source="builtin",
+                            steps=[Step(button=press, hold_frames=16,
+                                        wait_frames=8)])
+
     grid = _block_grid(tiles, cfg, walkable, npcs, map_wh, player, warp_blocks)
     grid[start[1]][start[0]] = True  # you can always stand where you stand
     dist, parents = _bfs(grid, start)
@@ -115,9 +149,16 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                                              dist[b]))
     if goal is None:
         return None
-    seq = _route(parents, goal)[:MAX_STEPS]
+    full = _route(parents, goal)
+    seq = full[:MAX_STEPS]
     if not seq:
         return None
-    return Behavior(name=name, source="builtin",
-                    steps=[Step(button=d, hold_frames=8, wait_frames=8)
-                           for d in seq])
+    steps = [Step(button=d, hold_frames=8, wait_frames=8) for d in seq]
+    # finish the job: after stepping onto an edge warp, walk off the edge —
+    # only when the route actually reaches the warp (not truncated)
+    if (name == "walk_to_exit" and len(full) <= MAX_STEPS
+            and goal in warp_at):
+        press = _edge_press(*warp_at[goal], map_wh)
+        if press is not None:
+            steps.append(Step(button=press, hold_frames=16, wait_frames=8))
+    return Behavior(name=name, source="builtin", steps=steps)
