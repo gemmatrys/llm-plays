@@ -200,6 +200,18 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             goal = min(cands, key=lambda b: (-sign * (b[axis] - start[axis]),
                                              dist[b]))
     if goal is None:
+        if name != "walk_to_exit":
+            # BFS sees nothing reachable that way, but the world continues
+            # past the map edge (town/route connections live there — they
+            # are not warps and render as nothing). Fall back to ONE direct
+            # step: at an edge it crosses the connection; against a real
+            # wall it bumps once and "[move blocked]" says so. Hold long
+            # enough to turn AND walk.
+            btn = {"walk_north": "UP", "walk_south": "DOWN",
+                   "walk_west": "LEFT", "walk_east": "RIGHT"}[name]
+            return Behavior(name=orig, source="builtin",
+                            steps=[Step(button=btn, hold_frames=16,
+                                        wait_frames=8)])
         return None
     full = _route(parents, goal)
     seq = full[:MAX_STEPS]
