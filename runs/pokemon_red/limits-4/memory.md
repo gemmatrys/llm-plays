@@ -1,1 +1,1 @@
-In Pewter City, outside the Mart. Walking to the gym's doormat (Goal 19). Next: Enter the gym (Goal 20).
+In Pewter City, moving south to bypass the gym wall and reach the doormat (Goal 19). Next: Enter gym (Goal 20).
