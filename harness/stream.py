@@ -132,12 +132,13 @@ OVERLAY_HTML = """<!DOCTYPE html>
   .label { margin-top:10px; font-size:11px; letter-spacing:.12em;
            text-transform:uppercase; color:var(--dim); }
   /* bounded "stream of thought": fixed window, newest at the bottom, older
-     lines scroll up and fade under the top mask. Without the height cap a long
-     transcript (now real — up to ~2k chars) would blow up the whole overlay. */
-  #thinking { height:7.2em; font-size:14px; color:var(--fg); opacity:.97;
+     lines scroll up and fade under the top mask. Tall on purpose — the
+     thinking IS the show — but still capped so a long transcript (up to ~4k
+     tokens) can't blow up the whole overlay. */
+  #thinking { height:21.6em; font-size:14px; color:var(--fg); opacity:.97;
               overflow:hidden; white-space:pre-wrap; word-break:break-word;
-              -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 1.5em);
-              mask-image:linear-gradient(to bottom,transparent 0,#000 1.5em); }
+              -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 3em);
+              mask-image:linear-gradient(to bottom,transparent 0,#000 3em); }
   #thinking.offline { height:auto; color:var(--dim); font-style:italic;
               opacity:.7; -webkit-mask-image:none; mask-image:none; }
   #why { font-size:14px; color:var(--fg); margin-top:2px; }
