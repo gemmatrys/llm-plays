@@ -1,1 +1,1 @@
-Leaving Viridian Forest via the top-left exit to head toward Pewter City (Goal 12).
+In Viridian Forest, heading to the top-left exit to reach Pewter City (Goal 12). Next: Route 2, then Pewter City Pokemon Center to heal.
