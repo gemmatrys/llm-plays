@@ -7,27 +7,7 @@
 15. [DONE] Walk Route 2 north into Pewter City.
 16. [DONE] Heal at the Pewter Center - EMBER's PP is refilled.
 
-17. [DONE] Buy 5 POTIONs at the Pewter MART (the "Pewter Mart door" bearing).
-    Getting there, from outside the Center: NEVER use walk_to_exit
-    while you are outdoors - outdoors it walks INTO the nearest
-    building door, which is how you have re-entered the Center four
-    times. Use plain walks only. First walk EAST to the "east of the
-    Center" landmark; only then follow the "Pewter Mart door" bearing
-    (its east part before its north part - the Center door sits in the
-    column just north of you and swallows northbound walks). Inside, use walk_to_counter, then
-    buy_potion_x5 - it holds the
-    whole conversation and purchase, one behavior, 1500 total. If the
-    bag event shows FEWER than you asked (a "[bag: +1 POTION]" for a
-    x5 ask), just call it again - repeat until the bag line reads
-    POTION x5, then mark done. Your money covers it. SHOP SCREEN TRAP:
-    when the BUY/SELL/QUIT box and the item list show AT THE SAME
-    TIME, the active menu is BUY/SELL/QUIT - your DOWNs move ITS
-    selection, not the item cursor, even though the item list shows an
-    arrow. Press A on BUY first; only then do DOWNs move the item
-    cursor. Buying by hand: A on POTION, then UP presses set the
-    count (x1 -> x5 needs four), A, then ONE A on the price yes/no.
-    If you cannot afford it, move on without buying. Skip the MUSEUM -
-    it only costs money.
+17. [DONE] Buy POTIONs at the Pewter Mart - the bag holds 6.
 
 18. Win the BOULDERBADGE at the Pewter GYM (the "Pewter Gym door"
     bearing). Inside, a JR TRAINER blocks the way - beat him, then if
