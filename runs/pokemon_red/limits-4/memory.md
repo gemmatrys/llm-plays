@@ -1,1 +1,1 @@
-In Pewter Pokemon Center. Goal 19: Walk to the gym's doormat. Next: exit the center, then use walk_to_pewter_center_door to position for the gym.
+In Pewter City. Goal 19: Walk to the gym's doormat. Next: walk to the street west of the center.
