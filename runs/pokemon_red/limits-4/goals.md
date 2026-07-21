@@ -25,6 +25,9 @@
     slot 1) - these bugs fall in 1-2 hits. Only if SCRATCH also reads
     UNUSABLE, flee in ONE reply: chain press_B, press_DOWN,
     press_RIGHT, press_A - that lands the arrow on RUN and confirms.
+    Your HP stays under half until that heal - there are no POTIONs
+    in the bag, so Potion rules do not apply on this walk; these bugs
+    cannot beat a level 14 CHARMANDER, just keep moving north.
     Stamp when the nurse heals you and place= says Pewter Pokemon
     Center.
 
