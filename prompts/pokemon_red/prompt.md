@@ -51,11 +51,11 @@ struggling silently costs hours. Play honestly, flag freely.
 ## Allowed behaviors
 {behaviors}
 
-## Your notes (you wrote these; trust but verify against the screen)
-{memory}
-
 ## Your quests
 {goals}
+
+## Your notes (you wrote these; trust but verify against the screen)
+{memory}
 
 ## Known game state
 {ram}
