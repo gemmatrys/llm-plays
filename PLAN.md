@@ -55,7 +55,13 @@ judge. So navigation splits three ways:
   DONE line in the state vocabulary ("DONE when your location reads Route
   2: mark it done then") — and procedures over coordinates ("take the FIRST
   opening WEST a walk report shows"): two coordinate guesses were falsified
-  live in one forest; the procedure fixed both. Run-2: ingest pret
+  live in one forest; the procedure fixed both. Complex approaches get
+  ordered CARDINAL SUB-STEPS inside the goal, each anchored to a landmark
+  bearing ("(a) WEST until X reads 2 or less; (b) NORTH until Y; (c) EAST
+  along the row - never step south, that is the ledge") — decided
+  2026-07-22 over the alternative of a wired move-to-<place> macro, which
+  the user rejected as cheating: the model must still walk the route; the
+  checkpoint provides the legs and the landmarks, never the walking. Run-2: ingest pret
   walkability grids so waypoint anchors are validated (unwalkable -> snap
   to nearest walkable) instead of guessed, and map-connection headers so
   edge crossings are announced as facts the game itself shows.
