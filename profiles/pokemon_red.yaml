@@ -86,7 +86,6 @@ state_lines:
   edges: "{v}"         # already a full sentence from the harness
   can_move: "{v}"      # already a full sentence from the harness
   last_move: "Your last movement: {v}."
-  route: "{v}"         # multi-line step tracker, already sentences
   in_battle:
     0: "You are NOT in a battle."
     1: "You are IN a battle with a WILD Pokemon."
