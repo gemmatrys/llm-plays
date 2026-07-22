@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from . import items, navigate
+from . import items, navigate, route
 from .behaviors import random_mash_steps
 from .executor import Executor
 from .interfaces import Extras, Eyes, Unsupported
@@ -54,6 +54,8 @@ class GameLoop:
         self._moves_cache: tuple[float, dict[int, str]] | None = None
         self._wp_cache: tuple[float, dict] | None = None
         self._marks: dict[str, tuple[int, int]] = {}  # slug -> map coords
+        # route progress latches: (route.yaml mtime, {goal: set(step idx)})
+        self._route_state: tuple[float, dict[int, set[int]]] | None = None
         self._maps_cache: tuple[float, dict[int, str]] | None = None
         self._marts_cache: tuple[float, dict[int, list[str]]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
@@ -261,6 +263,31 @@ class GameLoop:
             ram_ctx = dict(ram_ctx)
             ram_ctx["place"] = names.get(
                 ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
+
+        # route progress (user 2026-07-22): the model cannot map its
+        # position to "which sub-step am I on" - the harness checks each
+        # declared step against map data, latches progress, and SAYS the
+        # current step in a state line
+        if ram_ctx is not None and not ram_ctx.get("in_battle"):
+            rp = self.runlog.dir / "route.yaml"
+            try:
+                mtime = rp.stat().st_mtime
+                if self._route_state is None or self._route_state[0] != mtime:
+                    self._route_state = (mtime, {})
+                routes = route.load(rp)
+                goal_n = route.current_goal(self.runlog.goals())
+                if goal_n is not None and goal_n in routes:
+                    wps = (self._wp_cache[1] if self._wp_cache else {})
+                    latched = self._route_state[1].setdefault(goal_n, set())
+                    latched, cur = route.progress(
+                        routes[goal_n], ram_ctx, wps, latched)
+                    ram_ctx = dict(ram_ctx)
+                    ram_ctx["route"] = route.render(
+                        goal_n, routes[goal_n], cur)
+            except FileNotFoundError:
+                pass
+            except Exception:  # noqa: BLE001 — route context is optional
+                pass
 
         # edge awareness (user 2026-07-21): the model cannot tell a map edge
         # from an ordinary wall — say plainly when it stands at or near one.

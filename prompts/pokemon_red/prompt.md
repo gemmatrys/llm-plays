@@ -53,6 +53,9 @@ Truth signals (these beat your memory AND the screenshot):
   over the screenshot. A person blocking a tile wanders: wait a turn
   or step around. A ledge crosses ONE way - hop down it going south,
   never push against it from below.
+- "Your route" tracks the current goal's sub-steps FOR you: the step
+  marked YOU ARE ON THIS STEP is the only one to work on. Steps marked
+  DONE stay done - never redo or second-guess them.
 
 Movement:
 - PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
