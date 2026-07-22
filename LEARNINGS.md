@@ -4,6 +4,37 @@ What the first real runs taught us. Most items are already encoded in code,
 prompts, or config; this file is the narrative record so checkpoints and future
 phases don't relearn them. Format: lesson → where it now lives.
 
+LOAD-BEARING INDEX (one line per section, for checkpoints under alarm
+pressure — the full accounts are below, in chronological order):
+- Model & serving: serve base `-it` models with online quant; MAXLEN is free
+  up to the KV pool; thinking needs streaming.
+- ASCII map (retired): collision is per-tileset, per-block bottom-left; warp
+  coords are (y,x); ground-truth coordinate systems by producing a transition.
+- Behaviors/fish: randomized bursts beat fixed sequences; mash short+bursty.
+- Game knowledge: door trap; A-mash is gravity; ground mechanics claims live
+  (the naming-grid B lie cost 15 min).
+- Prompting economics: latency scales with what must be INFERRED — feed
+  conclusions; stale guidance is worse than none; never make the model do
+  spatial search; encourage trial and error.
+- Charmander incident: never mash a committing yes/no; second savestate slot.
+- Harness & ops: every outage class needs its own alarm; goals-file edits are
+  the highest-leverage unstick tool; verify-every-step restarts.
+- Doors & grounding: walks stop beside doors; false stamps are routine —
+  validate against RAM; the harness must count/attest (bag events, visit
+  counters); force stale-notes rewrites at the decoder.
+- Attestation suite: place/bag/party/bearings/battle_hint — grounded context
+  beats taught rules.
+- Skills thesis: wire POSITIONING and fixed geometry, keep conversations with
+  the model under the choice-stop guard; warp tables lie about enterability.
+- Conflict economics: inapplicable rules cost +47% latency — rule-silencing
+  lines and yield clauses; battle menus are geometry (attack_N skills);
+  tripwire-judge; trajectory detectors (the model cannot see its own loop).
+- Sentences beat structure: no jargon anywhere the model reads; micro-goals
+  with DONE lines; probe tiles after two failed prose fixes.
+- Cleanup & quest feed (2026-07-22): harness ingests the checkpoint-authored
+  quest tree; prune ban-laden behaviors; fetch data, don't recall it; state
+  serving stays generic.
+
 ## Model & serving — QAT vs base+online-quant (2026-07-20)
 
 - **Every QAT/pre-quantized checkpoint hit an untested XPU kernel path and
@@ -104,10 +135,12 @@ phases don't relearn them. Format: lesson → where it now lives.
   `wCurMapWidth` and marking anything beyond them `#` stops the model from
   ever thinking it can walk into the border void.
 - **The portal marker + a relative-direction summary line (not just the grid)
-  is what actually helps** — "You are not on an exit. Exits: 2 left." answers
-  both "am I on a portal" and "which way do I walk" using only reliable RAM
-  (player pos + warp table), independent of the still-imperfect walkability
-  tileset data.
+  was what actually helped** — "You are not on an exit. Exits: 2 left."
+  answered both "am I on a portal" and "which way do I walk" from reliable RAM
+  alone. RETIRED with the map removal (2026-07-21): the string is still built
+  but no prompt placeholder renders it — the same information now reaches the
+  model via can_move's "(through a doorway)" and bearings. Backlog: drop the
+  dead render (keep the tilemap READ — it feeds _nav for BFS/can_move).
 
 ## Behaviors: step_factory for randomization, and the fish should DO things
 

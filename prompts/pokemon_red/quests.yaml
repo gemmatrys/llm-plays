@@ -11,9 +11,15 @@
 #   escalations); COACH note -> status coach. Checkpoint validates
 #   against each act's `verify` and edits this file live.
 # - Acts 1-10 quests are DRAFTS from plans/pokemon_red/master-plan.md:
-#   refine each act at its act_stamped alarm BEFORE it goes live —
-#   facts marked GUESS in the master plan stay guesses here until
-#   fetched from pret or verified live. Structure over correctness.
+#   refine act N+1 while act N is in its GYM quest (the natural pause) —
+#   acts AUTO-ADVANCE on the closing stamp, so an unrefined act plays
+#   its GUESS facts live until the checkpoint answers the alarm.
+# - EDITING PROTOCOL (numbering is positional): only edit quests at or
+#   after current+1; never insert/delete before the current quest (it
+#   would renumber the model's stamp target mid-play). mark_done only
+#   accepts the current quest's number, so a shifted number is rejected,
+#   not mis-stamped. Clear `status: coach` back to todo when a flag is
+#   answered — stale flags make the file scarier than reality.
 version: 1
 game_goal: Beat the game - defeat the Elite Four at Indigo Plateau,
   which needs ALL 8 GYM BADGES first.
@@ -209,7 +215,7 @@ acts:
       the byte is the anchor, never the announcement.)"
     rules_extra: |
       - A fight this act's quests do not say how to handle: attack_1
-        (TACKLE) until VINE WHIP is learned, then attack_4 (VINE WHIP).
+        (TACKLE). (The grind quest says when that changes.)
       - No POTIONs are in the bag until Pewter - Potion rules do not
         apply in the forest; poison gets use_antidote right away.
     quests:
@@ -261,9 +267,11 @@ acts:
           - fight everything else with TACKLE for experience. The BUG
             CATCHER trainers on the path pay money and give the best
             experience - fight the ones that stop you.
-          Track levels in your notes ("L9... L11..."). If HP goes red
-          twice with no way to heal, walk back to the Viridian Center,
-          heal, and return through the gate.
+          Track levels in your notes ("L9... L11..."). The moment VINE
+          WHIP appears on your move list, use attack_4 (VINE WHIP) in
+          every fight from then on - it is far stronger than TACKLE.
+          If HP goes red twice with no way to heal, walk back to the
+          Viridian Center, heal, and return through the gate.
         done: your team line shows BULBASAUR at level 13 or higher
           with VINE WHIP on its move list
       - id: a1-pewter
@@ -388,10 +396,11 @@ acts:
         status: todo
         budget_min: 45
         text: |
-          Enter MT MOON (the "cave entrance" bearing) at full HP. Wild
-          ZUBAT and GEODUDE live here: flee what you do not need, but
-          catch ONE ZUBAT if balls allow. Two dropped items sit on the
-          way (bearings) - face each, press A, read the bag event. The
+          Enter MT MOON (the "cave entrance" bearing) at full HP. This
+          IS a catching quest for ONE ZUBAT (the ball rule allows it
+          here): catch the first one if 2+ balls remain, flee every
+          other wild battle. Two dropped items sit on the way
+          (bearings) - face each, press A, read the bag event. The
           way down is the northwest ladder (the "ladder down (1F
           northwest)" bearing); beat the HIKER standing over it.
         done: your location reads Mt. Moon B1F
@@ -403,10 +412,11 @@ acts:
           Cross B1F (the "ladder down to the bottom floor" bearing) to
           the bottom floor. ROCKETS in black fight you on the way. A
           SUPER NERD guards two fossils: beat him, take the LEFT one,
-          answer its question with ONE press A. If a PARAS appears
-          down here and a spare ball remains: weaken with TACKLE and
-          catch it. Leave by "ladder out past the fossils", then the
-          "daylight exit to Route 4".
+          answer its question with ONE press A. This is also a
+          catching quest for ONE PARAS (the ball rule allows it): if
+          one appears and a spare ball remains, weaken with TACKLE
+          and catch it. Leave by "ladder out past the fossils", then
+          the "daylight exit to Route 4".
         done: your location reads Route 4 and a fossil's bag event
           happened
       - id: a2-cerulean
@@ -586,25 +596,28 @@ acts:
         give it away; a quest will say when.
     quests:
       - id: a4-species
-        title: Counted to 10 kinds
+        title: Counted to 9 kinds
         status: todo
         budget_min: 30
         text: |
           The aide ahead pays out only at 10 kinds of Pokemon owned -
-          your state line carries the count. If it is below 10: the
-          house by the Vermilion Center gives an OLD ROD free (talk,
-          YES) - fish a MAGIKARP from any water edge (+1); the cave
-          ahead guarantees DIGLETT (+1). Plan the gap in your notes.
-        done: your state line says you have owned 10 or more kinds,
-          or your notes list the catches that will get there
+          your state line carries the count, and the cave ahead
+          guarantees a DIGLETT for the tenth. So the target NOW is 9.
+          If the count is below 9: the house by the Vermilion Center
+          gives an OLD ROD free (talk, YES) - stand at any water edge,
+          use_old_rod, and catch the MAGIKARP that always bites (a
+          catching quest - the ball rule allows it).
+        done: your state line says you have owned 9 or more kinds of
+          Pokemon
       - id: a4-diglett
         title: Through Diglett's Cave
         status: todo
         budget_min: 30
         text: |
           DIGLETT'S CAVE: the cave door is a short walk east of
-          Vermilion. Inside, catch ONE DIGLETT (they are everywhere),
-          then walk the single long tunnel to the far ladder and out.
+          Vermilion. Inside, this is a catching quest for ONE DIGLETT
+          (they are everywhere - weaken, use_poke_ball), then walk the
+          single long tunnel to the far ladder and out.
         done: your location reads Route 2
       - id: a4-flash
         title: Got and taught FLASH
@@ -750,18 +763,33 @@ acts:
           the poster on the back wall: talk, fight him, then press A
           on the POSTER - the wall opens onto a stairway down.
         done: your location reads Rocket Hideout B1F
-      - id: a5-descent
-        title: Descended the hideout
+      - id: a5-b1f
+        title: Descended to B2F
         status: todo
-        budget_min: 120
+        budget_min: 30
         text: |
-          Descend floor by floor to the bottom. Grunts fight on every
-          floor. Two floors carry ARROW TILES: stepping on an arrow
-          SLIDES you until a stop - you cannot steer mid-slide; that
-          is the floor working, not a glitch. Note which slides you
-          have tried ("slide by the crates: lands at lockers") and
-          combine them until the stairs down appear reachable. Keep
-          legs in your notes per floor.
+          Work across B1F to its stairs down. Grunts fight on the way;
+          use_potion below half.
+        done: your location reads Rocket Hideout B2F
+      - id: a5-b2f
+        title: Crossed the B2F arrow maze
+        status: todo
+        budget_min: 45
+        text: |
+          B2F is an ARROW-TILE floor: stepping on an arrow SLIDES you
+          until a stop - you cannot steer mid-slide, and that is the
+          floor working, not a glitch. Note each slide you try ("slide
+          by the crates: lands at lockers") and combine them until the
+          stairs down are reached.
+        done: your location reads Rocket Hideout B3F
+      - id: a5-b3f
+        title: Crossed B3F to the bottom
+        status: todo
+        budget_min: 45
+        text: |
+          B3F has more arrow slides and more grunts - same drill: try
+          a slide, note where it lands, combine. The stairs down lead
+          to the bottom floor.
         done: your location reads Rocket Hideout B4F
       - id: a5-liftkey
         title: Found the Lift Key
@@ -1195,27 +1223,53 @@ acts:
           REVIVEs, 4 MAX POTIONs.
         done: the restore stock reads in the bag and the team is at
           full HP
-      - id: a10-e4
-        title: The Elite Four and the Champion
+      - id: a10-lorelei
+        title: Beat Lorelei
         status: todo
-        budget_min: 240
+        budget_min: 45
         text: |
-          Five fights in a row - the doors lock behind you; a
-          blackout means restocking and walking back in, with
-          everything you learned. In order:
-          (a) LORELEI (ice): THUNDERBOLT her water Pokemon; VENUSAUR
-              stays benched (ice hits it double). FULL RESTORE below
-              a third, always.
-          (b) BRUNO (fighting and rock): RAZOR LEAF the ONIX pair
-              (quadruple); PSYCHIC the fighters (double).
-          (c) AGATHA (ghosts): PSYCHIC hits her whole team double;
-              never a normal move on the GENGARs. FULL HEAL sleep
-              early, not late.
-          (d) LANCE (dragons): THUNDERBOLT the GYARADOS (quadruple);
-              ICE BEAM the DRAGONAIRs and DRAGONITE (the big one
-              takes quadruple); THUNDERBOLT the AERODACTYL.
-          (e) THE CHAMPION - the rival, one last time: THUNDERBOLT
-              the bird and the fish, RAZOR LEAF the RHYDON, ICE BEAM
-              or SURF the CHARIZARD. Everything you have, in the
-              order that answers his lead.
+          The five final fights run back to back - the doors lock
+          behind you; a blackout means restocking and walking back
+          in, with everything you learned. First: LORELEI (ice).
+          THUNDERBOLT her water Pokemon; VENUSAUR stays benched (ice
+          hits it double). FULL RESTORE below a third, always.
+        done: Lorelei is beaten and the door onward stands open
+      - id: a10-bruno
+        title: Beat Bruno
+        status: todo
+        budget_min: 45
+        text: |
+          BRUNO (fighting and rock): RAZOR LEAF the ONIX pair (they
+          take quadruple); PSYCHIC the fighters (double). FULL
+          RESTORE below a third.
+        done: Bruno is beaten and the door onward stands open
+      - id: a10-agatha
+        title: Beat Agatha
+        status: todo
+        budget_min: 45
+        text: |
+          AGATHA (ghosts): PSYCHIC hits her whole team double; never
+          a normal move on the GENGARs (it does nothing at all).
+          FULL HEAL sleep early, not late.
+        done: Agatha is beaten and the door onward stands open
+      - id: a10-lance
+        title: Beat Lance
+        status: todo
+        budget_min: 45
+        text: |
+          LANCE (dragons): THUNDERBOLT the GYARADOS (quadruple); ICE
+          BEAM the DRAGONAIRs and the DRAGONITE (the big one takes
+          quadruple); THUNDERBOLT the AERODACTYL. His HYPER BEAM can
+          knock a healthy Pokemon out - FULL RESTORE at half, no
+          lower.
+        done: Lance is beaten and the last door stands open
+      - id: a10-champion
+        title: Beat the Champion
+        status: todo
+        budget_min: 60
+        text: |
+          THE CHAMPION - the rival, one last time: THUNDERBOLT the
+          bird and the fish, RAZOR LEAF the RHYDON, ICE BEAM or SURF
+          the CHARIZARD. Everything you have, in the order that
+          answers his lead.
         done: the HALL OF FAME scene played - the credits rolled

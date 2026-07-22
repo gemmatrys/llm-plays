@@ -124,10 +124,23 @@ def build_briefing(run_dir: Path, now: float | None = None) -> str:
     lines.append(memory.read_text(encoding="utf-8").strip() if memory.is_file()
                  else "(empty — Gemma has written no notes)")
     lines.append("")
-    goals = (run_dir / "goals.md")
-    lines.append("## Current goals.md")
-    lines.append(goals.read_text(encoding="utf-8").strip() if goals.is_file()
-                 else "(missing!)")
+    quests = (run_dir / "quests.yaml")
+    if quests.is_file():
+        # quest-era run: show the model's rendered strategy view (act
+        # ladder + current quest) — what the model actually sees beats
+        # the raw yaml for triage
+        lines.append("## Current quest view (rendered from quests.yaml)")
+        try:
+            from .quests import QuestBook
+            lines.append(QuestBook(quests).render().strip()
+                         or "(quests.yaml unreadable)")
+        except Exception as e:  # noqa: BLE001 — briefing must never fail
+            lines.append(f"(quest render failed: {e!r})")
+    else:
+        goals = (run_dir / "goals.md")
+        lines.append("## Current goals.md")
+        lines.append(goals.read_text(encoding="utf-8").strip()
+                     if goals.is_file() else "(missing!)")
     lines.append("")
 
     # -- recent activity + evidence pointers -----------------------------------

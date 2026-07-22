@@ -41,8 +41,17 @@ class RunLog:
         # may have rewritten them and a restart must not clobber that
         self.resumed = self.goals_path.exists()
         if not self.resumed:
-            self.goals_path.write_text(initial_goals or DEFAULT_GOALS,
-                                       encoding="utf-8")
+            # quest-era runs get a POINTER goals.md, not the generic
+            # default: a plausible-looking-but-unused strategy file in the
+            # run dir is exactly what a tired checkpoint edits by mistake
+            if initial_quests:
+                self.goals_path.write_text(
+                    "# This run's strategy lives in quests.yaml.\n"
+                    "# goals.md is unused here — edit quests.yaml.\n",
+                    encoding="utf-8")
+            else:
+                self.goals_path.write_text(initial_goals or DEFAULT_GOALS,
+                                           encoding="utf-8")
         # structured quest feed: seeded once from prompts/<game>/quests.yaml;
         # never clobbered on restart (the live copy carries model stamps and
         # checkpoint edits). When present it supersedes goals.md (loop.py).

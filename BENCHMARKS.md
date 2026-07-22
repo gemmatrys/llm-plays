@@ -57,6 +57,17 @@ Rules:
   is about the architecture's speed, and "Claude read the walkthrough so Gemma
   doesn't wander" is the strategy layer doing its job. Baselines had analogous
   help (TPP's crowd knew the game; Gemini's harness authors did too).
+- **Arm C is defined BEFORE its first run, and it includes the quest tree**
+  (rule written 2026-07-22, pre-launch of the Bulbasaur run): the full system
+  ships with a checkpoint-authored, whole-game quest file (prompts/<game>/
+  quests.yaml) fed piecemeal by the harness, refined per act by checkpoints
+  mid-run. That means Arm C's headline is honestly stated as "a local LLM
+  executes a frontier-authored route, making every moment-to-moment decision"
+  — a different claim than Gemini's per-step frontier reasoning, and the essay
+  must say so next to the 813 h comparison. The claim about UNAIDED local play
+  belongs to Arm B alone (no checkpoints, no quest tree — seed goals only).
+  The pre-authored tree is counted in the frontier-model budget (clock 4) as
+  checkpoint work, same as any mid-run refinement.
 - Report the **progress curve** (badges vs hours), not just the total — that's where
   "Claude escaped Mt. Moon in 2 h vs 78 h" stories live. Badge timestamps come from
   RAM-change milestones in `metrics.jsonl`.

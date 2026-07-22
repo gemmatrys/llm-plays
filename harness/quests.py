@@ -148,20 +148,26 @@ class QuestBook:
     # ---------- model marks ----------
 
     def mark_done(self, n: int) -> tuple[bool, dict | None]:
-        """Stamp quest `n` done. Returns (marked, act_just_finished): the
-        act dict when this stamp completed an act's last open quest — the
-        caller escalates act_stamped with the act's verify anchor."""
+        """Stamp quest `n` done — accepted ONLY for the CURRENT quest.
+        The whole game lives in this file, so a hallucinated number must
+        not silently pre-stamp a future quest (it would be skipped when
+        play reached it and the act would 'complete' with its verify
+        unmet); the caller reports the rejection back to the model.
+        Returns (marked, act_just_finished): the act dict when this stamp
+        completed an act's last open quest — the caller escalates
+        act_stamped with the act's verify anchor."""
         self._refresh()
         if not self.active:
             return False, None
-        for num, act, q in self._numbered():
-            if num == n and q.get("status") != "done":
-                q["status"] = "done"
-                self._save()
-                finished = all(qq.get("status") == "done"
-                               for qq in act.get("quests") or [])
-                return True, act if finished else None
-        return False, None
+        cur = self.current()
+        if cur is None or cur[0] != n:
+            return False, None
+        _num, act, q = cur
+        q["status"] = "done"
+        self._save()
+        finished = all(qq.get("status") == "done"
+                       for qq in act.get("quests") or [])
+        return True, act if finished else None
 
     def mark_coach(self, n: int) -> bool:
         """Flag quest `n` as needing coaching (visible in the file; the

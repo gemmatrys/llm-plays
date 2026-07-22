@@ -10,16 +10,23 @@ briefs BEHIND each act's quests, so refinement at act boundaries copies
 from here instead of re-deriving under alarm pressure. The plan can be
 wrong; the quests.yaml structure is what the run depends on.
 
-How to use, at each act_stamped alarm:
+How to use — REFINE EARLY, NOT AT THE ALARM (acts auto-advance on the
+closing stamp, so an unrefined act plays its GUESS facts live): refine
+act N+1 while act N is in its GYM quest, the natural pause. Then at
+each act_stamped alarm:
 1. Validate the closing act's verify line against RAM/screen (the
    verify anchors live in quests.yaml per act; the alarm echoes them);
-   un-stamp in the run's quests.yaml if the evidence disagrees.
-2. REFINE the next act's quests in the run's quests.yaml from this
-   file's section A before play reaches them: fix guesses fetched or
-   verified since, audit for jargon (no coordinates, no field names —
-   location phrases exactly as maps.yaml renders them). Status marks
-   and the ladder rendering are mechanical now — do not hand-edit
-   numbering or done-collapse.
+   un-stamp in the run's quests.yaml if the evidence disagrees. Also
+   verify the team's ACTUAL move slots against the forget table below —
+   one missed learn event silently breaks every later attack_N rule.
+2. If act N+1 was not yet refined, do it NOW from this file's section
+   A: fix guesses fetched or verified since, audit for jargon (raw
+   field names never; verified coordinates are fine — location phrases
+   exactly as maps.yaml renders them). Editing protocol: only at/after
+   current+1, never before the current quest (positional numbering);
+   clear answered coach flags back to todo. Status marks and the
+   ladder rendering are mechanical — do not hand-edit numbering or
+   done-collapse.
 3. Apply section B waypoints (keep the live waypoints.yaml SMALL — add
    the act's block, prune the previous act's one-problem scaffolds;
    crossed-map history is recoverable from git).

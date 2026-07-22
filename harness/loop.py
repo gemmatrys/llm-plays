@@ -391,6 +391,16 @@ class GameLoop:
             # false-stamped three times, so a stamp is a claim, not a fact)
             if self.quests.active:
                 marked, act_done = self.quests.mark_done(decision.done_goal)
+                if not marked:
+                    # only the CURRENT quest can be stamped — tell the
+                    # model instead of silently pre-stamping the future
+                    cur = self.quests.current()
+                    self.runlog.log_metric("goal_done_rejected",
+                                           goal=decision.done_goal,
+                                           current=cur[0] if cur else None)
+                    self._recent.append(
+                        f"[quest {decision.done_goal} is not your current "
+                        "quest - nothing was marked]")
                 if marked:
                     self.runlog.log_metric("goal_done",
                                            goal=decision.done_goal)

@@ -33,6 +33,19 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
   behavior loops, milestone drought — harness/stuckness.py), and the response is
   staged: one bounded random-input self-rescue first, then escalation rather than
   waiting for the next scheduled checkpoint.
+- **I4 — Grounded claims (added 2026-07-22, learned the hard way).** No claim
+  is acted on without a ground-truth anchor. Liveness (I1–I3) turned out to be
+  table stakes: not one major loss in the shakeout runs was a liveness failure —
+  every one was CONFIDENT FALSE BELIEF (phantom parcel, house-as-Center, false
+  badge stamps, a wrong game-mechanics "fact" followed dutifully for 15
+  minutes). So: state fed DOWN is attested (bag events, RAM place names,
+  live-computed bearings — "no event = it did not happen"); claims flowing UP
+  are validated before the system relies on them (believe-and-stamp with
+  checkpoint validation against RAM, tripwire-judge on skill outcomes, act
+  verify anchors); and the harness never asserts its own world-model
+  predictions (the warp-table/0x55 ban). This is the most transferable
+  invariant in the project — games without a RAM map (Balatro, BG3) will
+  stress it hardest, via OCR'd values and judge verdicts instead of RAM.
 
 **THE CORE PRINCIPLES (user, 2026-07-22 — the frame everything else
 elaborates):**
@@ -135,8 +148,8 @@ judge. So navigation splits three ways:
                        ┌──────────────────────────────────────────┐
                        │                HARNESS (Python)          │
    ┌────────┐  frames  │  ┌─────────┐   ┌──────────┐  behaviors   │  ┌───────────────┐
-   │  EYES  ├─────────►│  │ CV      │   │ Decision │─────────────►│  │   EXECUTOR    │
-   │ driver │          │  │ sidecar │──►│ loop     │              │  │ (frame-rate,  │
+   │  EYES  ├─────────►│  │ obs     │   │ Decision │─────────────►│  │   EXECUTOR    │
+   │ driver │          │  │ builder │──►│ loop     │              │  │ (frame-rate,  │
    └────────┘          │  └─────────┘   └────┬─────┘              │  │  reflexes)    │
                        │                     │ watchdog /         │  └──────┬────────┘
                        │                     │ fallback ladder    │         │ inputs
@@ -148,20 +161,20 @@ judge. So navigation splits three ways:
                        decide │                  │ read/write
                      ┌────────▼───┐      ┌───────┴────────────────┐
                      │ LOCAL LLM  │      │ CLAUDE CHECKPOINT      │
-                     │ (Gemma,    │      │ (scheduled + escalation│
-                     │  JSON-     │      │  -triggered; via MCP)  │
-                     │  constrained)     │ summarize, update goals│
+                     │ (Gemma,    │      │ (escalation-woken      │
+                     │  JSON-     │      │  Claude Code session)  │
+                     │  constrained)     │ validate, refine quests│
                      └────────────┘      │ author new skills      │
                                          └────────────────────────┘
 ```
 
 **Division of labor by timescale:**
 
-| Layer          | Cadence      | Who                | Job                                        |
-|----------------|--------------|--------------------|--------------------------------------------|
-| Reflex         | per frame    | Executor (code/CV) | run behaviors, scripted reactions          |
-| Decision       | 1–5 s        | Local LLM          | pick next behavior from skill library      |
-| Strategy       | 5 h / event  | Claude checkpoint  | summarize, unstick, update goals, write skills |
+| Layer          | Cadence         | Who                | Job                                        |
+|----------------|-----------------|--------------------|--------------------------------------------|
+| Reflex         | per frame       | Executor (code)    | run behaviors, scripted reactions          |
+| Decision       | ~30 s (20–40 s thinking) | Local LLM | pick next behavior from skill library      |
+| Strategy       | event (alarms)  | Claude checkpoint  | validate stamps, refine quests, unstick, write skills |
 
 The local LLM is a *behavior selector*, not a button presser. In Phase 1–2 the "skill
 library" is nearly empty (behaviors like `press_A`), but the interface exists from day one.
@@ -282,27 +295,52 @@ RAM address map (if emulated), decision cadence, prompt template.
   applies them (today: the `memory` field → memory.md). Extending Gemma's write powers
   means adding a schema field + a harness apply-step, never file access.
 - *Claude* edits files with its own tools at checkpoint time (Claude Code on this
-  machine; the MCP server adds game powers, not file powers) — but every edit is
+  machine; the emulator bridge socket adds game powers, not file powers) — but every edit is
   validated where the harness CONSUMES it, so a bad write degrades, never stalls:
   invalid prompt.md → last-good version + `prompt_invalid` escalation; malformed
   skill YAML → skipped + `skills_invalid` escalation; goals/memory are plain text
   read fresh each tick (worst case: bad advice, still bounded by the ladder).
 
-## 5. Claude checkpoint
+## 5. Claude checkpoint (as actually built — rewritten 2026-07-22; the
+## original MCP-server design was never implemented and is retired)
 
-- **Trigger:** scheduled every ~5 h (usage-reset aligned) **or** early-woken by an
-  escalation event, whichever comes first.
-- **Access:** an MCP server exposing `tail_log`, `get_metrics`, `screenshot`,
-  `read_ram`, `press_button`, `save/loadstate`, `read/write goals.md`,
-  `add_skill`, `resolve_escalation`.
+- **Trigger: escalation alarms.** Every alarm launches `escalation.alert_cmd`
+  (Windows toast today; swappable for a webhook or a headless `claude -p` wake
+  without code changes), plus session-scoped watchers tailing
+  escalations.jsonl/metrics.jsonl while a checkpoint session is open. The alarm
+  taxonomy IS the checkpoint contract:
+  - `goal_stamped` / `act_stamped` — the model marked a quest/act done;
+    validate against the verify anchor (RAM first — the alarm is not
+    evidence), un-stamp in quests.yaml if false.
+  - `goal_overtime` — a quest ran past its time budget; unstick, reroute,
+    or rewrite it.
+  - `model_flag` — a COACH note; answer every one (check, decide, fix the
+    plan, clear the quest's coach status).
+  - detector ladder (`loop_detected`, `slow_streak`, `nav_ineffective`) —
+    rung 1 self-nudges; rung 2 escalates with evidence.
+  - infrastructure (`driver_down`, `llm_failure`, `prompt_invalid`,
+    `quests_invalid`, `tiles_invalid`) — fix the layer that broke.
+  Alert cooldown is 300 s: bursts suppress toasts, so the periodic
+  escalations.jsonl sweep is the habit; toasts are tie-breakers.
+- **Access: Claude Code on this machine.** Direct file edits to the hot
+  surfaces (quests.yaml, prompt.md, waypoints.yaml, data/*.yaml, skills/) —
+  every edit validated where the harness consumes it and auto-published to
+  `live/<run-id>` (verify the publish metric per edit); `harness/briefing.py`
+  digest read FIRST instead of raw JSONL; the emulator bridge socket for
+  RAM probes and savestates; scratchpad probe scripts for tile truth.
 - **Duties, in order:**
-  1. Triage escalations — diagnose stuckness from snapshots/log; if softlocked, use
-     loadstate (emulator) or direct recovery play (console).
-  2. Compress `log.jsonl` into `progress.md`; prune consumed logs.
-  3. Rewrite `goals.md` — next objectives, warnings ("stop re-entering that cave").
-  4. Author skills — turn observed failure patterns or puzzle solutions into scripted
-     behaviors the local LLM can invoke thereafter. **The skill library is the
-     compounding asset across the whole project.**
+  1. Triage the open escalations (briefing first; rebuild timelines from
+     metrics.jsonl + console.log before theorizing).
+  2. Validate stamps/acts against ground truth (I4); refine act N+1's
+     quests from the master plan while act N is in its gym quest — acts
+     auto-advance, so refinement must beat the stamp, not chase it.
+  3. Keep the model's world honest: correct false notes, prune/adjust
+     waypoints, extend data tables as new tilesets/maps appear.
+  4. Author skills — turn observed failure patterns into wired intents.
+     **The skill library is the compounding asset across the whole
+     project.**
+  5. Record what was learned (run learnings.md for run-scoped, LEARNINGS.md
+     for global) and hand off state at session rotation.
 
 ## 6. Calibration mode & benchmarks
 
@@ -334,9 +372,10 @@ Expected: 3–6 s per vision decision on the B70 (Gemma-3-27B Q4). Levers, by pr
    or the screen changes meaningfully — never on a fixed timer during animations.
 3. **Speculative decisions** (Phase 2/4): infer during execution of the previous
    behavior; apply only if the frame is still similar, else discard and re-ask.
-4. **Cheaper calls**: try Gemma 12B before 27B (measure vs fish baseline, don't
-   assume); byte-identical static prompt prefix for vLLM prefix caching; cap the
-   `why` field (~15 words); verify guided-JSON isn't on a slow path.
+4. **Cheaper calls**: SETTLED — measured, 31B QAT chosen for quality (12B fp8
+   kept as the fast fallback; 12B sym_int4 garbles vision). Byte-identical
+   static prompt prefix for vLLM prefix caching; cap the `why` field
+   (~15 words); verify guided-JSON isn't on a slow path.
 5. **Skills as a latency cache** (Phase 4): every Claude-authored skill and CV
    pre-filter turns future LLM calls into frame-rate scripts. Track `% rung-1
    decisions` over time — it should fall.
@@ -388,9 +427,11 @@ objective 0 + the boot_mash skill.
 context), grammar-constrained decisions, full fallback ladder, game profile loading.
 *Exit: local LLM demonstrably outperforms the fish baseline on progress metrics.*
 
-**Phase 3 — Claude checkpoint.** MCP server over harness state; scheduled checkpoint;
-escalation queue + early-wake; progress.md/goals.md loop working. *Exit: a stuck run is
-diagnosed and unstuck by a checkpoint without human help.*
+**Phase 3 — Claude checkpoint.** Built as escalation queue + alert command +
+Claude Code sessions over harness state (the planned MCP server proved
+unnecessary — direct file/tool access does the job; see §5). *Exit: a stuck
+run is diagnosed and unstuck by a checkpoint without human help — MET,
+repeatedly, in the limits runs.*
 
 **Phase 4 — Skills & hierarchy.** Real behavior library (menu nav, heal, save, shop);
 CV sidecar (stuckness hashing, UI template matching); Claude authoring new skills at
