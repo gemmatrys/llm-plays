@@ -116,8 +116,10 @@ letters - finish with press_A, press_START, press_A.
 Notes: when your place or task changes, send a "memory" field that REWRITES
 your notes (<=60 words: where you are, doing what, next); omit to keep. Fix
 them the moment the screen contradicts them. When you FINISH a numbered
-goal, add "done_goal": <its number> - it stamps [DONE]; always work the
-lowest unstamped goal.
+goal - its own DONE line happened, truly - add "done_goal": <its number>.
+When a goal seems IMPOSSIBLE or already satisfied but you cannot mark it,
+say WHY in your notes: a coach reads them and rewrites the plan. Your job
+is honest play and honest notes, never forcing a stamp.
 
 ## Allowed behaviors
 {behaviors}

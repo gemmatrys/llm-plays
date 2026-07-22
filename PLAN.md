@@ -68,7 +68,14 @@ judge. So navigation splits three ways:
   day: a harness-side sub-step tracker was built and REVERTED — knowing
   which stage of a plan you are in is the model's cognition, validated
   by it, not computed for it; the harness contributes facts, the goals
-  contribute checkable conditions). Run-2: ingest pret
+  contribute checkable conditions). The goals file opens with a GOAL
+  TREE (user 2026-07-22): the road to beating the game, decomposed —
+  Elite Four ← 8 badges ← the current badge's sequence, with YOU ARE
+  HERE marked. Every decision sees why the current goal matters, goal
+  validation gets an anchor (a goal is sensible relative to its
+  parent), and the model is told to report impossible/already-true
+  goals in its notes instead of forcing a stamp — the checkpoint reads
+  notes and rewrites the plan. Run-2: ingest pret
   walkability grids so waypoint anchors are validated (unwalkable -> snap
   to nearest walkable) instead of guessed, and map-connection headers so
   edge crossings are announced as facts the game itself shows.
