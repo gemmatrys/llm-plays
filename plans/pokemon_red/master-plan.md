@@ -81,7 +81,9 @@ These are cited by name below; the full accounts are in LEARNINGS.md.
   the model's NOTES ("N: a done, working b"), notes fixed when the
   screen disagrees; an explicit DONE line in state-line vocabulary; a
   "Time budget: N minutes." line. Cardinal sub-steps anchor to landmark
-  BEARINGS, never coordinates. Doors end in a single press — walks stop
+  BEARINGS by default; VERIFIED coordinates are also fair game in quest
+  text (user 2026-07-22: humans follow walkthrough coordinates too —
+  only GUESSED coordinates burned us). Doors end in a single press — walks stop
   BESIDE doors, only a raw press enters. (enter_door_above and
   walk_to_exit were REMOVED from the vocabulary 2026-07-22: one-problem
   scaffold and a two-bans-needed trap respectively; rooms are left by

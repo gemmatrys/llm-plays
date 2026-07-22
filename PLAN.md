@@ -50,9 +50,12 @@ elaborates):**
 3. **Communication with the local LLM is NATURAL LANGUAGE, only.** The
    harness may read RAM, grids, and tables, but everything it conveys is
    plain-language sentences a player could say ("You are in Pewter City.
-   From this tile you can step: south, east."). No field names, no
-   coordinates, no jargon, no structures — if it cannot be said plainly,
-   it is not ready to be served.
+   From this tile you can step: south, east." / "x = 12"). No raw field
+   names, no data structures, no engine jargon — if it cannot be said
+   plainly, it is not ready to be served. Coordinates ARE plain language
+   (user 2026-07-22): human players follow walkthrough coordinates too;
+   the forest lesson was about GUESSED coordinates being wrong, so
+   verify them — then use them freely in state lines and quest text.
 
 **The harness is GLUE (the same statement, mechanism-side).**
 Three parties: the LOCAL LLM plays the game; the CHECKPOINT (Claude) plans
