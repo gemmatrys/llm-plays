@@ -22,6 +22,15 @@ from .tilemap import TerrainTable, _map_coord, render_ascii
 from .types import Behavior, Observation, Step, phash_diff
 
 
+# the served state fields, in display order. Serving criterion (user
+# 2026-07-22): a field earns its place only by carrying information the
+# model CANNOT infer from the still frame + the prompt + the goals; each
+# provider's docstring states its justification. Rendering to sentences
+# happens in the profile's state_lines.
+STATE_FIELDS = ("bag", "bearings", "place", "edges", "money", "party",
+                "battle_hint", "can_move", "last_move")
+
+
 class GameLoop:
     def __init__(self, profile: GameProfile, eyes: Eyes, executor: Executor,
                  extras: Extras | None, watchdog, runlog: RunLog, base: Path,
@@ -221,118 +230,19 @@ class GameLoop:
                 for k in ("map_id", "pos_x", "pos_y")):
             self._nav_blocked = 0
 
-        # bag = game-VERIFIED inventory in the model's {ram} view, plus delta
-        # events. Beliefs like "I should have the parcel now" die against a
-        # displayed "bag=(empty)"; item gains/losses are the ground-truth
-        # spine that self-narrated events ("I healed", "I delivered") lack.
-        if ram_ctx is not None and self.profile.bag is not None \
-                and self.extras is not None:
-            try:
-                bag = self._read_bag()
-                names = self._item_names()
-                ram_ctx = dict(ram_ctx)
-                ram_ctx["bag"] = ", ".join(
-                    f"{names.get(i, f'ITEM_0x{i:02x}')} x{q}"
-                    for i, q in bag.items()) or "(empty)"
-                if self._last_bag is not None and bag != self._last_bag:
-                    for i in set(bag) | set(self._last_bag):
-                        d = bag.get(i, 0) - self._last_bag.get(i, 0)
-                        if d:
-                            nm = names.get(i, f"ITEM_0x{i:02x}")
-                            self._recent.append(
-                                f"[bag: {'+' if d > 0 else ''}{d} {nm} "
-                                "(game-verified)]")
-                self._last_bag = bag
-            except Exception:  # noqa: BLE001 — bag context is optional
-                pass
-
-        # live compass: bearings to checkpoint-curated waypoints (HOT file in
-        # the run dir), recomputed from the true position every decision — so
-        # goal text never carries compass directions that rot as the player
-        # moves (a "the Mart is west of you" note is wrong three walks later)
-        if ram_ctx is not None and {"map_id", "pos_x", "pos_y"} <= ram_ctx.keys():
-            b = self._bearings(ram_ctx)
-            if b:
-                ram_ctx = dict(ram_ctx)
-                ram_ctx["bearings"] = b
-
-        # place name: interiors all look alike to the model (it has called a
-        # house the Center, a house the Mart, and the lab both) — the harness
-        # KNOWS the map id, so say it by name (HOT data/<game>/maps.yaml,
-        # live-verified ids only; unlisted ids self-tag as unknown)
-        if ram_ctx is not None and "map_id" in ram_ctx:
-            names = self._map_names()
+        # every templated field flows through ONE interface (user
+        # 2026-07-22): get_templated_field(name) — the provider docstrings
+        # carry each field's justification against the serving criterion:
+        # information the model CANNOT infer from the still frame + prompt
+        # + goals. The tilemap is read first because can_move/last_move
+        # derive from this tick's walkability grid.
+        tilemap = self._read_tilemap()
+        if ram_ctx is not None:
             ram_ctx = dict(ram_ctx)
-            ram_ctx["place"] = names.get(
-                ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
-
-        # edge awareness (user 2026-07-21): the model cannot tell a map edge
-        # from an ordinary wall — say plainly when it stands at or near one.
-        # Dimensions come from context RAM in 2x2-tile blocks (Gen 1); player
-        # coords are tiles, so the far edge sits at 2*blocks-1. States a fact
-        # a player sees (the ground ends); never claims the edge is crossable.
-        if ram_ctx is not None and {"map_w", "map_h", "pos_x", "pos_y"} \
-                <= ram_ctx.keys():
-            try:
-                max_x = 2 * int(ram_ctx["map_w"]) - 1
-                max_y = 2 * int(ram_ctx["map_h"]) - 1
-                x, y = int(ram_ctx["pos_x"]), int(ram_ctx["pos_y"])
-                parts = []
-                for dist, side, word in ((y, "northern", "north"),
-                                         (max_y - y, "southern", "south"),
-                                         (x, "western", "west"),
-                                         (max_x - x, "eastern", "east")):
-                    if dist == 0:
-                        parts.append(f"You are ON the {side} edge of "
-                                     "this area.")
-                    elif dist <= 2:
-                        parts.append(f"The {side} edge of this area is "
-                                     f"{dist} tile{'s' if dist > 1 else ''} "
-                                     f"{word} of you.")
-                if parts:
-                    ram_ctx = dict(ram_ctx)
-                    ram_ctx["edges"] = " ".join(parts)
-            except Exception:  # noqa: BLE001 — edge context is optional
-                pass
-
-        # money = the third resource goals reason about (buying, the
-        # blackout halving) — 3-byte BCD; goals said "if money is short"
-        # to a model that could not see money (2026-07-21 audit)
-        if ram_ctx is not None and self.profile.party is not None \
-                and self.profile.party.money_addr is not None \
-                and self.extras is not None:
-            try:
-                mb = self.extras.read_block(self.profile.party.money_addr, 3)
-                ram_ctx = dict(ram_ctx)
-                ram_ctx["money"] = int("".join(f"{b:02x}" for b in mb))
-            except Exception:  # noqa: BLE001 — money context is optional
-                pass
-
-        # party = the team's REAL state (nick, species, level, HP, status):
-        # the model must see "HP 4/24" and "POISONED" to decide to heal —
-        # asking it to remember battle outcomes is how false beliefs start
-        if ram_ctx is not None and self.profile.party is not None \
-                and self.extras is not None:
-            try:
-                p = self._read_party()
-                if p:
-                    ram_ctx = dict(ram_ctx)
-                    ram_ctx["party"] = p
-            except Exception:  # noqa: BLE001 — party context is optional
-                pass
-
-        # battle hint: enemy identity + Gen 1 type math, computed — a 31B
-        # shouldn't burn thinking tokens deriving that Ember is resisted by
-        # a Geodude when a lookup table knows it cold
-        if ram_ctx is not None and ram_ctx.get("in_battle") \
-                and self.profile.battle is not None and self.extras is not None:
-            try:
-                h = self._battle_hint()
-                if h:
-                    ram_ctx = dict(ram_ctx)
-                    ram_ctx["battle_hint"] = h
-            except Exception:  # noqa: BLE001 — hint is optional context
-                pass
+            for fname in STATE_FIELDS:
+                v = self.get_templated_field(fname, ram_ctx)
+                if v is not None:
+                    ram_ctx[fname] = v
 
         # stale notes: the model keeps acting on a world description it wrote
         # rooms ago (this repeatedly cost progress). When its notes predate a
@@ -357,32 +267,6 @@ class GameLoop:
             # it last tick; the ladder re-arms or escalates if it persists
             extra["intervention"] = self._nudge
             self._nudge = None
-        tilemap = self._read_tilemap()
-        # blocked-directions line (user 2026-07-21): the model should not
-        # have to read the map to know its immediate options — say outright
-        # which neighbor tiles it can step onto and what blocks the rest.
-        # Derived from the same walkability grid the map renders; skipped in
-        # battle (position frozen, screen is not the overworld).
-        if ram_ctx is not None and not ram_ctx.get("in_battle"):
-            cm = self._can_move_line()
-            if cm:
-                ram_ctx = dict(ram_ctx)
-                ram_ctx["can_move"] = cm
-            # last movement's self-report as state (user 2026-07-21): the
-            # openings a walk passed are navigation facts, not history —
-            # resurface the newest one until a walk replaces it. Dropped on
-            # map change (its distances describe the old map).
-            if self._last_move is not None:
-                lm_map, lm_note = self._last_move
-                if lm_map != ram_ctx.get("map_id"):
-                    self._last_move = None
-                else:
-                    m = re.match(r"\[walk_(\w+): went (\d+)(.*)\]$", lm_note)
-                    if m:
-                        ram_ctx = dict(ram_ctx)
-                        ram_ctx["last_move"] = (
-                            f"walking {m.group(1)} you went "
-                            f"{m.group(2)} tile(s){m.group(3)}")
         # generalized item intents (user 2026-07-21): names minted from what
         # is actually possible right now — the bag makes use_<item>, the
         # current map's shop table makes buy_<item>_x<n>. The model supplies
@@ -897,6 +781,133 @@ class GameLoop:
             return marts
         except Exception:  # noqa: BLE001 — shop tables are context, never fatal
             return self._marts_cache[1] if self._marts_cache else {}
+
+    def get_templated_field(self, name: str, ram_ctx: dict):
+        """THE serving interface: every templated state field comes from
+        here. Returns the field's value or None (not applicable right now /
+        provider failed — optional context is never fatal)."""
+        fn = getattr(self, f"_field_{name}", None)
+        if fn is None:
+            return None
+        try:
+            return fn(ram_ctx)
+        except Exception:  # noqa: BLE001 — context fields must never stall play
+            return None
+
+    def _field_bag(self, ram_ctx: dict):
+        """Cannot infer: inventory is invisible in the frame unless a menu
+        is open, and opening one costs decisions. Game-VERIFIED contents
+        plus delta events — beliefs like 'I should have the parcel now' die
+        against the displayed truth."""
+        if self.profile.bag is None or self.extras is None:
+            return None
+        bag = self._read_bag()
+        names = self._item_names()
+        if self._last_bag is not None and bag != self._last_bag:
+            for i in set(bag) | set(self._last_bag):
+                d = bag.get(i, 0) - self._last_bag.get(i, 0)
+                if d:
+                    nm = names.get(i, f"ITEM_0x{i:02x}")
+                    self._recent.append(
+                        f"[bag: {'+' if d > 0 else ''}{d} {nm} "
+                        "(game-verified)]")
+        self._last_bag = bag
+        return ", ".join(f"{names.get(i, f'ITEM_0x{i:02x}')} x{q}"
+                         for i, q in bag.items()) or "(empty)"
+
+    def _field_bearings(self, ram_ctx: dict):
+        """Cannot infer: named places sit far off the 9-tile window and the
+        game has no minimap. Live compass to checkpoint waypoints,
+        recomputed from the true position — remembered directions rot as
+        the player moves. Side effect: stashes same-map marks for the
+        walk_to_<landmark> intents."""
+        if not ({"map_id", "pos_x", "pos_y"} <= ram_ctx.keys()):
+            return None
+        return self._bearings(ram_ctx) or None
+
+    def _field_place(self, ram_ctx: dict):
+        """Cannot infer: interiors look identical in the frame (the model
+        has called a house the Center, a house the Mart, and the lab both).
+        The map id knows."""
+        if "map_id" not in ram_ctx:
+            return None
+        return self._map_names().get(
+            ram_ctx["map_id"], f"map {ram_ctx['map_id']} (unknown)")
+
+    def _field_edges(self, ram_ctx: dict):
+        """Cannot infer: an area edge beyond the window is invisible, and at
+        the window's rim an edge is indistinguishable from a wall. States
+        where the ground ends; never claims an edge is crossable."""
+        if not ({"map_w", "map_h", "pos_x", "pos_y"} <= ram_ctx.keys()):
+            return None
+        max_x = 2 * int(ram_ctx["map_w"]) - 1
+        max_y = 2 * int(ram_ctx["map_h"]) - 1
+        x, y = int(ram_ctx["pos_x"]), int(ram_ctx["pos_y"])
+        parts = []
+        for dist, side, word in ((y, "northern", "north"),
+                                 (max_y - y, "southern", "south"),
+                                 (x, "western", "west"),
+                                 (max_x - x, "eastern", "east")):
+            if dist == 0:
+                parts.append(f"You are ON the {side} edge of this area.")
+            elif dist <= 2:
+                parts.append(f"The {side} edge of this area is {dist} "
+                             f"tile{'s' if dist > 1 else ''} {word} of you.")
+        return " ".join(parts) or None
+
+    def _field_money(self, ram_ctx: dict):
+        """Cannot infer: cash shows on no overworld frame. Goals reason
+        about it constantly (buying, the blackout halving) — the 07-21
+        audit found goals saying 'if money is short' to a model that could
+        not see money."""
+        if self.profile.party is None \
+                or self.profile.party.money_addr is None \
+                or self.extras is None:
+            return None
+        mb = self.extras.read_block(self.profile.party.money_addr, 3)
+        return int("".join(f"{b:02x}" for b in mb))
+
+    def _field_party(self, ram_ctx: dict):
+        """Cannot infer: levels, HP, PP, and status are invisible outside
+        menus — asking the model to remember battle outcomes is how false
+        beliefs start."""
+        if self.profile.party is None or self.extras is None:
+            return None
+        return self._read_party() or None
+
+    def _field_battle_hint(self, ram_ctx: dict):
+        """Cannot infer reliably: enemy identification from pixels is
+        error-prone and the Gen 1 type chart is exactly the lookup a 31B
+        burns thinking tokens getting wrong. Battle only."""
+        if not ram_ctx.get("in_battle") or self.profile.battle is None \
+                or self.extras is None:
+            return None
+        return self._battle_hint() or None
+
+    def _field_can_move(self, ram_ctx: dict):
+        """Cannot infer (measured): the model misreads walkability from
+        pixels — one-block gaps, bush-vs-tree, ledge direction. Derived
+        from the same grid the walks use. Overworld only (battle freezes
+        position)."""
+        if ram_ctx.get("in_battle"):
+            return None
+        return self._can_move_line()
+
+    def _field_last_move(self, ram_ctx: dict):
+        """Cannot infer: history is in no single frame. The newest stride
+        report resurfaced until a walk replaces it; dropped on map change
+        (its distances describe the old map)."""
+        if ram_ctx.get("in_battle") or self._last_move is None:
+            return None
+        lm_map, lm_note = self._last_move
+        if lm_map != ram_ctx.get("map_id"):
+            self._last_move = None
+            return None
+        m = re.match(r"\[walk_(\w+): went (\d+)(.*)\]$", lm_note)
+        if not m:
+            return None
+        return (f"walking {m.group(1)} you went {m.group(2)} "
+                f"tile(s){m.group(3)}")
 
     def _can_move_line(self) -> str | None:
         """One sentence on the four adjacent tiles, from this tick's nav
