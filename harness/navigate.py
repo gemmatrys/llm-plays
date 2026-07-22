@@ -4,7 +4,7 @@ Watching the 31B "calculate" routes in its thinking was the single biggest
 latency sink after stale goals — spatial BFS is exactly what a deterministic
 harness does in microseconds and a language model does in thousands of tokens.
 The library exposes navigation behaviors (walk_north/south/east/west,
-walk_to_exit) as stubs; when the model picks one, the loop swaps in a real
+walk_to_counter, ...) as stubs; when the model picks one, the loop swaps in a real
 path computed here over the SAME block-walkability grid the ASCII map is
 rendered from (terrain table + NPC blocks + off-map border, block bottom-left
 convention). A plain walk_<dir> is a STRAIGHT STRIDE: exactly that direction
@@ -24,7 +24,7 @@ from .tilemap import _map_coord
 from .types import Behavior, Step
 
 NAV_BEHAVIORS = ("walk_north", "walk_south", "walk_west", "walk_east",
-                 "walk_to_exit", "walk_to_counter", "walk_to_grass",
+                 "walk_to_counter", "walk_to_grass",
                  "walk_to_mark")  # mark: BFS toward a named waypoint (map
                                   # coords via the `mark` kwarg); the model
                                   # utters walk_to_<landmark-slug>
@@ -164,26 +164,6 @@ def _stochastic_route(start: tuple[int, int],
     return seq, cur
 
 
-def _edge_press(wx: int, wy: int, map_wh: tuple[int, int] | None) -> str | None:
-    """The outward button for a warp sitting on a map edge, or None for an
-    interior warp. Edge doormats (e.g. the Poke Center's) don't fire on
-    step-on — the player must walk OFF the edge from the mat; instant warps
-    (house mats, stairs) fire during the transition anyway, so an extra
-    outward press after them is harmless (buttons are ignored mid-warp)."""
-    if map_wh is None:
-        return None
-    mw, mh = map_wh
-    if wy >= mh - 1:
-        return "DOWN"
-    if wy <= 0:
-        return "UP"
-    if wx <= 0:
-        return "LEFT"
-    if wx >= mw - 1:
-        return "RIGHT"
-    return None
-
-
 def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
             npcs: list[tuple[int, int]],
             map_wh: tuple[int, int] | None,
@@ -209,25 +189,12 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
         return None  # this tileset has no wild grass
     start = (cfg.player_col // 2, cfg.player_row // 2)
     warp_blocks: set[tuple[int, int]] = set()
-    warp_at: dict[tuple[int, int], tuple[int, int]] = {}
     if player is not None:
         px, py = player
         for wx, wy in warps:
             sc, sr = cfg.player_col + (wx - px) * 2, cfg.player_row + (wy - py) * 2
             if 0 <= sc < cfg.cols and 0 <= sr < cfg.rows:
                 warp_blocks.add((sc // 2, sr // 2))
-                warp_at[(sc // 2, sr // 2)] = (wx, wy)
-
-    # already STANDING on a warp (walk_to_exit used to answer "no path" here,
-    # wedging the model on doormats): the exit is one outward press away
-    if (name == "walk_to_exit" and player is not None
-            and (px, py) in set(warps)):
-        press = _edge_press(px, py, map_wh)
-        if press is not None:
-            # hold long enough to turn AND walk (a short tap only turns)
-            return Behavior(name=orig, source="builtin",
-                            steps=[Step(button=press, hold_frames=16,
-                                        wait_frames=8)])
 
     grid = _block_grid(tiles, cfg, walkable, npcs, map_wh, player, warp_blocks)
     grid[start[1]][start[0]] = True  # you can always stand where you stand
@@ -379,36 +346,6 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                     note=f"[{orig}: this is as close as the ground allows "
                          "from here - the way in lies on another side; "
                          "walk around the building]")
-    elif name == "walk_to_exit":
-        reach = {b for b in warp_blocks if b in dist and b != start}
-        if reach:
-            # target the SET of exits, not one chosen warp: a doorway pair
-            # like the forest gate's (4,0)/(5,0) has one mat game-blocked
-            # from below — the random descent over the set finds whichever
-            # side actually lets you through
-            field = _dist_to_set(grid, reach)
-            seq, end = _stochastic_route(start, field, MAX_STEPS)
-            if seq:
-                steps = [Step(button=b, hold_frames=8, wait_frames=8)
-                         for b in seq]
-                if end in warp_at:
-                    press = _edge_press(*warp_at[end], map_wh)
-                    if press is not None:
-                        steps.append(Step(button=press, hold_frames=16,
-                                          wait_frames=8))
-                return Behavior(name=orig, source="builtin", steps=steps)
-        if warps and player is not None:
-            # no warp on screen (a small room's far corner puts its own
-            # doormat one row past the 20x18 window): head TOWARD the
-            # nearest warp by map coords — the next call sees it on screen
-            # and the edge-press logic finishes the exit
-            wx, wy = min(warps, key=lambda w: abs(w[0] - px) + abs(w[1] - py))
-            tb = ((cfg.player_col + (wx - px) * 2) // 2,
-                  (cfg.player_row + (wy - py) * 2) // 2)
-            toward = [b for b in dist if b != start]
-            if toward:
-                goal = min(toward, key=lambda b: (abs(b[0] - tb[0])
-                                                  + abs(b[1] - tb[1]), dist[b]))
     else:
         axis, sign = {"walk_north": (1, -1), "walk_south": (1, 1),
                       "walk_west": (0, -1), "walk_east": (0, 1)}[name]
@@ -541,7 +478,7 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
                            key=lambda b: (-sign * (b[axis] - start[axis]),
                                           dist[b]))
     if goal is None:
-        if name not in ("walk_to_exit", "walk_to_counter", "walk_to_mark"):
+        if name not in ("walk_to_counter", "walk_to_mark"):
             # BFS sees nothing reachable that way, but the world continues
             # past the map edge (town/route connections live there — they
             # are not warps and render as nothing). Fall back to ONE direct
@@ -562,13 +499,6 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     # time before the next input or the rest of the path desyncs
     steps = [Step(button=d.rstrip("*"), hold_frames=8,
                   wait_frames=30 if d.endswith("*") else 8) for d in seq]
-    # finish the job: after stepping onto an edge warp, walk off the edge —
-    # only when the route actually reaches the warp (not truncated)
-    if (name == "walk_to_exit" and len(full) <= MAX_STEPS
-            and goal in warp_at):
-        press = _edge_press(*warp_at[goal], map_wh)
-        if press is not None:
-            steps.append(Step(button=press, hold_frames=16, wait_frames=8))
     # finish the job: on arriving at the counter spot, a short tap turns to
     # face across the counter — only when the route actually got there
     if (name == "walk_to_counter" and len(full) <= MAX_STEPS

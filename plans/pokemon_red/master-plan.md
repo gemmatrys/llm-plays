@@ -1,32 +1,34 @@
-# Master plan — Pokémon Red, Bulbasaur run (quest-tree expansion)
+# Master plan — Pokémon Red, Bulbasaur run
 
-CHECKPOINT-VOICE ONLY. This file is the meticulous expansion of
-quest-tree.md; the model NEVER reads it. The derivation contract in the
-tree header governs everything the model sees: acts only, verbatim
-`player:` lines, done-collapse, state-line vocabulary. This file exists
-so that when an act arrives, the checkpoint mints goals.md atoms by
-COPYING from here (renumbering to the run's sequence), instead of
-re-deriving routes and drills under alarm pressure.
+CHECKPOINT-VOICE ONLY; the model NEVER reads it. The quest tree itself
+lives at prompts/pokemon_red/quests.yaml (moved 2026-07-22, user
+decision): the HARNESS ingests it, feeds one quest at a time with the
+act ladder and time budgets, and records the model's done/coach marks;
+the checkpoint authors and refines its content. This file is the
+generatable companion — the reasoning, routes, data prep, and risk
+briefs BEHIND each act's quests, so refinement at act boundaries copies
+from here instead of re-deriving under alarm pressure. The plan can be
+wrong; the quests.yaml structure is what the run depends on.
 
-How to use, at each act boundary:
+How to use, at each act_stamped alarm:
 1. Validate the closing act's verify line against RAM/screen (the
-   goal_stamped anchors below), mark the tree node [x] with goal numbers.
-2. Prune the stamped goals to one-line stubs (prune-on-stamp — stamped
-   text left at full length correlated with llm_failure spikes and 190s
-   decisions in Pewter).
-3. Paste the next act's micro-goals from section A, renumbered; audit
-   for jargon (no coordinates, no field names — location phrases exactly
-   as maps.yaml renders them); update the goals.md preamble tree (done
-   acts collapse to one "Done:" line, move YOU ARE HERE).
-4. Apply section B waypoints (keep the live waypoints.yaml SMALL — add
+   verify anchors live in quests.yaml per act; the alarm echoes them);
+   un-stamp in the run's quests.yaml if the evidence disagrees.
+2. REFINE the next act's quests in the run's quests.yaml from this
+   file's section A before play reaches them: fix guesses fetched or
+   verified since, audit for jargon (no coordinates, no field names —
+   location phrases exactly as maps.yaml renders them). Status marks
+   and the ladder rendering are mechanical now — do not hand-edit
+   numbering or done-collapse.
+3. Apply section B waypoints (keep the live waypoints.yaml SMALL — add
    the act's block, prune the previous act's one-problem scaffolds;
    crossed-map history is recoverable from git).
-5. Do section C data prep BEFORE the act needs it (marts, tilesets,
+4. Do section C data prep BEFORE the act needs it (marts, tilesets,
    state fields, skills) — an unharvested tileset makes every walk
    macro a silent no-op.
-6. Read section D (risk brief) so alarms are answered from a plan, not
+5. Read section D (risk brief) so alarms are answered from a plan, not
    from scratch.
-7. VERIFY THE PUBLISH per edit (standing instruction — `kind:"publish"`
+6. VERIFY THE PUBLISH per edit (standing instruction — `kind:"publish"`
    metric or `git log live/<run-id>`).
 
 Marking convention (from the limits runs):
@@ -35,10 +37,10 @@ Marking convention (from the limits runs):
   WHERE things are; never for behavior (the warp table lies about
   enterability — the forest gate (4,0) lesson).
 - GUESS — offset math, walkthrough recall, or my memory of the game.
-  Eyeball at first crossing, promote with corrected coords from the
-  live log. Team rosters/levels/inventories recalled from memory are
-  GUESS too: re-check against pret data or a walkthrough AT ACT PREP,
-  before the text reaches goals.md.
+  FETCH FROM THE SOURCE at act prep (user rule 2026-07-22: prefer
+  fetching pret/walkthrough data over writing from recall — the mart
+  table and map-name gaps are already fetched and de-GUESSed); eyeball
+  coordinates at first crossing, promote with the live log.
 - Data tables (marts, names, collision lists) are pre-ingested from
   pret/pokered; LIVE verification is reserved for BEHAVIORAL claims
   (the 0x55 fence, ledges, anything one-way or conditional).
@@ -79,11 +81,12 @@ These are cited by name below; the full accounts are in LEARNINGS.md.
   the model's NOTES ("N: a done, working b"), notes fixed when the
   screen disagrees; an explicit DONE line in state-line vocabulary; a
   "Time budget: N minutes." line. Cardinal sub-steps anchor to landmark
-  BEARINGS, never coordinates. Doors end in a single press or
-  enter_door_above — walks stop BESIDE doors, only a raw press enters.
-- NO walk_to_exit OUTDOORS (it walks into the nearest building door)
-  and NEVER in gate buildings (it picks the near door, the model wants
-  the far one). Between buildings: landmark walks or plain walks.
+  BEARINGS, never coordinates. Doors end in a single press — walks stop
+  BESIDE doors, only a raw press enters. (enter_door_above and
+  walk_to_exit were REMOVED from the vocabulary 2026-07-22: one-problem
+  scaffold and a two-bans-needed trap respectively; rooms are left by
+  walking onto the doormat — can_move announces doorways — plus one
+  edge press. Between buildings: landmark walks or plain walks.)
 - BELIEVE-AND-STAMP: the model stamps done_goal on belief; the next
   goal feeds at once; goal_stamped brings the coach in async to
   validate against the act's verify anchor (RAM first — the alarm is
@@ -111,12 +114,11 @@ These are cited by name below; the full accounts are in LEARNINGS.md.
 Tree verify (goal_stamped anchor for the act): team line shows
 BULBASAUR; Pokedex obtained; owned species >= 3; POKE BALLs in bag.
 
-The paste-ready goals.md for run creation is plans/pokemon_red/
-act0-goals.md — it is this section's A-part plus preamble and Rules,
-already renumbered 1-12 and vocabulary-audited. This section carries
-the reasoning and the checkpoint-side annotations.
+The run-ready quests are act0 of prompts/pokemon_red/quests.yaml —
+this section's A-part in quest form, vocabulary-audited. This section
+carries the reasoning and the checkpoint-side annotations.
 
-### A. Micro-goals (DRAFT — the act0-goals.md copy is authoritative)
+### A. Micro-goals (DRAFT — the quests.yaml act0 copy is authoritative)
 
 1. Boot a NEW GAME. Fresh cartridge state: the title menu has no
    CONTINUE (rule-silencing line needed — prompt.md says "on a title
@@ -189,7 +191,7 @@ the reasoning and the checkpoint-side annotations.
     DONE: team at full HP and location reads Viridian Pokemon Center.
     Budget 10m.
 
-### B. Waypoint prep (initial waypoints.yaml — also in act0-goals.md)
+### B. Waypoint prep (initial waypoints.yaml at run creation)
 
 All Pallet/Viridian/Route-1 coords were LIVE-VERIFIED in limits runs
 (recovered from git history of runs/pokemon_red/limits-4/waypoints.yaml
@@ -278,8 +280,7 @@ Tree verify: RAM badges 0 -> 1 (BOULDER bit); TM34 bag event.
    DONE: location reads Route 2. Budget 10m.
 2. North on Route 2 to the forest gate door (the "forest gate door"
    bearing), through the gate building: cross the room with plain
-   walks and step through the doorway ahead (NEVER walk_to_exit in a
-   gate — it picks the near door).
+   walks and step through the FAR doorway (the standing gate drill).
    DONE: location reads Viridian Forest south gate building, then
    Viridian Forest. Budget 10m.
 3. FOREST, leg 1 (the maze lesson: the forest only opens northward on
@@ -337,7 +338,7 @@ Tree verify: RAM badges 0 -> 1 (BOULDER bit); TM34 bag event.
     Route 3" — the badge-gate man stops you and DRAGS you to the gym
     himself; mash his speech and do not walk away.
     DONE: the doormat bearing reads "you are here". Budget 20m.
-11. Enter the gym: enter_door_above (one behavior, judge-checked).
+11. Enter the gym: one step UP through the door above (press_UP).
     DONE: location reads Pewter Gym. Budget 5m.
 12. Reach BROCK (the "Brock" bearing): the JR TRAINER on the way is
     effectively mandatory (trainer battles cannot be fled) — VINE
@@ -397,9 +398,9 @@ sight line (leave unwaypointed, as limits-4 did).
   town/gym this plan flags for probing (it becomes THE probe tool).
 - marts.yaml: Pewter (56) ingested. tiles.yaml: forest, gate, gym,
   museum all present from limits runs. Nothing new expected.
-- Skills: enter_door_above exists (judge-confirmed); attack_1..4,
-  flee_battle exist; use_potion battle path may get its first firing
-  at Brock — the limits-4 watch item transfers here.
+- Skills: attack_1..4, flee_battle exist; use_potion battle path may
+  get its first firing at Brock — the limits-4 watch item transfers
+  here. (Gym entry is a plain press_UP on the doormat now.)
 - Savestates: re-pin slot 2 healed-pre-gym after goal 8 (Brock loss
   recovery insurance; in-game blackout recovery remains the actual
   loss path).
@@ -521,9 +522,8 @@ becomes the act-2 exit and then prunes).
 
 - tiles.yaml: CAVERN already ingested (stretch3 review). Cerulean
   interiors are pokecenter/mart/gym/house — all known tilesets.
-- marts.yaml: add Cerulean (map 67). GUESS inventory (verify against
-  pret marts.asm at prep): POKE BALL, POTION, REPEL, ANTIDOTE, BURN
-  HEAL, AWAKENING, PARLYZ HEAL. REPEL matters: Act 4 buys them here
+- marts.yaml: Cerulean (67) INGESTED 2026-07-22 (fetched from pret
+  marts.asm, whole-game table). REPEL matters: Act 4 buys them here
   or in Lavender for Rock Tunnel.
 - Species/moves data already full-table. Nothing else.
 - Savestates: pin slot 2 at the cave mouth pre-entry (stretch3 risk
@@ -653,9 +653,7 @@ the ship is left (it is gone).
   SHIP_PORT (dock). Pre-ingest from pret collision lists before the
   act (the unharvested-tileset = dead-walks lesson); tag any misses
   live via the raw-dump fallback.
-- marts.yaml: add Vermilion (map 91). GUESS inventory (verify at
-  prep): POKE BALL, SUPER POTION, ICE HEAL, AWAKENING, PARLYZ HEAL,
-  REPEL.
+- marts.yaml: Vermilion (91) INGESTED (fetched).
 - NEW SKILL CLASS — FIELD MOVES: use_cut (goal 9) is the first
   overworld party-menu move. Wire as a minted intent (same pattern
   as use_<item>: party slot resolved at runtime from the team read,
@@ -679,8 +677,8 @@ the ship is left (it is gone).
   positive class, check before intervening. goal_overtime response:
   none needed, the reset loop is bounded by design (2^-ish odds each
   round).
-- Underground path gates: the near-door trap (walk_to_exit banned in
-  gates — Rules line persists all run).
+- Underground path gates: the far-doorway drill (a run-wide Rules
+  line) — plain walks only in gates.
 - Rival fights x2: PIDGEOTTO confusion (Sand-Attack accuracy drops
   make TACKLE whiff — the model may flag COACH on repeated misses;
   answer: keep attacking, misses are the mechanic, not a wedge).
@@ -825,15 +823,10 @@ get "the first ladder", "the ladder back up", "the last ladder",
   (the harness sees through darkness; the MODEL does not — this
   asymmetry is why goal 7 orders use_flash immediately; never let
   goals route a dark screen).
-- marts.yaml: add Lavender (150) and the Celadon store floors.
-  GUESS inventories — verify at prep. CELADON SCHEMA PROBLEM,
-  flagged now: the store's 2F has TWO clerks (meds + TMs) on one
-  map id; marts.yaml is keyed by map. Options at prep: (i) goals
-  only ever buy from one designated clerk per floor and the yaml
-  carries that clerk's list; (ii) extend the schema. Decide at act
-  prep, not mid-run. Goal 10 as drafted needs NO mart buys (vending
-  + gift + 4F stone) — the stone counter is single-clerk [GUESS —
-  verify].
+- marts.yaml: Lavender (150), Celadon 2F clerk 1 (123), Celadon 4F
+  stones (125) all INGESTED (fetched). Celadon two-clerk floors:
+  RESOLVED by modeling only clerk 1 per floor (the yaml says so);
+  the 2F TM clerk and 5F are off-plan and unminted on purpose.
 - SKILLS: buy_fresh_water (vending menu, wire at prep);
   use_thunder_stone (the items.py use path with a party-slot
   target — same flow as use_potion outside battle; verify the
@@ -985,9 +978,8 @@ when the FLUTE stamps.
   live early on B2F), or (ii) exclude arrow tiles from BFS goals
   in navigate.py (small glue change — movement geometry, legal).
   Decide at prep; (i) needs no code.
-- marts.yaml: Lavender list needed by goal 5's Great Ball buy —
-  ingest at prep (GUESS: GREAT BALL, SUPER POTION, REVIVE, ESCAPE
-  ROPE, SUPER REPEL, ANTIDOTE, BURN HEAL, PARLYZ HEAL).
+- marts.yaml: Lavender (150) INGESTED (fetched) — Great Balls for
+  goal 5's optional Snorlax buy are on its shelf.
 - SKILLS: use_poke_flute (overworld item use — items.py path, works
   today; the Snorlax targeting is positional: stand adjacent).
 - Savestates: pin slot 2 pre-hideout descent; re-pin pre-tower;
@@ -1105,13 +1097,12 @@ Prune safari waypoints the moment HM03/teeth stamp.
 
 ### C. Data prep
 
-- NEW STATE FIELD (add at act prep): Safari steps remaining.
-  Provider `_field_safari_steps` reading wSafariSteps. Serving
-  criterion justification: the countdown is invisible on-frame and
-  un-inferable, yet it decides whether the model should press on or
-  accept ejection; without it the ejection reads as a teleport bug
-  and burns a COACH round-trip. state_lines sentence: "The Safari
-  Game allows about N more steps." Rendered ONLY inside the zone.
+- NO new state field for safari steps (cut 2026-07-22, user
+  generic-only rule: a zone-specific counter is exactly the
+  one-problem serving the criterion exists to block). The quest text
+  carries the mitigation instead: the ejection is pre-explained
+  ("the game ENDS ITSELF after a step count and returns you to the
+  gate") so it reads as the rules working, not a teleport bug.
 - OFFLINE DERIVATION: all four safari areas, with a measured
   minimal-step route Center→1→2→3→house; the leg text in goal 3
   comes from it. Also Routes 12-15's fence/board sections and
@@ -1122,8 +1113,7 @@ Prune safari waypoints the moment HM03/teeth stamp.
 - tiles.yaml: safari areas share FOREST-family tilesets [GUESS —
   check constants]; gym is GYM (done); warden/house interiors are
   HOUSE (likely done by now).
-- marts.yaml: Fuchsia (152) — GUESS: GREAT BALL, SUPER POTION,
-  REVIVE, FULL HEAL, SUPER REPEL. Verify at prep.
+- marts.yaml: Fuchsia (152) INGESTED (fetched).
 - SKILLS: safari battle menu — flee_battle's corner-reset needs a
   live verify on its FIRST safari encounter (RUN sits bottom-right
   in both menus [GUESS]; if the geometry differs, hot-fix the
@@ -1267,8 +1257,7 @@ Prune Silph anchors when the MASTER BALL stamps.
   schedule real time for it at act prep.
 - tiles.yaml: FACILITY already harvested (hideout); Silph shares it
   [GUESS — verify]; INTERIOR variants for the dojo.
-- marts.yaml: Saffron (180) — GUESS: GREAT BALL, HYPER POTION, MAX
-  REPEL, ESCAPE ROPE, FULL HEAL, REVIVE. Verify at prep.
+- marts.yaml: Saffron (180) INGESTED (fetched).
 - SKILLS: none new — pads are walk-on warps; the Lapras take and
   the drink give are conversations (choice-stop guard).
 - Savestates: pin slot 2 pre-Silph (Lapras/Master Ball are one-
@@ -1327,7 +1316,7 @@ Tree verify: badges byte has VOLCANO; TM38 bag event.
    swimmers; LAPRAS leads.
    DONE: location reads Cinnabar Island. Budget 60m.
 4. Heal at the Cinnabar Center; restock at the mart (HYPER/SUPER
-   POTIONs to 6, 2 FULL HEALs if listed [GUESS inventory]).
+   POTIONs to 6, 2 FULL HEALs — both on the ingested shelf).
    DONE: team full, restock events in the bag. Budget 20m.
 5. POKEMON MANSION (the ruined building west of town): doors are
    locked or opened by STATUE SWITCHES — press A on the glowing
@@ -1390,8 +1379,7 @@ Tree verify: badges byte has VOLCANO; TM38 bag event.
   derivation needed beyond door order).
 - tiles.yaml: MANSION tileset harvest; Seafoam exterior is
   overworld (done).
-- marts.yaml: Cinnabar (172) — GUESS: ULTRA BALL, GREAT BALL,
-  HYPER POTION, MAX REPEL, ESCAPE ROPE, FULL HEAL, REVIVE.
+- marts.yaml: Cinnabar (172) INGESTED (fetched).
 - Quiz answers: pull the fixed YES/NO list from a walkthrough at
   prep (walkthrough facts may go in goals text verbatim; they are
   behavior-free).
@@ -1519,12 +1507,11 @@ Tree verify: Hall of Fame (credits; post-champion save state).
    reads Indigo Plateau. Budget 60m per floor, 3 floors.
 4. INDIGO PLATEAU lobby: heal, then SHOP — the final list, in
    priority order, skipping what money cannot cover: 6 FULL
-   RESTOREs, 4 REVIVEs, 4 MAX/HYPER POTIONs [GUESS inventory —
-   verify at prep; sell the NUGGET here if cash is short: one
-   sell flow, wire-or-drill decision at prep [checkpoint: selling
-   is an unwired menu path — if cash math at prep says the
-   Nugget is unnecessary, DROP the sell and keep the vocabulary
-   closed]].
+   RESTOREs, 4 REVIVEs, 4 MAX POTIONs (the ingested lobby shelf
+   carries all three). Sell the NUGGET here only if cash is short
+   [checkpoint: selling is an unwired menu path — if cash math at
+   prep says the Nugget is unnecessary, DROP the sell and keep the
+   vocabulary closed].
    DONE: the restore stock reads in the bag; team full. Budget
    30m.
 5. THE ELITE FOUR — five fights in a row, NO Center between; the
@@ -1585,7 +1572,7 @@ Tree verify: Hall of Fame (credits; post-champion save state).
   straight only — the lane just needs to be clear].
 - use_strength: the Act 3 field-move executor's last variant —
   verify once on the first boulder.
-- marts.yaml: Indigo lobby (174) — GUESS list above; verify.
+- marts.yaml: Indigo lobby (174) INGESTED (fetched).
 - E4/champion rosters + quiz-style facts: walkthrough pull at
   prep; levels into goal text as plain claims ("about level
   55") — never as certainties.

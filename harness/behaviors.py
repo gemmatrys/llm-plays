@@ -192,11 +192,13 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
     # The wait stub only runs if no map is available that tick. Counted
     # variants (walk_east_3 = exactly up to 3 tiles east) let the model walk
     # a bearing distance instead of always going as far as possible.
+    # walk_to_exit was REMOVED from the vocabulary 2026-07-22 (user
+    # cleanup): it needed two standing usage bans (outdoors it walks INTO
+    # buildings; in gates it picks the near door) and still wedged runs.
+    # Rooms are left by walking onto the doormat (can_move announces
+    # doorways) plus one edge press - honest single steps over a macro
+    # that guessed intent.
     nav_desc = {
-        "walk_to_exit": "walk through the NEAREST door/exit including the "
-                        "final doormat step - for LEAVING rooms. Outdoors it "
-                        "walks INTO the nearest building: never use it "
-                        "outside.",
         "walk_to_counter": "walk to the person behind a counter (nurse, "
                            "clerk) and stop FACING them; if they were off "
                            "screen it only gets closer - call it again.",
@@ -204,10 +206,10 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
                          "it - repeat it to hunt wild battles.",
     }
     for nav in ("walk_north", "walk_south", "walk_west", "walk_east",
-                "walk_to_exit", "walk_to_counter", "walk_to_grass"):
+                "walk_to_counter", "walk_to_grass"):
         lib[nav] = _builtin(nav, [Step(op="wait", wait_frames=8)],
                             nav_desc.get(nav))  # walk_<dir>: family line
-        if nav not in ("walk_to_exit", "walk_to_counter", "walk_to_grass"):
+        if nav not in ("walk_to_counter", "walk_to_grass"):
             for n in range(1, 10):
                 lib[f"{nav}_{n}"] = _builtin(f"{nav}_{n}",
                                              [Step(op="wait", wait_frames=8)])

@@ -42,10 +42,20 @@ convey intent: the model's intents down into the game (skills, walks,
 menu geometry), the model's claims and flags up to the checkpoint
 (stamps, COACH flags, alarms), and the checkpoint's strategy down to the
 model (goals presentation). The harness never plans, never judges, never
-tracks strategy state — quest trees, goal minting, validation, and
-progression bookkeeping are checkpoint work; two harness-side attempts at
-strategy mechanics (a route tracker, a quest-tree walker) were rejected
-on this principle before running.
+tracks strategy state.
+
+Goals-presentation revision (user, 2026-07-22 evening): the quest tree
+now lives at prompts/<game>/quests.yaml and the HARNESS ingests it —
+feeds one quest at a time under the act ladder, runs the time-budget
+clock, records the model's done/coach marks, and escalates every stamp
+(goal_stamped / act_stamped, with the checkpoint's own verify anchors
+echoed back). This is presentation MECHANICS, not planning: the
+checkpoint authors every word (titles, quest texts, DONE lines, budgets,
+rules, verifies) and remains the sole validator of stamps; the harness
+merely turns pages. The earlier rejections stand for what they were —
+a route tracker that computed the model's plan-position (the model's
+cognition) and a tree walker that would have chosen strategy; a
+mechanical page-turner over a checkpoint-authored file is neither.
 
 **Navigation division of labor (decided 2026-07-21, after the limits-4
 forest arc).** Constraint set by the user: the local LLM is not very smart,
@@ -205,7 +215,11 @@ class LocalPolicy(Protocol):
 
 ```
 runs/<game>/<run-id>/
-  goals.md            # strategy prompt; rewritten by Claude, injected into local-LLM prompt
+  quests.yaml         # the quest tree, seeded from prompts/<game>/quests.yaml:
+                      #   checkpoint-authored acts/quests with DONE lines and
+                      #   time budgets; harness feeds one quest at a time and
+                      #   records done/coach marks; supersedes goals.md when present
+  goals.md            # legacy strategy prompt; rewritten by Claude, injected into local-LLM prompt
   memory.md           # the local model's SELF-maintained notes (location, task) — written
                       #   via the "memory" field of its replies, carried verbatim into the
                       #   {memory} placeholder; checkpoints correct false beliefs

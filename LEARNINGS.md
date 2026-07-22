@@ -142,9 +142,6 @@ phases don't relearn them. Format: lesson → where it now lives.
   time + `chat_template_kwargs {"enable_thinking": true}` per request
   (`reasoning_effort` is ignored by llm-scaler 0.21.0-b1). Thinking coexists
   with JSON-schema guided decoding. → llm.py `reasoning` option, default low.
-- (Pruned 2026-07-21: the logprobs-based thinking recovery that lived here
-  is superseded — streaming `delta.reasoning` ships instead; see "Thinking
-  transcript" above, which keeps the logprobs trick as documented fallback.)
 - **Thinking starves under a tight token cap exactly when confused** — long
   reasoning eats max_tokens and `content` comes back None, so the hardest
   states produced no decision. → generous budget (1100), explicit error text,
@@ -304,9 +301,9 @@ phases don't relearn them. Format: lesson → where it now lives.
 - **Directional walks can never stop ON a door** — they take the farthest
   reachable block along the axis, so they route around or past buildings;
   the model orbited the Viridian Center for 8 decisions "aligning with the
-  door". walk_to_exit is the only door-stopper, but its NAME biased the
-  model against using it to ENTER. → prompt.md movement bullet now says so
-  explicitly; run-2 candidate: rename to walk_to_door.
+  door". (walk_to_exit was the era's door-stopper; RETIRED 2026-07-22 —
+  see the cleanup section. Doors are entered by a single press; rooms are
+  left by walking onto the doormat plus one edge press.)
 - **Map-edge doormats are invisible to BFS** (no off-map goal exists):
   exiting a room needs a single raw press toward the edge, or entering the
   mat block sideways. → goals rule; DONE since: walk_to_exit appends the
@@ -400,10 +397,6 @@ choice cursor. Ops: goals_complete alarm fires on the LAST-numbered goal
 stamped (instruction-style middle goals never stamp); checkpoint protocol
 = strategy subagents with full context packages + self-initiated session
 rotation.
-
-## NEXT GAP (user thesis, 2026-07-20) — RESOLVED 2026-07-21
-(Trimmed: the thesis landed as positioning macros + choice-stop guard,
-conversations kept with the model — full account in the next section.)
 
 ## The skills thesis, tested live — wire POSITIONING, not conversations
 ## (2026-07-21 overnight, Viridian→Forest stretch)
@@ -636,6 +629,49 @@ conversations kept with the model — full account in the next section.)
   blocks need distinct phrasing from walls in can_move (the model
   reroutes around people instead of waiting). nav_ineffective and the
   confusion detectors all need a menu/dialog gate (five menu false
-  positives in a day). walk_to_exit outdoors walks INTO the nearest
-  building (five accidental re-entries) — it must exclude the door
-  just exited.
+  positives in a day). walk_to_exit outdoors walked INTO the nearest
+  building (five accidental re-entries) — resolved 2026-07-22 by
+  REMOVING the behavior (next section).
+
+## Cleanup and the quest feed (2026-07-22 evening — user directives)
+
+- **The quest tree moved INTO the harness** (revising the morning's
+  checkpoint-side-only call): prompts/<game>/quests.yaml is a
+  structured tree — acts (verbatim player titles, verify anchors,
+  per-act rules) holding quests (text, DONE line, budget_min, status).
+  harness/quests.py feeds it piecemeal (act ladder with done-collapse
+  and YOU ARE HERE, exactly one current quest), runs the budget clock,
+  and records the model's marks: done_goal -> status done +
+  goal_stamped/act_stamped escalations; a COACH note -> status coach.
+  Glue-consistent because the harness only turns pages: every word is
+  checkpoint-authored and every stamp is checkpoint-validated. The
+  derivation contract that was prose convention is now code — the
+  rendering cannot drift from it. goals.md remains the fallback for
+  runs without a quests.yaml.
+- **Vocabulary pruning rule: a behavior that needs usage bans is a
+  removal candidate.** walk_to_exit carried two standing bans (walks
+  INTO buildings outdoors; picks the near door in gates) and still
+  wedged runs — REMOVED, with its navigate.py special cases. Rooms
+  are left by walking onto the doormat (can_move announces doorways)
+  plus one edge press; doors are entered by one press. enter_door_above
+  (built for one Pewter doormat) — REMOVED; it was a skill-shaped
+  patch for a routing problem. Keep: attack_1..4/flee_battle (every
+  battle in the game), walk_to_counter/walk_to_grass (every town/
+  grind), minted use_/buy_/walk_to_ intents (closed-grammar, data-
+  driven).
+- **Fetch, don't recall.** Mart inventories and map-name gaps written
+  from memory in the first master-plan draft were replaced by fetching
+  pret directly: marts.asm gave the whole-game shop table in one pull
+  (the recalled Lavender list had dropped ICE HEAL; menu order drifted
+  elsewhere), and map_constants.asm exposed ~40 reachable maps
+  missing from maps.yaml (all Silph floors, all Safari areas, Rock
+  Tunnel B1F, the mansion basement, every Elite Four room) — each one
+  a guaranteed "map N (unknown)" wedge the run would have hit at the
+  worst time. The hour of fetching beats any amount of confident
+  recall; recall is only for choosing WHAT to fetch.
+- **State serving stays generic.** The proposed safari-steps field
+  (zone-specific countdown) was cut: a field that serves one room of
+  one game is the pattern the serving criterion exists to block —
+  quest text carries zone quirks instead ("the game ends itself and
+  returns you to the gate"). Owned-kinds and a surfing line remain
+  the only planned additions (game-wide, DONE-line-checkable).
