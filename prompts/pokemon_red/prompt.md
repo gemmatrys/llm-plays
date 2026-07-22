@@ -54,59 +54,20 @@ Truth signals (these beat your memory AND the screenshot):
   or step around. A ledge crosses ONE way - hop down it going south,
   never push against it from below.
 
-Movement:
-- PREFER walk_north/south/east/west - a plain one strides STRAIGHT that
-  way until a wall stops it (~12 tiles max; it steps around a lone tree
-  and hops ledges going down), then REPORTS what it passed: "[walk_north:
-  went 9, stopped at a wall; openings passed: east after 3]" means a gap
-  in the side wall sat 3 tiles along - walk_south_6 returns to it from
-  where you stand (9-3), or remember it for the way back. Openings are
-  how mazes continue; the report is the truth about what you passed.
-  Walking the same direction again after a stop just bumps the same
-  wall. Counted variants walk a bearing EXACTLY: "3 south, 4 east" =
-  ["walk_south_3","walk_east_4"]. When nothing is walkable that way it
-  still takes ONE step in that direction - which is exactly how you
-  cross town/route boundaries at the area's edge (just keep walking
-  the bearing). "[move blocked]" afterward = a real wall.
-- walk_to_exit goes THROUGH the nearest D - entering or leaving, including
-  the final doormat step even if you already stand on it. It is the ONLY
-  move that stops at a door; directional walks overshoot doors - if you are
-  circling a building, use it.
-- walk_to_counter walks to the person behind a counter (nurse, shop clerk)
-  and leaves you FACING them - use it inside Centers/Marts/gyms instead of
-  hand-navigating. If they were not on screen it only walks a few steps:
-  just use it again.
-- walk_to_grass enters the nearest tall grass and paces inside it -
-  wild battles start while pacing, so repeat it to hunt encounters.
-  Its no-grass message means none is in sight here.
-- Single UP/DOWN/LEFT/RIGHT = fine positioning; A talks to what you face.
-- Bouncing between two maps = walking in/out a door: step away, go around.
-- Walking into a wall changes nothing - turn. Black screens: wait.
-
-Dialogue: mash_through_dialogue ALWAYS presses A at least once, then keeps
-pressing until the text closes or a choice appears - so facing someone and
-calling it both STARTS and clears their speech. It never answers choices.
-Careful: calling it again while still facing someone restarts their speech.
-Read its feedback: "[text closed...]" = speech over, move on; "[stopped at
-a choice...]" = answer with ONE press; "[pressed A once - nothing
-opened]" = nothing to talk to, act on your goal.
-
-Menus: UP/DOWN cursor, A confirm, B cancel; START = main menu (B closes).
-A yes/no CONFIRMING something (take/buy/learn/nickname): ONE press, never
-mash - a stray A commits irreversibly. A=YES, B=NO. "Choose a POKeMON"
-listing your OWN party is the party menu, not a gift - B closes it.
-
-Battle: attack_N uses the move in slot N of your team line (it lists
-EMBER third -> attack_3) and plays the whole turn out, ending at the next
-battle menu - no manual cursor work, it finds FIGHT from anywhere in the
-battle menus. flee_battle escapes a wild battle the same way; its
-"[stopped at a choice]" feedback while the battle line still says you are
-IN a battle means the escape failed - just call it again. Never flee
-trainers (it always fails). One battle turn = ONE behavior: pick attack_N
-or flee_battle and you are done deciding. "About this battle" does the
-type math for you: who the enemy is, how hard your moves hit it, how hard
-it hits you. "(resisted)" both ways = a slow grind, fine if healthy; your
-moves "(resisted)" while its moves hit hard = flee.
+Movement and menus, the parts no single behavior owns:
+- Bearings pair with counted walks: "3 south, 4 east" = walk_south_3,
+  walk_east_4. Prefer landmark walks (walk_to_<place>) when one matches
+  your target.
+- Bouncing between two maps = walking in and out of a door: step away.
+- A yes/no CONFIRMING something (take/buy/learn/nickname): ONE deliberate
+  press, never mash - a stray A commits irreversibly. A=YES, B=NO.
+  "Choose a POKeMON" listing your OWN party is the party menu, not a
+  gift - B closes it.
+- One battle turn = ONE behavior (an attack, a flee, or an item) - pick
+  it and you are done deciding. "About this battle" does the type math:
+  who the enemy is, how hard your moves hit, how hard it hits back.
+  "(resisted)" both ways = a slow grind, fine if healthy; your moves
+  resisted while its moves hit hard = flee.
 
 Title screen: press START; CONTINUE resumes, NEW GAME restarts - goals say
 which; NEVER pick anything that deletes/overwrites a save. Naming screens:

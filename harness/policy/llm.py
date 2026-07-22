@@ -60,18 +60,6 @@ location or task changes: where you are, what you are doing, what comes next.
 {recent}"""
 
 
-def _collapse_counted(behaviors: list[str]) -> list[str]:
-    """Display the 36 counted walk variants as one legend entry — the schema
-    enum still carries every exact name; this only tidies the listing."""
-    counted = re.compile(r"walk_(north|south|west|east)_[1-9]$")
-    out = [n for n in behaviors if not counted.fullmatch(n)]
-    if len(out) != len(behaviors):
-        out.append("walk_north_<1-9> / walk_south_<1-9> / walk_west_<1-9> / "
-                   "walk_east_<1-9> (walk EXACTLY that many tiles - e.g. a "
-                   "'3 south, 4 east' bearing = walk_south_3, walk_east_4)")
-    return out
-
-
 def _state_line(key: str, value, spec) -> str | None:
     """One state field -> the sentence the model reads. spec comes from the
     profile's state_lines: a {v} template, a value->sentence map (enums), or
@@ -102,7 +90,7 @@ def render_prompt(template: str, behaviors: list[str], goals: str,
         ram_text = "(unknown)"
     recent_text = ", ".join(recent[-15:]) if recent else "(none)"
     return (template
-            .replace("{behaviors}", ", ".join(_collapse_counted(behaviors)))
+            .replace("{behaviors}", "\n".join(behaviors))
             .replace("{goals}", goals.strip())
             .replace("{ram}", ram_text)
             .replace("{recent}", recent_text)
@@ -184,7 +172,7 @@ class LLMPolicy:
         # grammar enum; the DISPLAYED list gets the collapsed legend lines
         dyn_names = obs.extra.get("dynamic_behaviors", [])
         dyn_legend = obs.extra.get("dynamic_legend", [])
-        shown = self.library.names() + dyn_legend
+        shown = self.library.listing() + dyn_legend
         self._enum_names = self.library.names() + dyn_names
         text = render_prompt(template, shown,
                              obs.goals, obs.ram, obs.recent, self.max_plan,

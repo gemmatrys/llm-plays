@@ -12,7 +12,7 @@
 # Wild battles only - RUN always fails against trainers (game rule).
 # Misuse in the overworld is benign: UP LEFT DOWN RIGHT nets zero displacement.
 name: flee_battle
-description: Flee the current wild battle from anywhere in its menus.
+description: Battle - escape the current WILD battle and play the escape out; if the battle line still says you are in a battle, call it again. Never works on trainer battles.
 steps:
   - {op: advance_text}
   - {button: B, hold_frames: 4, wait_frames: 24}

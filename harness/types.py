@@ -86,6 +86,10 @@ class Behavior:
     name: str
     steps: list[Step]
     source: str = "builtin"  # builtin | skill | llm | claude
+    # what this behavior DOES, in the model's language - served verbatim in
+    # the prompt's allowed-behaviors list (behavior serving: the list is the
+    # documentation; prompt.md never re-teaches individual behaviors)
+    description: str | None = None
     # optional: generate fresh steps at execute time (randomized/reflexive
     # behaviors). When set, the executor calls this instead of using `steps`.
     step_factory: Callable[[], list[Step]] | None = None

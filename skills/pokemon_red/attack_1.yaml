@@ -6,7 +6,7 @@
 # the trailing advance_text plays the whole turn out, ending at the next
 # battle menu ("[stopped at a choice]") or at battle end ("[text closed]").
 name: attack_1
-description: Use the move in slot 1 of party= and play the turn out.
+description: Battle - use the move in slot 1 of your team line and play the whole turn out; finds FIGHT from anywhere in the battle menus.
 steps:
   - {op: advance_text}
   - {button: B, hold_frames: 4, wait_frames: 24}

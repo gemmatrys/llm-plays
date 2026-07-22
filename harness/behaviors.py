@@ -24,6 +24,7 @@ Claude checkpoints grow this library over time; the local LLM selects from it by
 from __future__ import annotations
 
 import random
+import re
 from pathlib import Path
 
 import yaml
@@ -31,8 +32,31 @@ import yaml
 from .types import Behavior, Step
 
 
-def _builtin(name: str, steps: list[Step]) -> Behavior:
-    return Behavior(name=name, steps=steps, source="builtin")
+def _builtin(name: str, steps: list[Step],
+             desc: str | None = None) -> Behavior:
+    return Behavior(name=name, steps=steps, source="builtin",
+                    description=desc)
+
+
+# family lines for the served allowed-behaviors listing: counted walks and
+# single presses would be ~45 near-identical entries; one line each family
+FAMILY_LINES = [
+    ("walk_north / walk_south / walk_west / walk_east",
+     "stride STRAIGHT that way until something stops you (~12 tiles), "
+     "sidestepping a lone obstacle and hopping ledges downward; reports how "
+     "far it went and every side opening it passed - openings are how mazes "
+     "continue. At an area's edge one more step crosses into the next area. "
+     "Repeating it after a stop just bumps the same wall."),
+    ("walk_<direction>_<1-9>",
+     "walk EXACTLY that many tiles (a '3 south, 4 east' bearing = "
+     "walk_south_3, walk_east_4). Straight walks stop BESIDE doors - a "
+     "single press steps through."),
+    ("press_UP / press_DOWN / press_LEFT / press_RIGHT / press_A / "
+     "press_B / press_START / press_SELECT",
+     "one single press: fine positioning (one step), A talks to what you "
+     "face or answers YES, B answers NO or backs out, START opens the "
+     "main menu."),
+]
 
 
 MOVES = ("UP", "DOWN", "LEFT", "RIGHT")
@@ -125,10 +149,15 @@ def fish_move(buttons: list[str], rng: "random.Random | None" = None) -> Behavio
 
 def builtins(buttons: list[str]) -> dict[str, Behavior]:
     lib: dict[str, Behavior] = {
-        "wait": _builtin("wait", [Step(op="wait", wait_frames=30)]),
+        "wait": _builtin("wait", [Step(op="wait", wait_frames=30)],
+                         "stand still a moment (black screens, waiting out "
+                         "a person in the way)."),
         # short, bursty taps — quick presses in rapid succession clear dialogue
         # and confirm menus/naming screens faster than long-held/spaced presses
-        "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=4, wait_frames=6)] * 6),
+        "mash_a": _builtin("mash_a", [Step(button="A", hold_frames=4, wait_frames=6)] * 6,
+                           "several quick A taps - fastest through plain "
+                           "text; NEVER on a yes/no that commits (one "
+                           "deliberate press there)."),
         # RAM-grounded closed loop (executor op "advance_text"): presses A
         # only while a text box is open, stops when it closes or a choice
         # cursor appears, does nothing at all in the overworld — so it can
@@ -136,24 +165,48 @@ def builtins(buttons: list[str]) -> dict[str, Behavior]:
         # open-loop randomized burst (mash_dialogue_steps) survives only in
         # the fish's repertoire.
         "mash_through_dialogue": _builtin(
-            "mash_through_dialogue", [Step(op="advance_text")]),
+            "mash_through_dialogue", [Step(op="advance_text")],
+            "start AND clear a conversation with whoever you face: presses "
+            "A only while text is open, stops the moment a choice appears "
+            "(never answers it). Read its feedback: text closed = move on; "
+            "stopped at a choice = answer with ONE press; nothing opened = "
+            "no one to talk to. Calling it again while still facing someone "
+            "restarts their speech."),
         # explore: a fresh short random walk each run (fish + lost-model use)
         "wander": Behavior(name="wander", steps=wander_steps(),
-                           source="builtin", step_factory=wander_steps),
+                           source="builtin", step_factory=wander_steps,
+                           description="a short random stroll - only when "
+                           "truly lost with no bearing to follow."),
         # escape hatch: crazy random inputs to break out of a wedged state
         "get_unstuck": Behavior(name="get_unstuck",
                                 steps=random_mash_steps(buttons), source="builtin",
-                                step_factory=lambda: random_mash_steps(buttons)),
-        "savestate": _builtin("savestate", [Step(op="savestate")]),
+                                step_factory=lambda: random_mash_steps(buttons),
+                                description="wild random inputs - LAST "
+                                "resort for a wedged screen nothing else "
+                                "answers."),
+        "savestate": _builtin("savestate", [Step(op="savestate")],
+                              "save a progress snapshot."),
     }
     # navigation macros: registered as stubs so the schema enum knows them;
     # the LOOP swaps in a real BFS path at decision time (harness/navigate.py).
     # The wait stub only runs if no map is available that tick. Counted
     # variants (walk_east_3 = exactly up to 3 tiles east) let the model walk
     # a bearing distance instead of always going as far as possible.
+    nav_desc = {
+        "walk_to_exit": "walk through the NEAREST door/exit including the "
+                        "final doormat step - for LEAVING rooms. Outdoors it "
+                        "walks INTO the nearest building: never use it "
+                        "outside.",
+        "walk_to_counter": "walk to the person behind a counter (nurse, "
+                           "clerk) and stop FACING them; if they were off "
+                           "screen it only gets closer - call it again.",
+        "walk_to_grass": "walk into the nearest tall grass and pace inside "
+                         "it - repeat it to hunt wild battles.",
+    }
     for nav in ("walk_north", "walk_south", "walk_west", "walk_east",
                 "walk_to_exit", "walk_to_counter", "walk_to_grass"):
-        lib[nav] = _builtin(nav, [Step(op="wait", wait_frames=8)])
+        lib[nav] = _builtin(nav, [Step(op="wait", wait_frames=8)],
+                            nav_desc.get(nav))  # walk_<dir>: family line
         if nav not in ("walk_to_exit", "walk_to_counter", "walk_to_grass"):
             for n in range(1, 10):
                 lib[f"{nav}_{n}"] = _builtin(f"{nav}_{n}",
@@ -177,7 +230,8 @@ def load_skills(dirs: list[str | Path], base: Path,
                 raw = yaml.safe_load(f.read_text(encoding="utf-8"))
                 steps = [Step(**s) for s in raw["steps"]]
                 lib[raw["name"]] = Behavior(name=raw["name"], steps=steps,
-                                            source="skill")
+                                            source="skill",
+                                            description=raw.get("description"))
             except Exception as e:  # noqa: BLE001 — quarantine, don't crash
                 if errors is not None:
                     errors.append(f"{f.name}: {e}")
@@ -196,6 +250,24 @@ class BehaviorLibrary:
 
     def names(self) -> list[str]:
         return sorted(self._lib)
+
+    def listing(self) -> list[str]:
+        """Behavior serving: the allowed-behaviors list IS the documentation.
+        One line per behavior with its true description; counted walks and
+        single presses collapse to family lines (their members stay in the
+        schema enum via names())."""
+        counted = re.compile(r"walk_(north|south|west|east)_[1-9]$")
+        plain_walk = re.compile(r"walk_(north|south|west|east)$")
+        press = re.compile(r"press_[A-Z]+$")
+        out = [f"{fam} - {desc}" for fam, desc in FAMILY_LINES]
+        for name in sorted(self._lib):
+            if counted.fullmatch(name) or press.fullmatch(name) \
+                    or plain_walk.fullmatch(name):
+                continue  # covered by family lines
+            b = self._lib[name]
+            out.append(f"{name} - {b.description}" if b.description
+                       else name)
+        return out
 
     def reload_skills(self, skills_dirs: list[str], base: Path) -> None:
         """Called by HotSync so checkpoint-authored skills appear live."""

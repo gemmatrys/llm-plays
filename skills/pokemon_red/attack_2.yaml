@@ -1,7 +1,7 @@
 # Slot 2 variant of attack_1 (see that file for the mechanism): pin slot 1,
 # then one DOWN.
 name: attack_2
-description: Use the move in slot 2 of party= and play the turn out.
+description: Battle - use the move in slot 2 of your team line and play the whole turn out; finds FIGHT from anywhere in the battle menus.
 steps:
   - {op: advance_text}
   - {button: B, hold_frames: 4, wait_frames: 24}
