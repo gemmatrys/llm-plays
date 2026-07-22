@@ -468,9 +468,21 @@ class GameLoop:
                     self._recent.append(f"[{b.name}: no path visible]")
         if decision.memory_update is not None:
             # the model rewrote its own notes; store verbatim, never interpret
+            prev_notes = self.runlog.memory()
             self.runlog.set_memory(decision.memory_update)
             self._notes_map = map_now
             self._notes_age = 0
+            # the COACH flag (user 2026-07-22): the model is TOLD that
+            # flagging doubt is free and encouraged - it plays and reports,
+            # the checkpoint makes the hard calls. A note containing COACH
+            # raises the alarm; a wrong flag costs checkpoint minutes, a
+            # suppressed doubt costs the run hours.
+            if ("COACH" in decision.memory_update.upper()
+                    and decision.memory_update != prev_notes):
+                self.runlog.escalate(
+                    "model_flag",
+                    "the model flagged its coach: "
+                    + decision.memory_update[:300])
         else:
             self._notes_age += 1
         if decision.done_goal is not None:
