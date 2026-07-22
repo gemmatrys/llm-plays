@@ -61,7 +61,14 @@ judge. So navigation splits three ways:
   along the row - never step south, that is the ledge") — decided
   2026-07-22 over the alternative of a wired move-to-<place> macro, which
   the user rejected as cheating: the model must still walk the route; the
-  checkpoint provides the legs and the landmarks, never the walking. Run-2: ingest pret
+  checkpoint provides the legs and the landmarks, never the walking.
+  Each sub-step carries its own CHECK — a condition the model validates
+  itself against its state lines — and the model keeps the progress
+  record in its NOTES, fixing them when the screen disagrees (user, same
+  day: a harness-side sub-step tracker was built and REVERTED — knowing
+  which stage of a plan you are in is the model's cognition, validated
+  by it, not computed for it; the harness contributes facts, the goals
+  contribute checkable conditions). Run-2: ingest pret
   walkability grids so waypoint anchors are validated (unwalkable -> snap
   to nearest walkable) instead of guessed, and map-connection headers so
   edge crossings are announced as facts the game itself shows.
