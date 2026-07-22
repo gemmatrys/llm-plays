@@ -11,8 +11,26 @@ Every leaf becomes 1-N numbered micro-goals with CHECKs at run time.
 Coordinates and screen facts marked GUESS need live verification; the
 starter drill especially: READ THE LABEL, never mash a confirm.
 
+MODEL-FACING DERIVATION (this file is checkpoint-voice; the model gets
+a derived view in the goals.md preamble - the run-1 learnings, applied):
+- ACT GRANULARITY ONLY. The model's tree shows acts, never leaves -
+  sub-goals churn constantly (ten rewrites in one gym afternoon); the
+  act list never does. Goal restructuring must never touch the tree
+  text the model reads.
+- Use each act's `player:` line VERBATIM - pre-written player voice,
+  stable across checkpoints and cache-friendly. Never re-word live.
+- Done acts collapse to one "Done:" line (the prune lesson: stamped
+  text left in the prompt correlated with thinking-budget failures);
+  the CURRENT act is marked YOU ARE HERE; future acts stay one line
+  each; checkpoint annotations (risks, GUESS, wedge classes, ledgers)
+  are NEVER sent - they become goal drills when their act arrives.
+- Everything sent obeys the state-line vocabulary: place names exactly
+  as the location line says them, no coordinates, no jargon.
+
 - [ ] BEAT THE GAME — defeat the Elite Four at Indigo Plateau
   - [ ] ACT 0 — Bulbasaur and the errand loop (Pallet/Viridian)
+        player: start the journey - choose BULBASAUR and finish
+        Oak's errand
     - [ ] New game: preset name, mash-safe dialogue until the lab
     - [ ] STARTER = BULBASAUR, verified: at each ball press A to READ
           its label; confirm YES only when the screen names BULBASAUR
@@ -24,6 +42,7 @@ starter drill especially: READ THE LABEL, never mash a confirm.
     - [ ] Buy Poke Balls; catch 2-3 on Routes 1/22 (Pidgey/Rattata/
           Nidoran - species count feeds the Flash aide later)
   - [ ] ACT 1 — BOULDER badge (Brock, Pewter)
+        player: win the BOULDER badge from Brock in Pewter City
     - [ ] Route 2 south + Viridian Forest (catch Pikachu if seen -
           lategame flyer/water answer; grind Bulbasaur to L13: VINE
           WHIP arrives at 13 and trivializes this act)
@@ -32,6 +51,8 @@ starter drill especially: READ THE LABEL, never mash a confirm.
           (If entry wedges: the east-road badge-gate man DRAGS you to
           the gym - walk east toward Route 3 and let him)
   - [ ] ACT 2 — CASCADE badge (Misty, Cerulean)
+        player: cross Mt. Moon and win the CASCADE badge from Misty
+        in Cerulean City
     - [ ] Route 3 trainer gauntlet (6 trainers; heal after)
     - [ ] Mt. Moon: 3 floors, Team Rocket, fossil choice (either is
           fine; do not lose the Moon Stone hunt time) - exit Route 4
@@ -40,6 +61,8 @@ starter drill especially: READ THE LABEL, never mash a confirm.
           Target L18-20. BubbleBeam TM is a keeper for a future water
           catch
   - [ ] ACT 3 — THUNDER badge (Lt. Surge, Vermilion)
+        player: meet Bill, sail the S.S. Anne, and win the THUNDER
+        badge from Lt. Surge in Vermilion City
     - [ ] Nugget Bridge + Routes 24/25 -> Bill's cottage (S.S. Ticket)
     - [ ] Cerulean rocket (backyard dig house), Routes 5/6 south
     - [ ] Vermilion; S.S. Anne: rival battle 2, the Captain -> HM01 CUT
@@ -51,6 +74,8 @@ starter drill especially: READ THE LABEL, never mash a confirm.
           carry the adjacent-can drill; electric vs part-poison Ivysaur
           is survivable. Target L22-24
   - [ ] ACT 4 — RAINBOW badge (Erika, Celadon)
+        player: reach Celadon City through Rock Tunnel and win the
+        RAINBOW badge from Erika
     - [ ] Route 2 aide: HM05 FLASH at 10 owned species - plan catches
           to reach 10 BEFORE Rock Tunnel (species-count subgoal)
     - [ ] Routes 9/10; Rock Tunnel WITH Flash (dark maze without it is
@@ -63,12 +88,16 @@ starter drill especially: READ THE LABEL, never mash a confirm.
           hit hard; bring the Pikachu or a Pidgeotto with Gust/Wing
           Attack as second attacker. Target L26-29
   - [ ] ACT 5 — story gates (Rocket, ghosts, the Flute)
+        player: drive Team Rocket from Celadon, lay the Pokemon
+        Tower ghost to rest, and wake the sleeping Snorlax
     - [ ] Game Corner hideout: lift key, Giovanni fight 1 -> SILPH SCOPE
     - [ ] Pokemon Tower: rival battle 3, Marowak ghost (Scope), Mr.
           Fuji -> POKE FLUTE
     - [ ] Snorlax (Route 12 OR 16): flute, then fight-or-flee; catching
           it is a luxury, not a requirement
   - [ ] ACT 6 — SOUL badge (Koga, Fuchsia)
+        player: reach Fuchsia City, learn to SURF at the Safari
+        Zone, and win the SOUL badge from Koga
     - [ ] South to Fuchsia: Routes 12/13/14/15 (no bike dependency)
     - [ ] Safari Zone run: HM03 SURF (secret house) + GOLD TEETH ->
           warden -> HM04 STRENGTH. Step-limited zone: goals must route
@@ -76,6 +105,8 @@ starter drill especially: READ THE LABEL, never mash a confirm.
     - [ ] Koga: invisible-wall maze (walk the walls patiently);
           poison-vs-poison is safe but slow. Target L35-38
   - [ ] ACT 7 — MARSH badge (Sabrina, Saffron)
+        player: free Silph Co. from Team Rocket and win the MARSH
+        badge from Sabrina in Saffron City
     - [ ] Saffron guard: hand over a Celadon roof drink
     - [ ] Silph Co: 11 floors, card key shortcuts, rival battle 4,
           Giovanni fight 2 -> MASTER BALL (save it; Lapras gift on 7F
@@ -85,14 +116,18 @@ starter drill especially: READ THE LABEL, never mash a confirm.
           back. Teleport-pad maze: goals carry the pad route. Target
           L38-42
   - [ ] ACT 8 — VOLCANO badge (Blaine, Cinnabar)
+        player: surf to Cinnabar Island, unlock the Mansion, and
+        win the VOLCANO badge from Blaine
     - [ ] Teach SURF (Lapras ideal); Routes 19/20/21 south by water
     - [ ] Pokemon Mansion: SECRET KEY maze (statue switches)
     - [ ] Blaine: fire vs grass is BAD - this is Lapras/water's gym.
           Target L40-44
   - [ ] ACT 9 — EARTH badge (Giovanni, Viridian)
+        player: win the EARTH badge from Giovanni in Viridian City
     - [ ] Viridian gym now open: ground/rock vs Razor Leaf - Venusaur's
           gym. Giovanni fight 3. Target L43-46
   - [ ] ACT 10 — the end
+        player: cross Victory Road and defeat the Elite Four
     - [ ] Route 22 rival final; Route 23 badge-gate gauntlet
     - [ ] Victory Road: STRENGTH boulder puzzles (worst navigation in
           the game - goals must carry probed routes, one puzzle per
