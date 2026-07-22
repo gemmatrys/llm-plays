@@ -34,6 +34,19 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
   staged: one bounded random-input self-rescue first, then escalation rather than
   waiting for the next scheduled checkpoint.
 
+**The harness is GLUE (user, 2026-07-22 — the definitive role statement).**
+Three parties: the LOCAL LLM plays the game; the CHECKPOINT (Claude) plans
+the strategy; the HARNESS glues them — it (a) provides useful information
+the player cannot infer for itself, (b) provides the mechanisms that
+convey intent: the model's intents down into the game (skills, walks,
+menu geometry), the model's claims and flags up to the checkpoint
+(stamps, COACH flags, alarms), and the checkpoint's strategy down to the
+model (goals presentation). The harness never plans, never judges, never
+tracks strategy state — quest trees, goal minting, validation, and
+progression bookkeeping are checkpoint work; two harness-side attempts at
+strategy mechanics (a route tracker, a quest-tree walker) were rejected
+on this principle before running.
+
 **Navigation division of labor (decided 2026-07-21, after the limits-4
 forest arc).** Constraint set by the user: the local LLM is not very smart,
 everything it reads is natural language, and the harness must not direct or
