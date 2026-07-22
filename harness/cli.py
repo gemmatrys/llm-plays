@@ -56,6 +56,7 @@ def main() -> None:
 
     runlog = RunLog(base, profile.name, args.run_id,
                     initial_goals=prompts.initial_goals,
+                    initial_quests=prompts.initial_quests,
                     alert_cmd=profile.escalation.alert_cmd,
                     alert_cooldown_s=profile.escalation.alert_cooldown_s)
     # segment marker: a restart (hotfix, recovery) must not smear its downtime
@@ -98,7 +99,10 @@ def main() -> None:
 
     # seeding report — the prompt must exist before the game starts
     if runlog.resumed:
-        print("[harness] resumed run: existing goals.md kept")
+        print("[harness] resumed run: existing goals/quests kept")
+    elif prompts.initial_quests:
+        print(f"[harness] quests.yaml seeded from prompts/{profile.name}/"
+              "quests.yaml (structured quest feed active)")
     elif prompts.initial_goals:
         print(f"[harness] goals.md seeded from prompts/{profile.name}/goals.md")
     else:

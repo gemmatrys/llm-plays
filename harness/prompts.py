@@ -16,7 +16,12 @@ Layout:
                                 placeholders at the bottom so the static head
                                 stays prefix-cacheable.
     prompts/<game>/goals.md     seed copied to runs/<game>/<run-id>/goals.md
-                                when a new run starts
+                                when a new run starts (legacy strategy feed)
+    prompts/<game>/quests.yaml  seed copied to runs/<game>/<run-id>/
+                                quests.yaml when a new run starts — the
+                                structured quest tree (checkpoint-authored,
+                                harness-fed piecemeal; supersedes goals.md
+                                when present)
 """
 from __future__ import annotations
 
@@ -28,13 +33,17 @@ from pathlib import Path
 class GamePrompts:
     prompt_path: Path | None = None
     initial_goals: str | None = None
+    initial_quests: str | None = None
 
     @classmethod
     def load(cls, base: Path, game: str) -> "GamePrompts":
         d = base / "prompts" / game
         prompt = d / "prompt.md"
         goals = d / "goals.md"
+        quests = d / "quests.yaml"
         return cls(
             prompt_path=prompt if prompt.is_file() else None,
             initial_goals=goals.read_text(encoding="utf-8") if goals.is_file() else None,
+            initial_quests=quests.read_text(encoding="utf-8")
+            if quests.is_file() else None,
         )

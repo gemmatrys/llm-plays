@@ -1,0 +1,1221 @@
+# Quest tree — Pokémon Red, Bulbasaur run. SEED: copied to the run dir at
+# creation; the live copy is machine-rewritten (status marks) and
+# checkpoint-edited (refinements, un-stamps) — comments survive only here.
+#
+# Contract (harness/quests.py renders this; PLAN §1):
+# - model sees: act ladder (done collapsed, YOU ARE HERE), current act's
+#   done quests one line, ONE current quest + DONE line + time budget,
+#   global rules + current act's rules_extra. Everything else (verify,
+#   ids, comments) is checkpoint-side.
+# - model marks: done_goal -> status done (goal_stamped / act_stamped
+#   escalations); COACH note -> status coach. Checkpoint validates
+#   against each act's `verify` and edits this file live.
+# - Acts 1-10 quests are DRAFTS from plans/pokemon_red/master-plan.md:
+#   refine each act at its act_stamped alarm BEFORE it goes live —
+#   facts marked GUESS in the master plan stay guesses here until
+#   fetched from pret or verified live. Structure over correctness.
+version: 1
+game_goal: Beat the game - defeat the Elite Four at Indigo Plateau,
+  which needs ALL 8 GYM BADGES first.
+preamble: |
+  Your current quest is one small step on this road. Unsure about it in
+  ANY way - looks done, looks impossible, or you just do not know what
+  to do? Put "COACH: <what and why>" in your notes. The coach is
+  alerted at once and makes the hard calls; flagging is always the
+  right move.
+rules: |
+  Rules (the FIRST rule that fits the screen wins - run it and stop
+  thinking; the current quest's own text outranks this list; a rule you
+  cannot follow right now does not apply - skip it without discussion):
+  - Poke Balls only work on WILD Pokemon (the battle line says WILD);
+    in a trainer battle they are simply lost. Only throw a ball when
+    the current quest is a catching quest.
+  - Anything that CONFIRMS something (take, buy, learn, a yes/no about
+    a specific choice) gets ONE press after READING what the screen
+    names - never a mash.
+  - When the screen says your Pokemon is evolving, WAIT it out - press
+    nothing; B cancels evolutions forever.
+  - Buy ONLY what a quest lists. Nothing else.
+  - Nickname prompts: NO (press B). If a letter grid ever opens
+    anyway: B only deletes letters - escape with press_A, press_START,
+    press_A.
+  - Leaving a building puts you ON its doorstep: a step UP walks back
+    in. Step away first. Entering any door is a single step onto it -
+    walks stop BESIDE doors on purpose.
+  - In the little gate buildings, cross the room with plain walks and
+    step through the FAR doorway - the one ahead, not the one you came
+    in by.
+  - Mark a quest done when, as far as you can tell, its DONE line
+    happened - the coach checks every stamp and fixes mistakes, so an
+    honest wrong stamp costs nothing. What you must NEVER do is stamp
+    a quest to escape it because it feels hard - that is what the
+    "COACH:" flag is for.
+acts:
+  - id: act0
+    title: Start the journey - choose BULBASAUR and finish Oak's errand
+    verify: "team line shows BULBASAUR (and nothing else early); Pokedex
+      obtained; owned species >= 3; POKE BALLs in bag. Wrong starter =
+      the ONE pre-authorized loadstate rollback."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_1
+        (TACKLE).
+      - POISONED outside battle: use_antidote once the bag has one - or
+        any Pokemon Center. Do not walk it off; it drains HP.
+    quests:
+      - id: a0-newgame
+        title: Start a brand-new game
+        status: todo
+        budget_min: 15
+        text: |
+          Start a BRAND-NEW game. This cartridge has no saved game: on
+          the title screen pick NEW GAME (the usual CONTINUE rule does
+          not apply - there is nothing to continue). Mash through the
+          professor's welcome speech. At the NAME screen: press DOWN
+          once, then A - that takes the first ready-made name. If a
+          screen full of letters opens anyway: press_A, then
+          press_START, then press_A escapes it. The same happens once
+          more for the other boy's name.
+        done: your location reads Red's House 2F
+      - id: a0-outside
+        title: Went downstairs and outside
+        status: todo
+        budget_min: 5
+        text: |
+          Go downstairs and outside. The stairs work by walking onto
+          them; the front door is at the bottom of the house.
+        done: your location reads Pallet Town
+      - id: a0-oak
+        title: Was walked to Oak's lab
+        status: todo
+        budget_min: 10
+        text: |
+          Walk NORTH toward the tall grass at the top edge of town. An
+          old man will stop you himself and walk you to his lab - that
+          is the plan, let him; mash through everything he says. You
+          never reach the grass and that is correct.
+        done: your location reads Professor Oak's lab
+      - id: a0-starter
+        title: Chose BULBASAUR
+        status: todo
+        budget_min: 15
+        text: |
+          Choose BULBASAUR - read before you touch. Three Poke Balls
+          sit on the table. At each ball: press A once and READ the
+          words - the screen names which Pokemon it is. Keep progress
+          in your notes ("ball 1 was CHARMANDER, trying next") and fix
+          the notes when the screen disagrees.
+          (a) Read a ball's label.
+              Check: the dialogue names a Pokemon.
+          (b) If it names BULBASAUR: answer YES with ONE press. If it
+              names anything else: answer NO with ONE press of B and
+              read the next ball. Never confirm a ball you have not
+              read.
+              Check: the team line shows BULBASAUR.
+          (c) The nickname question: answer NO (one press B).
+        done: your team line shows BULBASAUR
+      - id: a0-rival1
+        title: Fought the rival's Charmander
+        status: todo
+        budget_min: 15
+        text: |
+          Beat the rival boy's CHARMANDER (he attacks you before you
+          can leave). Use attack_1 (TACKLE) every turn; when he uses
+          GROWL nothing bad happens, keep attacking. If you lose you
+          only lose some money - carry on either way.
+        done: the battle is over and your location still reads
+          Professor Oak's lab
+      - id: a0-viridian
+        title: Walked Route 1 to Viridian
+        status: todo
+        budget_min: 20
+        text: |
+          Walk to Viridian City: leave the lab (south over the mats),
+          walk north out of town onto Route 1 (the gap in the top
+          edge, near the grass), then north the whole length of Route
+          1. Wild PIDGEY and RATTATA live in the grass: fight them
+          with TACKLE for experience or flee_battle - either is fine;
+          you have no Poke Balls yet, so never try to catch.
+        done: your location reads Viridian City
+      - id: a0-parcel
+        title: Took the parcel
+        status: todo
+        budget_min: 10
+        text: |
+          Get the parcel: enter the Viridian Poke Mart (the "Viridian
+          Mart door" bearing), walk to the counter and talk - the
+          clerk hands you a parcel for Professor Oak without being
+          asked.
+        done: '"[bag: +1 OAK''s PARCEL]" happened'
+      - id: a0-deliver
+        title: Delivered it, got the Pokedex
+        status: todo
+        budget_min: 20
+        text: |
+          Deliver it: walk back south to Pallet Town (Route 1 south -
+          the little ledges hop DOWN only; hopping down is a shortcut,
+          never try to climb one), enter the lab, talk to Professor
+          Oak and mash through the scene - he takes the parcel, and
+          both boys receive a POKEDEX.
+        done: '"[bag: -1 OAK''s PARCEL]" happened and the POKEDEX scene
+          played'
+      - id: a0-shop
+        title: Bought balls and antidotes
+        status: todo
+        budget_min: 15
+        text: |
+          Shop: return north to Viridian City and buy at the Mart:
+          buy_poke_ball_x5, then buy_antidote_x3. Every "[bag: +N ...]"
+          event is the proof. This shelf sells no POTIONs - Potion
+          rules do not apply until Pewter City.
+        done: the bag shows 5 POKE BALLs and 3 ANTIDOTEs
+      - id: a0-catch-r1
+        title: Caught on Route 1
+        status: todo
+        budget_min: 30
+        text: |
+          Catch your first Pokemon in the Route 1 grass (south gap of
+          town): fight a PIDGEY or RATTATA down to yellow or red HP
+          with TACKLE, then use_poke_ball. If the ball misses, hit
+          once more and throw again. Catch one PIDGEY and one RATTATA.
+        done: your state line says you have owned 3 or more kinds of
+          Pokemon
+      - id: a0-catch-r22
+        title: Caught a Nidoran on Route 22
+        status: todo
+        budget_min: 30
+        text: |
+          Catch a NIDORAN on Route 22: the road WEST out of Viridian
+          (the "gap to Route 22" bearing). Same drill: weaken with
+          TACKLE, use_poke_ball. Either kind of NIDORAN counts. If the
+          rival boy appears and demands a fight: fight him with TACKLE
+          - a loss costs money only.
+        done: your state line says you have owned 4 or more kinds of
+          Pokemon
+      - id: a0-heal
+        title: Healed at the Viridian Center
+        status: todo
+        budget_min: 10
+        text: |
+          Heal at the Viridian Pokemon Center (the "Viridian Center
+          door" bearing): walk to the counter, answer the nurse's
+          question with ONE press A, mash through the rest. Then stay
+          near the Center - the next quest arrives.
+        done: your team is at full HP and your location reads Viridian
+          Pokemon Center
+  - id: act1
+    title: Win the BOULDER badge from Brock in Pewter City
+    verify: "RAM badges byte 0x00 -> BOULDER bit set; TM34 bag event.
+      (Two false BOULDERBADGE stamps happened in limits-4 at badges=0 -
+      the byte is the anchor, never the announcement.)"
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_1
+        (TACKLE) until VINE WHIP is learned, then attack_4 (VINE WHIP).
+      - No POTIONs are in the bag until Pewter - Potion rules do not
+        apply in the forest; poison gets use_antidote right away.
+    quests:
+      - id: a1-route2
+        title: Reached Route 2
+        status: todo
+        budget_min: 10
+        text: |
+          Walk north through Viridian to the top edge (the "gap to
+          Route 2" bearing). An old man mid-town shows off how to
+          catch a Pokemon (a scripted scene): mash his speech.
+        done: your location reads Route 2
+      - id: a1-gate
+        title: Entered the forest
+        status: todo
+        budget_min: 10
+        text: |
+          North on Route 2 to the forest gate building (the "forest
+          gate door" bearing); cross the room with plain walks and
+          step through the doorway ahead into the trees.
+        done: your location reads Viridian Forest
+      - id: a1-forest-legs
+        title: Crossed the forest maze
+        status: todo
+        budget_min: 45
+        text: |
+          The forest is a MAZE - do not chase the exit bearing
+          directly; it crosses tree walls. Walk the legs in order and
+          keep them in your notes ("legs done: a, b"):
+          (a) to "the path north (east side)" bearing.
+              Check: it reads "you are here" or 1-2 tiles.
+          (b) north, then west along "the top corridor" bearing.
+              Check: it reads "you are here" or 1-2 tiles.
+          (c) down the west lane past "the west side path" toward
+              "forest exit corner". A dropped item sits near the lane
+              - pick it up ONLY if it reads 1-2 tiles while you are on
+              the path.
+              Check: "forest exit corner" reads 3 tiles or less.
+        done: '"forest exit corner" reads 3 tiles or less'
+      - id: a1-grind
+        title: Ground to L13, hunted Pikachu
+        status: todo
+        budget_min: 90
+        text: |
+          Grind and catch in the forest grass near the exit corner:
+          - catch PIKACHU if one EVER appears (rare and precious -
+            always keep 2 balls spare for it);
+          - catch one WEEDLE or CATERPIE (cheap, once);
+          - fight everything else with TACKLE for experience. The BUG
+            CATCHER trainers on the path pay money and give the best
+            experience - fight the ones that stop you.
+          Track levels in your notes ("L9... L11..."). If HP goes red
+          twice with no way to heal, walk back to the Viridian Center,
+          heal, and return through the gate.
+        done: your team line shows BULBASAUR at level 13 or higher
+          with VINE WHIP on its move list
+      - id: a1-pewter
+        title: Reached Pewter
+        status: todo
+        budget_min: 15
+        text: |
+          Exit the forest north: the doormats at "forest exit corner",
+          through the north gate building (far doorway again), then
+          Route 2 north to the "gap to Pewter" bearing. Do NOT enter
+          the cave door on the way (its time comes much later).
+        done: your location reads Pewter City
+      - id: a1-heal
+        title: Healed at Pewter
+        status: todo
+        budget_min: 10
+        text: |
+          Heal at the Pewter Center (the "Pewter Center door"
+          bearing).
+        done: your team is at full HP and your location reads Pewter
+          Pokemon Center
+      - id: a1-potions
+        title: Bought Potions
+        status: todo
+        budget_min: 15
+        text: |
+          Buy POTIONs at the Pewter Mart (the "Pewter Mart door"
+          bearing) until the bag holds 6 - buy_potion_x6, or fewer if
+          money runs low; keep at least 600 in reserve. Every
+          "[bag: +N POTION]" event is the proof.
+        done: the bag shows 6 POTIONs, or money is at the reserve
+          floor
+      - id: a1-doormat
+        title: Stood on the gym doormat
+        status: todo
+        budget_min: 20
+        text: |
+          Walk to "the doormat below the Gym entrance" bearing. The
+          gym yard opens ONLY from the west; keep the legs in your
+          notes:
+          (a) from the Center, walk north up the west side of town.
+          (b) turn east into the yard row toward the doormat.
+          (c) stand on the doormat.
+          The south edge of the yard row is a ONE-WAY LEDGE - a fall
+          means starting again from (a); that is a restart, not a
+          failure. If the yard refuses you twice, flag COACH and walk
+          EAST along the main road instead - a man there stops anyone
+          without a badge and WALKS THEM to the Gym himself; mash his
+          speech and do not walk away.
+        done: '"the doormat below the Gym entrance" reads "you are
+          here"'
+      - id: a1-enter
+        title: Entered the gym
+        status: todo
+        budget_min: 5
+        text: |
+          Enter the gym: one step UP through the door above you
+          (press_UP).
+        done: your location reads Pewter Gym
+      - id: a1-jr
+        title: Beat the JR TRAINER
+        status: todo
+        budget_min: 15
+        text: |
+          Walk toward the "Brock" bearing. The JR TRAINER on the way
+          must be fought (trainer battles cannot be fled): VINE WHIP
+          (attack_4) beats his DIGLETT and SANDSHREW quickly. Below
+          half HP afterward: use_potion.
+        done: the "Brock" bearing reads 2 tiles or less
+      - id: a1-brock
+        title: Beat Brock
+        status: todo
+        budget_min: 45
+        text: |
+          Beat BROCK for the BOULDER badge: talk to him. His GEODUDE
+          and ONIX are rock - VINE WHIP (attack_4) hits them very
+          hard, two hits each. When ONIX is "storing energy" that is
+          BIDE - it returns double the damage it takes; that turn is a
+          fine use_potion turn. use_potion whenever you fall below
+          half HP. If you black out you wake at the Center with half
+          your money gone - heal and march back; after TWO losses,
+          grind the forest to level 15 first.
+        done: 'the badge announcement happened and "[bag: +1 TM34]"'
+  - id: act2
+    title: Cross Mt. Moon and win the CASCADE badge from Misty in
+      Cerulean City
+    verify: "badges byte has CASCADE bit; TM11 bag event; a fossil bag
+      event on the way."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (VINE WHIP); bugs and birds resist it - attack_1 (TACKLE)
+        those.
+      - Wild battles you do not need: flee_battle. Trainers cannot be
+        fled.
+    quests:
+      - id: a2-restock
+        title: Restocked at Pewter
+        status: todo
+        budget_min: 15
+        text: |
+          Restock at the Pewter Mart before leaving - there is no shop
+          again until the far side of the mountain. In priority order,
+          skipping what you cannot afford: POTIONs to 6, 1 ESCAPE
+          ROPE, 2 ANTIDOTEs, 2 POKE BALLs. The bag events are the
+          proof.
+        done: the list is bought or money is spent down to about 100
+      - id: a2-route3
+        title: Fought down Route 3
+        status: todo
+        budget_min: 45
+        text: |
+          Leave Pewter east (the "east gap to Route 3" bearing) onto
+          ROUTE 3. Trainers line this road; the ones facing the path
+          stop you - fight them, use_potion below half HP. At the far
+          east end the road climbs north to ROUTE 4 and a Pokemon
+          Center by the cave mouth. Heal there. Inside, a man sells a
+          MAGIKARP for 500: ONE press B, do not buy.
+        done: your team is at full HP and your location reads Mt. Moon
+          Pokemon Center
+      - id: a2-mtmoon-1f
+        title: Crossed Mt Moon 1F
+        status: todo
+        budget_min: 45
+        text: |
+          Enter MT MOON (the "cave entrance" bearing) at full HP. Wild
+          ZUBAT and GEODUDE live here: flee what you do not need, but
+          catch ONE ZUBAT if balls allow. Two dropped items sit on the
+          way (bearings) - face each, press A, read the bag event. The
+          way down is the northwest ladder (the "ladder down (1F
+          northwest)" bearing); beat the HIKER standing over it.
+        done: your location reads Mt. Moon B1F
+      - id: a2-mtmoon-deep
+        title: Fossils and daylight
+        status: todo
+        budget_min: 45
+        text: |
+          Cross B1F (the "ladder down to the bottom floor" bearing) to
+          the bottom floor. ROCKETS in black fight you on the way. A
+          SUPER NERD guards two fossils: beat him, take the LEFT one,
+          answer its question with ONE press A. If a PARAS appears
+          down here and a spare ball remains: weaken with TACKLE and
+          catch it. Leave by "ladder out past the fossils", then the
+          "daylight exit to Route 4".
+        done: your location reads Route 4 and a fossil's bag event
+          happened
+      - id: a2-cerulean
+        title: Reached Cerulean
+        status: todo
+        budget_min: 15
+        text: |
+          Walk EAST the whole length of Route 4 into CERULEAN CITY
+          (the "gap to Cerulean" bearing). The ledges beside the road
+          hop SOUTH one-way: dropping is fine, climbing back is
+          impossible - keep east on whichever level you land.
+        done: your location reads Cerulean City
+      - id: a2-heal
+        title: Healed at Cerulean
+        status: todo
+        budget_min: 10
+        text: |
+          Heal at the Cerulean Center (the "Cerulean Center door"
+          bearing). BULBASAUR evolves at level 16: if the screen says
+          it is evolving, WAIT - never press B during the change.
+        done: your team is at full HP and your location reads Cerulean
+          Pokemon Center
+      - id: a2-grind
+        title: Ground to L18+
+        status: todo
+        budget_min: 45
+        text: |
+          If the team line is below IVYSAUR level 18: grind the grass
+          beside the city (south, by the Route 4 ledges) until it
+          reads 18 or higher. Do NOT cross the bridge north of town
+          yet - its trainers are the next act's business.
+        done: your team line shows IVYSAUR at level 18 or higher
+      - id: a2-misty
+        title: Beat Misty
+        status: todo
+        budget_min: 45
+        text: |
+          Beat MISTY in the Cerulean Gym (north part of town; one
+          swimmer trainer stands before her). Her STARYU and STARMIE
+          are water: VINE WHIP hits them double. STARMIE hits hard -
+          use_potion below half and keep attacking. After TWO losses,
+          grind to level 20 and return.
+        done: 'the badge announcement happened and "[bag: +1 TM11]"'
+  - id: act3
+    title: Meet Bill, sail the S.S. Anne, and win the THUNDER badge
+      from Lt. Surge in Vermilion City
+    verify: "badges byte has THUNDER bit; HM01 and TM24 bag events;
+      S.S. TICKET obtained then consumed; CUT on the team's move list."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (VINE WHIP); bugs and birds and fire: attack_1.
+      - When a level-up asks to learn POISONPOWDER: YES, and forget
+        GROWL (read the menu, one press per screen).
+    quests:
+      - id: a3-rival
+        title: Beat the rival at the bridge
+        status: todo
+        budget_min: 30
+        text: |
+          Heal, then walk north out of Cerulean toward the bridge. The
+          RIVAL waits at its foot: his PIDGEOTTO resists vines -
+          TACKLE it; his ABRA only teleports in place - free hits; his
+          CHARMANDER resists vines - TACKLE. use_potion below half.
+        done: the rival is beaten (his goodbye speech happened)
+      - id: a3-bridge
+        title: Cleared Nugget Bridge
+        status: todo
+        budget_min: 45
+        text: |
+          NUGGET BRIDGE: five trainers in a row, one fight at a time;
+          heal at the Center between fights if below half (beaten
+          trainers stay beaten). The man at the far end gives a NUGGET
+          and then attacks - fight him too.
+        done: '"[bag: +1 NUGGET]" happened and no one on the bridge
+          stops you'
+      - id: a3-bill
+        title: Got the S.S. Ticket
+        status: todo
+        budget_min: 60
+        text: |
+          Follow the road east then north to BILL'S HOUSE (Routes 24
+          and 25; about ten trainers stop you on the way - fight them,
+          use_potion below half; catch ONE ODDISH if it appears).
+          At the cottage: talk to the creature on the floor - it is
+          BILL; mash his story, answer YES to help, walk to the
+          MACHINE and press A, then talk to Bill again.
+        done: '"[bag: +1 S.S. TICKET]" happened'
+      - id: a3-rocket-house
+        title: Chased the Cerulean burglar
+        status: todo
+        budget_min: 30
+        text: |
+          Back to Cerulean; heal. The house north of the gym was
+          burgled: enter, walk out the smashed back wall, and fight
+          the ROCKET in the yard - he hands over TM28 when beaten.
+        done: '"[bag: +1 TM28]" happened'
+      - id: a3-south
+        title: Underground to Vermilion
+        status: todo
+        budget_min: 40
+        text: |
+          South out of Cerulean (Route 5, one-way ledges downhill).
+          The Saffron gate guard turns you back - use the UNDERGROUND
+          PATH instead: enter the house beside the gate, take the
+          stairs, walk the long tunnel, come up on Route 6, and
+          continue south into VERMILION CITY. Heal at the Center.
+        done: your location reads Vermilion Pokemon Center and the
+          team is at full HP
+      - id: a3-ship
+        title: Got HM01 from the captain
+        status: todo
+        budget_min: 60
+        text: |
+          THE SHIP leaves forever once you walk off it - everything on
+          board happens THIS visit. Board at the dock south of town
+          (your ticket is checked automatically). Work toward the
+          CAPTAIN'S room at the top of the stern stairs. The RIVAL
+          blocks the way: same answers as the bridge - TACKLE the
+          bird, VINE WHIP the rest, use_potion below half. In the
+          Captain's room, talk and mash - you rub his back and he
+          hands over HM01. Do not leave the ship before the bag event.
+        done: '"[bag: +1 HM01]" happened'
+      - id: a3-cut
+        title: Taught CUT
+        status: todo
+        budget_min: 15
+        text: |
+          Leave the ship (it sails as you step off - expected). Teach
+          CUT: use HM01 on IVYSAUR and forget TACKLE (read each menu,
+          one deliberate press per screen). CUT becomes your neutral
+          attack in slot 1.
+        done: CUT is on the team line's move list
+      - id: a3-cans
+        title: Solved the trash cans
+        status: todo
+        budget_min: 45
+        text: |
+          The gym door is behind a small TREE: stand beside it,
+          use_cut, and enter. Inside, the door to the leader is locked
+          by TWO switches hidden in TRASH CANS: press A on cans; when
+          one clicks, the second switch is ALWAYS in a can touching
+          it - check each neighbor. A wrong neighbor resets both
+          (lights out, start over - that is the puzzle working, not a
+          bug; note it, do not flag it). Gym trainers may interrupt -
+          electric hits IVYSAUR for half.
+        done: the locked gate opens (both switches clicked)
+      - id: a3-surge
+        title: Beat Lt. Surge
+        status: todo
+        budget_min: 45
+        text: |
+          Beat LT. SURGE: his VOLTORB, PIKACHU, and RAICHU are all
+          electric - IVYSAUR takes half from it; VINE WHIP them
+          (attack_4). use_potion below half.
+        done: 'the badge announcement happened and "[bag: +1 TM24]"'
+      - id: a3-tm24
+        title: Taught Thunderbolt
+        status: todo
+        budget_min: 10
+        text: |
+          If PIKACHU is on the team: use TM24 on PIKACHU - learn
+          THUNDERBOLT, forget GROWL (read the menus, one press per
+          screen). If there is no Pikachu, mark this done and move on.
+        done: THUNDERBOLT is on Pikachu's move list, or the team has
+          no Pikachu
+  - id: act4
+    title: Reach Celadon City through Rock Tunnel and win the RAINBOW
+      badge from Erika
+    verify: "badges byte has RAINBOW bit; HM05 + TM13 + TM21 bag
+      events; FLASH taught; owned species >= 10 confirmed by Pokedex
+      RAM at the aide."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (VINE WHIP); bugs, birds, fire, grass: attack_1 (CUT is slot
+        1 after the S.S. Anne).
+      - The second FRESH WATER is spoken for - never drink it, never
+        give it away; a quest will say when.
+    quests:
+      - id: a4-species
+        title: Counted to 10 kinds
+        status: todo
+        budget_min: 30
+        text: |
+          The aide ahead pays out only at 10 kinds of Pokemon owned -
+          your state line carries the count. If it is below 10: the
+          house by the Vermilion Center gives an OLD ROD free (talk,
+          YES) - fish a MAGIKARP from any water edge (+1); the cave
+          ahead guarantees DIGLETT (+1). Plan the gap in your notes.
+        done: your state line says you have owned 10 or more kinds,
+          or your notes list the catches that will get there
+      - id: a4-diglett
+        title: Through Diglett's Cave
+        status: todo
+        budget_min: 30
+        text: |
+          DIGLETT'S CAVE: the cave door is a short walk east of
+          Vermilion. Inside, catch ONE DIGLETT (they are everywhere),
+          then walk the single long tunnel to the far ladder and out.
+        done: your location reads Route 2
+      - id: a4-flash
+        title: Got and taught FLASH
+        status: todo
+        budget_min: 25
+        text: |
+          A few steps south, enter the gate building and go UPSTAIRS:
+          Professor Oak's AIDE checks your Pokedex and hands over HM05
+          at 10 kinds. Then teach FLASH: use HM05 on PIKACHU, forget
+          QUICK ATTACK (one press per screen). No Pikachu? Catch a
+          VOLTORB on Route 10 before the tunnel and teach it there.
+        done: '"[bag: +1 HM05]" happened and FLASH is on a team move
+          list'
+      - id: a4-repels
+        title: Restocked in Cerulean
+        status: todo
+        budget_min: 45
+        text: |
+          Return: back through Diglett's Cave to Vermilion, north
+          through the Underground Path to Cerulean. Heal, then buy 3
+          REPELs (buy_repel_x3) at the Cerulean Mart.
+        done: the bag shows 3 REPELs and the team is at full HP in
+          Cerulean
+      - id: a4-route9
+        title: Route 9 to the tunnel Center
+        status: todo
+        budget_min: 45
+        text: |
+          East out of Cerulean along ROUTE 9 - a long trainer road;
+          fight what stops you, use_potion below half - to the Pokemon
+          Center on Route 10 by the tunnel mouth. Heal.
+        done: your location reads Rock Tunnel Pokemon Center and the
+          team is at full HP
+      - id: a4-tunnel
+        title: Crossed Rock Tunnel
+        status: todo
+        budget_min: 90
+        text: |
+          ROCK TUNNEL: at the mouth use_repel; the moment the screen
+          goes dark inside, use_flash - it lights the cave. Two floors
+          of ladders; walk the legs and keep them in your notes:
+          (a) to the first ladder down;
+          (b) across the lower floor to the ladder back up;
+          (c) the upper floor's south run to the last ladder;
+          (d) the lower corridor to daylight.
+          Trainers are frequent and cannot be fled. Re-Repel when wild
+          battles start breaking through.
+        done: your location reads Route 10 and daylight is back
+      - id: a4-lavender
+        title: Rested in Lavender
+        status: todo
+        budget_min: 15
+        text: |
+          South into LAVENDER TOWN; heal at the Center. The tower here
+          is haunted and its time is later - note it and leave it
+          alone.
+        done: your location reads Lavender Pokemon Center and the team
+          is at full HP
+      - id: a4-celadon
+        title: Underground to Celadon
+        status: todo
+        budget_min: 30
+        text: |
+          West onto Route 8. The Saffron gate turns you back again -
+          the UNDERGROUND PATH house just south of the gate leads
+          under the city to Route 7; come up and continue west into
+          CELADON CITY. Heal at the Center.
+        done: your location reads Celadon Pokemon Center and the team
+          is at full HP
+      - id: a4-store
+        title: Department store errands
+        status: todo
+        budget_min: 45
+        text: |
+          The DEPARTMENT STORE is the tall building. Three errands,
+          checked off in your notes:
+          (a) ROOF: buy TWO FRESH WATERs from the vending machine
+              (200 each). Check: two "[bag: +1 FRESH WATER]" events.
+          (b) ROOF: the little girl beside the machines - give her ONE
+              FRESH WATER (talk, YES): she hands over TM13. The OTHER
+              Fresh Water is spoken for - keep it.
+              Check: "[bag: +1 TM13]".
+          (c) 4F: buy ONE THUNDER STONE (buy_thunder_stone_x1) if
+              money is above 3500. Check: "[bag: +1 THUNDER STONE]".
+        done: all three checks are in your notes (or money blocked (c))
+      - id: a4-raichu
+        title: Evolved Raichu
+        status: todo
+        budget_min: 10
+        text: |
+          If PIKACHU is on the team with THUNDERBOLT learned: use the
+          THUNDER STONE on PIKACHU - it becomes RAICHU. When the
+          screen shows it changing, WAIT - never press B during an
+          evolution. No Pikachu or no stone: mark this done.
+        done: the team line shows RAICHU, or there is no
+          Pikachu/stone
+      - id: a4-growlithe
+        title: Hunted a Growlithe
+        status: todo
+        budget_min: 30
+        text: |
+          Optional but valuable: the grass on Route 7 (just east of
+          town) hides GROWLITHE - a fire Pokemon that makes the next
+          gym easy. Weaken with CUT (fire resists vines, so CUT hits
+          harder here), then use_poke_ball. If the budget expires
+          without one, move on without flagging.
+        done: GROWLITHE is on the team or in the box, or the budget
+          expired
+      - id: a4-erika
+        title: Beat Erika
+        status: todo
+        budget_min: 60
+        text: |
+          Beat ERIKA in the Celadon Gym (south-center of town; if a
+          small tree blocks the way, use_cut). Her VICTREEBEL,
+          TANGELA, and VILEPLUME are grass: IVYSAUR takes almost
+          nothing from them but its vines do little back. Lead
+          GROWLITHE if caught - its EMBER hits them all double.
+          Otherwise: CUT for steady damage, use_potion through the
+          sleep and poison powders, and win by patience. After TWO
+          losses, grind to level 29 and return.
+        done: 'the badge announcement happened and "[bag: +1 TM21]"'
+  - id: act5
+    title: Drive Team Rocket from Celadon, lay the Pokemon Tower ghost
+      to rest, and wake the sleeping Snorlax
+    verify: "SILPH SCOPE and POKE FLUTE bag events; LIFT KEY event on
+      the way; location read south of the Route 12 Snorlax spot. No
+      badge this act."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4.
+      - IN THE TOWER: never use CUT or any normal move on a GHOST -
+        it does nothing at all. VINE WHIP, RAZOR LEAF, EMBER, and
+        THUNDERBOLT all work.
+      - When a level-up asks to learn RAZOR LEAF: YES, forget VINE
+        WHIP. Asks to learn GROWTH: NO (one press B).
+    quests:
+      - id: a5-poster
+        title: Opened the hideout
+        status: todo
+        budget_min: 30
+        text: |
+          In the GAME CORNER (west-center Celadon), a ROCKET guards
+          the poster on the back wall: talk, fight him, then press A
+          on the POSTER - the wall opens onto a stairway down.
+        done: your location reads Rocket Hideout B1F
+      - id: a5-descent
+        title: Descended the hideout
+        status: todo
+        budget_min: 120
+        text: |
+          Descend floor by floor to the bottom. Grunts fight on every
+          floor. Two floors carry ARROW TILES: stepping on an arrow
+          SLIDES you until a stop - you cannot steer mid-slide; that
+          is the floor working, not a glitch. Note which slides you
+          have tried ("slide by the crates: lands at lockers") and
+          combine them until the stairs down appear reachable. Keep
+          legs in your notes per floor.
+        done: your location reads Rocket Hideout B4F
+      - id: a5-liftkey
+        title: Found the Lift Key
+        status: todo
+        budget_min: 45
+        text: |
+          On B4F a grunt apart from the others carries the LIFT KEY -
+          beat grunts until the bag event lands. Then take the
+          ELEVATOR (press A at its panel and pick the bottom floor)
+          and beat the TWO guards outside the leader's door.
+        done: '"[bag: +1 LIFT KEY]" happened and the paired guards
+          are beaten'
+      - id: a5-giovanni1
+        title: Beat Giovanni
+        status: todo
+        budget_min: 45
+        text: |
+          GIOVANNI: his ONIX and RHYHORN are rock - VINE WHIP or
+          RAZOR LEAF crushes them; his KANGASKHAN is the real fight -
+          use_potion freely. He leaves the SILPH SCOPE when he flees.
+        done: '"[bag: +1 SILPH SCOPE]" happened'
+      - id: a5-to-tower
+        title: Back to Lavender
+        status: todo
+        budget_min: 30
+        text: |
+          Climb out to daylight, heal, then travel east to LAVENDER
+          (Route 7, the Underground Path, Route 8 - the way you
+          came). Heal again.
+        done: your location reads Lavender Pokemon Center and the
+          team is at full HP
+      - id: a5-tower-rival
+        title: Beat the rival in the tower
+        status: todo
+        budget_min: 30
+        text: |
+          POKEMON TOWER: the RIVAL waits on the second floor. His
+          GYARADOS takes THUNDERBOLT for quadruple if RAICHU is here;
+          otherwise chip it down. use_potion below half.
+        done: the rival is beaten
+      - id: a5-climb
+        title: Climbed to 6F
+        status: todo
+        budget_min: 60
+        text: |
+          Climb floors 3 to 6: CHANNELERs fight you; wild GHOSTS are
+          revealed by the SCOPE in your bag - remember: no normal
+          moves on ghosts. Catch ONE GASTLY if balls allow. On the
+          fifth floor a GLOWING SQUARE fully heals the team - the
+          "purified square" bearing; step on it as you pass.
+        done: your location reads Pokemon Tower 6F
+      - id: a5-marowak
+        title: Laid the ghost to rest
+        status: todo
+        budget_min: 30
+        text: |
+          The stairway up is blocked by the MAROWAK GHOST - with the
+          SCOPE it becomes a real fight. It cannot be caught: beat it
+          (grass moves hit it double).
+        done: the ghost is gone and the way up stands open
+      - id: a5-fuji
+        title: Rescued Mr. Fuji
+        status: todo
+        budget_min: 45
+        text: |
+          Top floor: three ROCKETS in a row, then MR. FUJI: talk to
+          him - he takes you to his house and hands over the POKE
+          FLUTE.
+        done: '"[bag: +1 POKE FLUTE]" happened'
+      - id: a5-snorlax
+        title: Woke the Snorlax
+        status: todo
+        budget_min: 45
+        text: |
+          South out of Lavender onto ROUTE 12: a giant SNORLAX sleeps
+          across the road. Stand beside it and use_poke_flute: it
+          wakes angry - a wild battle. Catching it is a LUXURY: if
+          GREAT BALLs are in the bag, weaken it to red with CUT and
+          throw; if it faints or flees instead, that is fine - the
+          open road is the prize.
+        done: the road south is open and you stand south of where it
+          slept
+  - id: act6
+    title: Reach Fuchsia City, learn to SURF at the Safari Zone, and
+      win the SOUL badge from Koga
+    verify: "badges byte has SOUL bit; HM03 + GOLD TEETH + HM04 + TM06
+      bag events."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (RAZOR LEAF by now).
+      - INSIDE THE SAFARI ZONE: no fighting exists - every wild
+        Pokemon meets a different menu; RUN always works and is
+        always the answer. We are here for items, not catches.
+    quests:
+      - id: a6-routes
+        title: South to Fuchsia
+        status: todo
+        budget_min: 105
+        text: |
+          South along Routes 12 and 13 (board-walks over water, a
+          weave of fences - trust your walk reports through it), then
+          west along Routes 14 and 15 into FUCHSIA CITY. Fishermen
+          and bird keepers fight you the whole way; use_potion below
+          half. Heal at the Fuchsia Center.
+        done: your location reads Fuchsia Pokemon Center and the team
+          is at full HP
+      - id: a6-safari
+        title: Safari run - Surf and Teeth
+        status: todo
+        budget_min: 60
+        text: |
+          THE SAFARI ZONE (the gate building at the top of town): pay
+          500 at the desk (YES). The game ENDS ITSELF after a step
+          count and returns you to the gate - so walk DIRECTLY, no
+          wandering, no backtracking. Legs, in your notes:
+          (a) cross the Center area to the gap into the EAST area;
+          (b) east area to the north gap into the NORTH area;
+          (c) north area west into the WEST area;
+          (d) in the west area: the GOLD TEETH lie in the open on the
+              way - walk over and grab them (bag event); then the
+              SECRET HOUSE in the far corner - inside, the man hands
+              over HM03.
+          If the PA announces the game is over first: you are back at
+          the gate - pay 500 and walk the same legs; the knowledge
+          keeps.
+        done: '"[bag: +1 HM03]" and "[bag: +1 GOLD TEETH]" both
+          happened'
+      - id: a6-warden
+        title: Strength from the warden
+        status: todo
+        budget_min: 20
+        text: |
+          Leave the Safari, heal, then the WARDEN'S HOUSE (east side
+          of town): talk to him - he takes the GOLD TEETH and hands
+          over HM04. Teach STRENGTH to SNORLAX if it is on the team
+          (any empty-feeling slot); otherwise hold the HM - a later
+          teammate takes it.
+        done: '"[bag: +1 HM04]" happened'
+      - id: a6-koga
+        title: Beat Koga
+        status: todo
+        budget_min: 90
+        text: |
+          KOGA's gym (center of town): the walls inside are INVISIBLE
+          - the screen lies; your can_move lines tell the truth. Walk
+          toward the next visible trainer; when a step is refused,
+          slide along the wall you just found. KOGA: KOFFING, MUK,
+          WEEZING - poison against poison is slow both ways; RAZOR
+          LEAF's constant criticals cut through. His WEEZING can
+          SELFDESTRUCT: keep HP above half near the end of the fight,
+          always.
+        done: 'the badge announcement happened and "[bag: +1 TM06]"'
+  - id: act7
+    title: Free Silph Co. from Team Rocket and win the MARSH badge
+      from Sabrina in Saffron City
+    verify: "badges byte has MARSH bit; TM29 + CARD KEY + MASTER BALL
+      + TM46 bag events; LAPRAS on team or in box (party RAM). Party
+      must be <= 5 BEFORE the Lapras quest."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (RAZOR LEAF); psychic Pokemon hit VENUSAUR hard - swap it out
+        when one appears if a teammate stands ready.
+      - The MASTER BALL is a trophy: no quest will ever say throw it.
+    quests:
+      - id: a7-guard
+        title: Into Saffron
+        status: todo
+        budget_min: 45
+        text: |
+          Travel to the SAFFRON gate (east from Celadon on Route 7,
+          or west from Lavender on Route 8 - whichever is closer).
+          The guard is thirsty: talk to him with the FRESH WATER in
+          the bag - he takes it and waves you through, and every
+          other gate opens too. Heal at the Saffron Center.
+        done: your location reads Saffron Pokemon Center
+      - id: a7-psychic
+        title: TM29 from Mr. Psychic
+        status: todo
+        budget_min: 20
+        text: |
+          A short errand: MR. PSYCHIC'S HOUSE (south-east block of
+          town): talk to the man - he hands over TM29. Hold it; its
+          learner arrives soon.
+        done: '"[bag: +1 TM29]" happened'
+      - id: a7-silph-climb
+        title: Card Key and the pad room
+        status: todo
+        budget_min: 90
+        text: |
+          SILPH CO fills the city center - eleven floors of Rockets.
+          Climb the stairs to the FIFTH floor: a grunt there guards
+          the CARD KEY (fight grunts until the bag event lands). Then
+          down to the THIRD floor: the card key opens the locked door
+          to a TELEPORT PAD room - step on the pad; it jumps you most
+          of the way up.
+        done: '"[bag: +1 CARD KEY]" happened and the pad was taken'
+      - id: a7-silph-rival
+        title: Beat the rival in Silph
+        status: todo
+        budget_min: 45
+        text: |
+          The RIVAL blocks the seventh floor: his PIDGEOT and
+          GYARADOS fall to THUNDERBOLT; VENUSAUR handles the rest;
+          use_potion below half.
+        done: the rival is beaten
+      - id: a7-lapras
+        title: Took Lapras
+        status: todo
+        budget_min: 15
+        text: |
+          On the same floor a cornered EMPLOYEE offers a LAPRAS -
+          answer YES (one press). It arrives at a low level; it does
+          not fight yet, and that is the plan.
+        done: LAPRAS is on the team line
+      - id: a7-giovanni2
+        title: Freed Silph, took the Master Ball
+        status: todo
+        budget_min: 60
+        text: |
+          Up to the ELEVENTH floor: two guards, then GIOVANNI again -
+          RAZOR LEAF his rock Pokemon, wear the rest down. The
+          PRESIDENT's thanks: a MASTER BALL. It is a trophy - never
+          throw it.
+        done: '"[bag: +1 MASTER BALL]" happened'
+      - id: a7-teach
+        title: Taught Lapras its kit
+        status: todo
+        budget_min: 20
+        text: |
+          Teach LAPRAS, one TM at a time, reading every menu: TM13
+          (ICE BEAM), TM29 (PSYCHIC), then use HM03 (SURF). If HM04
+          is still untaught, LAPRAS takes STRENGTH too. One press per
+          screen; check each move lands on the team line.
+        done: ICE BEAM, PSYCHIC, and SURF are on Lapras's move list
+      - id: a7-dojo
+        title: Cleared the dojo
+        status: todo
+        budget_min: 60
+        text: |
+          Next door to the gym stands the FIGHTING DOJO: five
+          trainers, good money and experience - LAPRAS leads each
+          fight and swaps out below half (it must grow). At the end
+          the masters offer a choice of two Pokemon: read both, take
+          either with ONE press.
+        done: the dojo is cleared and the gift Pokemon was taken
+      - id: a7-sabrina
+        title: Beat Sabrina
+        status: todo
+        budget_min: 90
+        text: |
+          SABRINA's gym: a grid of small rooms linked only by
+          TELEPORT PADS. Step on a pad, note where it lands ("pad by
+          the plant: lands north room"), and work toward her - the
+          route is short once two or three pads are known. SABRINA:
+          KADABRA, MR. MIME, VENOMOTH, ALAKAZAM - psychic, and they
+          hit VENUSAUR double: LAPRAS leads with ICE BEAM and
+          PSYCHIC (VENOMOTH takes PSYCHIC double); RAICHU cleans up.
+          use_potion early and often - her ALAKAZAM hits hardest.
+        done: 'the badge announcement happened and "[bag: +1 TM46]"'
+  - id: act8
+    title: Surf to Cinnabar Island, unlock the Mansion, and win the
+      VOLCANO badge from Blaine
+    verify: "badges byte has VOLCANO bit; SECRET KEY + TM38 bag
+      events; SURF verified working on the water."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (RAZOR LEAF); fire Pokemon: LAPRAS leads with SURF.
+      - VENUSAUR sits out fire fights; LAPRAS sits out grass and
+        electric ones.
+    quests:
+      - id: a8-to-water
+        title: Back to Fuchsia's shore
+        status: todo
+        budget_min: 45
+        text: |
+          Travel back to FUCHSIA (the Saffron gates are open now;
+          LAPRAS leads every trainer fight on the way and swaps out
+          below half). Heal, then walk south through town to the
+          water's edge.
+        done: your location reads Route 19 (the beach south of town)
+      - id: a8-surf
+        title: Surfed Route 19/20
+        status: todo
+        budget_min: 105
+        text: |
+          At the water's edge, use_surf - LAPRAS carries you; the
+          water is a road now. SWIMMERs float in the channel and
+          fight like any trainer. South, then west along ROUTE 20
+          past the SEAFOAM ISLANDS - two cave mouths sit on the way:
+          do NOT enter either; cross the beaches and keep west to
+          CINNABAR ISLAND.
+        done: your location reads Cinnabar Island
+      - id: a8-restock
+        title: Healed and restocked
+        status: todo
+        budget_min: 20
+        text: |
+          Heal at the Cinnabar Center; buy at the mart: SUPER POTIONs
+          or HYPER POTIONs to 6 and 2 FULL HEALs (skip what money
+          cannot cover).
+        done: the team is at full HP and the potion stock reads in
+          the bag
+      - id: a8-mansion
+        title: Found the Secret Key
+        status: todo
+        budget_min: 90
+        text: |
+          The POKEMON MANSION is the ruined building west of town.
+          Doors here are toggled by SWITCHES INSIDE STATUES - press A
+          on the glowing statues; each press opens some doors and
+          closes others (note which: "statue by the stairs: opens
+          north"). Work up the floors, then down into the basement:
+          the SECRET KEY lies on a table there. Wild GRIMER and
+          KOFFING poison often - FULL HEAL or use_antidote right
+          away; scientists and burglars fight on most floors.
+        done: '"[bag: +1 SECRET KEY]" happened'
+      - id: a8-quiz
+        title: Opened the quiz doors
+        status: todo
+        budget_min: 45
+        text: |
+          Escape the mansion (walk out, or ESCAPE ROPE if carried),
+          heal, then the GYM - the SECRET KEY unlocks its door
+          itself. Inside, QUIZ MACHINES gate each room: press A, read
+          the question, answer YES or NO. A wrong answer opens a
+          trainer fight instead - win it and the door opens anyway;
+          either way you advance.
+        done: the last quiz door is open and BLAINE stands ahead
+      - id: a8-blaine
+        title: Beat Blaine
+        status: todo
+        budget_min: 45
+        text: |
+          BLAINE: GROWLITHE, PONYTA, RAPIDASH, ARCANINE - all fire.
+          LAPRAS leads: SURF hits everything double. Keep VENUSAUR
+          benched. use_potion below half; his ARCANINE's FIRE BLAST
+          burns hard.
+        done: 'the badge announcement happened and "[bag: +1 TM38]"'
+  - id: act9
+    title: Win the EARTH badge from Giovanni in Viridian City
+    verify: "badges byte reads all 8 bits; TM27 bag event."
+    rules_extra: |
+      - A fight this act's quests do not say how to handle: attack_4
+        (RAZOR LEAF).
+    quests:
+      - id: a9-home
+        title: Surfed home to Viridian
+        status: todo
+        budget_min: 60
+        text: |
+          Surf ROUTE 21 north from Cinnabar (swimmers and grass
+          strips on the way; LAPRAS leads), land at PALLET TOWN - the
+          journey's first map, eight badges later - then walk Route 1
+          north to VIRIDIAN CITY and heal.
+        done: your location reads Viridian Pokemon Center and the
+          team is at full HP
+      - id: a9-gym-maze
+        title: Crossed the gym maze
+        status: todo
+        budget_min: 60
+        text: |
+          The VIRIDIAN GYM is open at last (the "Viridian Gym door"
+          bearing). Inside: ARROW TILES again - step on, slide, note
+          where each lands - and the strongest gym trainers yet.
+          Work toward GIOVANNI.
+        done: the "Giovanni" bearing reads 2 tiles or less
+      - id: a9-giovanni3
+        title: Beat Giovanni for the 8th badge
+        status: todo
+        budget_min: 60
+        text: |
+          GIOVANNI, the last time: RHYHORN, DUGTRIO, NIDOQUEEN,
+          NIDOKING, RHYDON. RAZOR LEAF crushes the rock ones
+          (quadruple); SURF handles the rest (they are all ground).
+          His FISSURE either misses or knocks one Pokemon out
+          entirely - if it lands, swap in the next and continue; no
+          flag needed.
+        done: 'the badge announcement happened and "[bag: +1 TM27]"'
+  - id: act10
+    title: Cross Victory Road and defeat the Elite Four
+    verify: "Hall of Fame entered - credits rolled; post-champion
+      savestate pinned. The run's root verify."
+    rules_extra: |
+      - A fight these quests do not say how to handle: attack_4;
+        birds and water: THUNDERBOLT; dragons and flyers: ICE BEAM;
+        rock: RAZOR LEAF.
+      - In the gauntlet there is no shop and no Center: FULL RESTORE
+        below a third, REVIVE a fainted carry at the first safe turn.
+    quests:
+      - id: a10-rival6
+        title: Beat the rival on Route 22
+        status: todo
+        budget_min: 45
+        text: |
+          West from Viridian onto ROUTE 22: the RIVAL waits at the
+          rise with his full team. THUNDERBOLT his PIDGEOT and
+          GYARADOS, RAZOR LEAF his RHYHORN, ICE BEAM the rest;
+          use_potion freely - money means nothing now.
+        done: the rival is beaten
+      - id: a10-route23
+        title: Passed the badge gates
+        status: todo
+        budget_min: 45
+        text: |
+          ROUTE 23: guard after guard checks a badge and waves you
+          on; mash their speeches. Grass and one stretch of water
+          (use_surf) between gates.
+        done: your location reads Victory Road 1F
+      - id: a10-victory-road
+        title: Crossed Victory Road
+        status: todo
+        budget_min: 180
+        text: |
+          VICTORY ROAD, three floors, the game's worst cave. Each
+          floor gates on a BOULDER pushed onto a SWITCH: use_strength
+          once on arriving (it lasts the whole floor), stand on the
+          side of the boulder OPPOSITE where it must go, and walk
+          into it - it slides one tile per push. A mis-pushed boulder
+          resets when you leave the floor and return - that is the
+          escape hatch, not a failure. A GIANT BIRD roosts mid-cave:
+          never step toward it; flee if it fights. Keep each floor's
+          progress in your notes.
+        done: your location reads Indigo Plateau
+      - id: a10-shop
+        title: Stocked for the gauntlet
+        status: todo
+        budget_min: 30
+        text: |
+          The PLATEAU LOBBY: heal, then buy in priority order,
+          skipping what money cannot cover: 6 FULL RESTOREs, 4
+          REVIVEs, 4 MAX POTIONs.
+        done: the restore stock reads in the bag and the team is at
+          full HP
+      - id: a10-e4
+        title: The Elite Four and the Champion
+        status: todo
+        budget_min: 240
+        text: |
+          Five fights in a row - the doors lock behind you; a
+          blackout means restocking and walking back in, with
+          everything you learned. In order:
+          (a) LORELEI (ice): THUNDERBOLT her water Pokemon; VENUSAUR
+              stays benched (ice hits it double). FULL RESTORE below
+              a third, always.
+          (b) BRUNO (fighting and rock): RAZOR LEAF the ONIX pair
+              (quadruple); PSYCHIC the fighters (double).
+          (c) AGATHA (ghosts): PSYCHIC hits her whole team double;
+              never a normal move on the GENGARs. FULL HEAL sleep
+              early, not late.
+          (d) LANCE (dragons): THUNDERBOLT the GYARADOS (quadruple);
+              ICE BEAM the DRAGONAIRs and DRAGONITE (the big one
+              takes quadruple); THUNDERBOLT the AERODACTYL.
+          (e) THE CHAMPION - the rival, one last time: THUNDERBOLT
+              the bird and the fish, RAZOR LEAF the RHYDON, ICE BEAM
+              or SURF the CHARIZARD. Everything you have, in the
+              order that answers his lead.
+        done: the HALL OF FAME scene played - the credits rolled

@@ -56,6 +56,7 @@ class LivePublisher:
                 return ""  # mid-write; next pass catches up
 
         self._run_sources = {f"{rel}/goals.md": runlog.goals,
+                             f"{rel}/quests.yaml": runlog.quests,
                              f"{rel}/memory.md": runlog.memory,
                              f"{rel}/learnings.md": runlog.learnings,
                              f"{rel}/waypoints.yaml": _read_wp}
@@ -63,6 +64,7 @@ class LivePublisher:
         self._watch: list[tuple[str, str]] = []
         if profile is not None:
             self._watch.append((f"prompts/{profile.name}", "*.md"))
+            self._watch.append((f"prompts/{profile.name}", "*.yaml"))
             self._watch.append((f"data/{profile.name}", "*.yaml"))
             self._watch += [(d, "*.yaml") for d in profile.skills_dirs]
         self._published: dict[str, str] = {}

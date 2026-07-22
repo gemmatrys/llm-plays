@@ -198,6 +198,43 @@ maps:
   200: Rocket Hideout B2F
   201: Rocket Hideout B3F
   202: Rocket Hideout B4F
+  # --- gap fill 2026-07-22: ingested from pret constants/map_constants.asm
+  # (fetched) — these ids were missing and would have rendered as
+  # "map N (unknown)" exactly when the Bulbasaur run reaches them
+  # (Silph, Safari, mansion, Rock Tunnel B1F, Elite Four rooms).
+  203: Rocket Hideout Elevator
+  207: Silph Co 2F
+  208: Silph Co 3F
+  209: Silph Co 4F
+  210: Silph Co 5F
+  211: Silph Co 6F
+  212: Silph Co 7F
+  213: Silph Co 8F
+  214: Pokemon Mansion 2F
+  215: Pokemon Mansion 3F
+  216: Pokemon Mansion B1F
+  217: Safari Zone East
+  218: Safari Zone North
+  219: Safari Zone West
+  220: Safari Zone Center
+  221: Safari Zone Center Rest House
+  222: Safari Zone Secret House
+  223: Safari Zone West Rest House
+  224: Safari Zone East Rest House
+  225: Safari Zone North Rest House
+  226: Cerulean Cave 2F
+  227: Cerulean Cave B1F
+  228: Cerulean Cave 1F
+  229: "Name Rater's House"
+  230: Cerulean Badge House
+  232: Rock Tunnel B1F
+  233: Silph Co 9F
+  234: Silph Co 10F
+  235: Silph Co 11F
+  236: Silph Co Elevator
+  245: "Lorelei's Room"
+  246: "Bruno's Room"
+  247: "Agatha's Room"
   203: Rocket Hideout Elevator
   207: Silph Co 2F
   208: Silph Co 3F

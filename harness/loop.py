@@ -15,6 +15,7 @@ from .behaviors import random_mash_steps
 from .executor import Executor
 from .interfaces import Extras, Eyes, Unsupported
 from .profile import GameProfile
+from .quests import QuestBook
 from .runlog import RunLog
 from .stream import StreamState
 from .stuckness import StucknessMonitor
@@ -70,6 +71,13 @@ class GameLoop:
         # ONE goal; the checkpoint holds the rest. (goal number, first-seen
         # ts, overtime-alarmed latch)
         self._goal_clock: tuple[int, float, bool] | None = None
+        # structured quest feed (user 2026-07-22): when the run dir carries
+        # quests.yaml, it replaces goals.md as the strategy source — same
+        # single-quest presentation, budgets, stamps, and coach flags, but
+        # mechanical instead of checkpoint-minted. goals.md stays the
+        # fallback for runs without one.
+        self.quests = QuestBook(runlog.dir / "quests.yaml")
+        self._quests_err_alarmed: str | None = None
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._grass_seen: dict[int, tuple[int, int]] = {}  # map_id -> map (x,y)
         self._nav_blocked = 0  # consecutive walk-attempts with zero movement
@@ -367,19 +375,44 @@ class GameLoop:
                     "model_flag",
                     "the model flagged its coach: "
                     + decision.memory_update[:300])
+                # quest mode: make the flag durable in the file the
+                # checkpoint opens — the current quest reads status: coach
+                if self.quests.active:
+                    cur = self.quests.current()
+                    if cur is not None and self.quests.mark_coach(cur[0]):
+                        self.runlog.log_metric("quest_coach", quest=cur[0])
         else:
             self._notes_age += 1
         if decision.done_goal is not None:
-            # the model reports a numbered goal finished; the harness stamps
-            # it [DONE] so finished objectives stop being re-chased
-            if self.runlog.mark_goal_done(decision.done_goal):
+            # the model reports a numbered quest/goal finished; the harness
+            # stamps it so finished objectives stop being re-chased. Every
+            # stamp is a checkpoint alarm (believe-and-stamp: the next quest
+            # feeds at once, the checkpoint validates async — the model has
+            # false-stamped three times, so a stamp is a claim, not a fact)
+            if self.quests.active:
+                marked, act_done = self.quests.mark_done(decision.done_goal)
+                if marked:
+                    self.runlog.log_metric("goal_done",
+                                           goal=decision.done_goal)
+                    self._recent.append(
+                        f"[quest {decision.done_goal} marked DONE]")
+                    self.runlog.escalate(
+                        "goal_stamped",
+                        f"the model marked quest {decision.done_goal} done "
+                        "- validate against RAM/screen evidence in "
+                        "quests.yaml (or un-stamp)")
+                    if act_done is not None:
+                        # an act's last quest stamped: hand the checkpoint
+                        # its OWN verify anchor back for validation — the
+                        # harness echoes it, never rules on it
+                        self.runlog.escalate(
+                            "act_stamped",
+                            f"act '{act_done.get('title')}' fully stamped"
+                            " - validate: "
+                            + (act_done.get("verify") or "(no verify line)"))
+            elif self.runlog.mark_goal_done(decision.done_goal):
                 self.runlog.log_metric("goal_done", goal=decision.done_goal)
                 self._recent.append(f"[goal {decision.done_goal} marked DONE]")
-                # every stamp is a checkpoint alarm (user 2026-07-22: feed
-                # FEW goals, escalate on completion - the checkpoint
-                # validates the stamp against ground truth and only then
-                # issues the next goal; the model has false-stamped three
-                # times, so a stamp is a claim, not a fact)
                 self.runlog.escalate(
                     "goal_stamped",
                     f"the model marked goal {decision.done_goal} done - "
@@ -392,7 +425,8 @@ class GameLoop:
         # goals never earn stamps). Latched; a rewrite with a fresh final
         # goal re-arms it. Catches both the model stamping it AND a
         # checkpoint writing a finished file.
-        if self.runlog.goals_finished():
+        if (self.quests.all_done() if self.quests.active
+                else self.runlog.goals_finished()):
             if not self._goals_alarmed:
                 self._goals_alarmed = True
                 self.runlog.log_metric("goals_finished")
@@ -719,7 +753,43 @@ class GameLoop:
         validating each stamp (user 2026-07-22: feed less, alarm more).
         Also runs the goal clock: a 'Time budget: N minutes' line in the
         current goal escalates once when exceeded, so the checkpoint steps
-        in on schedule instead of on luck. Rules always show."""
+        in on schedule instead of on luck. Rules always show.
+
+        Quest mode (runs with quests.yaml): the QuestBook renders the same
+        contract — act ladder, done-collapse, one current quest, budget —
+        from structure instead of markdown parsing; only the clock lives
+        here (it is loop time, not file state)."""
+        if self.quests.active or self.quests.error:
+            if self.quests.error:
+                # a bad checkpoint edit degrades to the last good tree and
+                # must self-report (the prompt_invalid pattern), once per
+                # distinct error
+                if self._quests_err_alarmed != self.quests.error:
+                    self._quests_err_alarmed = self.quests.error
+                    self.runlog.escalate(
+                        "quests_invalid",
+                        f"quests.yaml rejected ({self.quests.error}); "
+                        "playing on the last good tree")
+            else:
+                self._quests_err_alarmed = None
+            out = self.quests.render()
+            cur = self.quests.current()
+            if cur is not None:
+                n, _act, q = cur
+                now = time.time()
+                if self._goal_clock is None or self._goal_clock[0] != n:
+                    self._goal_clock = (n, now, False)
+                budget = q.get("budget_min")
+                if budget and not self._goal_clock[2]:
+                    mins = (now - self._goal_clock[1]) / 60
+                    if mins > int(budget):
+                        self._goal_clock = (n, self._goal_clock[1], True)
+                        self.runlog.escalate(
+                            "goal_overtime",
+                            f"quest {n} has run {mins:.0f} min against a "
+                            f"{budget}-min budget - the checkpoint should "
+                            "step in (unstick, reroute, or rewrite it)")
+            return out
         full = self.runlog.goals()
         blocks = re.split(r"(?=^\d+\. )", full, flags=re.M)
         head = blocks[0] if blocks and not re.match(r"^\d+\. ", blocks[0]) \

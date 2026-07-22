@@ -1,7 +1,13 @@
 # Shop inventories by MART MAP id -> items in menu order (slot = index).
-# Pre-ingested from pret/pokered data/items/marts.asm (data-table
-# convention: full authoritative table, LIVE-verified reserved for
-# behavioral claims). Grow as the run approaches new towns.
+# FULL table ingested 2026-07-22 from pret/pokered data/items/marts.asm
+# (fetched, not recalled — every list below is the game's own shelf in
+# its exact menu order; TM constants mapped to their in-game TMxx names).
+# buy_<item>_x<n> intents are minted from this table; a missing map =
+# no buys there.
+#
+# SCHEMA NOTE: one list per map. Two Celadon floors have TWO clerks on
+# one map — only the modeled clerk's list is included (see comments);
+# buying from an unmodeled clerk is off-plan and unminted on purpose.
 marts:
   42:  # Viridian Poke Mart
     - POKE BALL
@@ -16,3 +22,79 @@ marts:
     - BURN HEAL
     - AWAKENING
     - PARLYZ HEAL
+  67:  # Cerulean Poke Mart
+    - POKE BALL
+    - POTION
+    - REPEL
+    - ANTIDOTE
+    - BURN HEAL
+    - AWAKENING
+    - PARLYZ HEAL
+  91:  # Vermilion Poke Mart
+    - POKE BALL
+    - SUPER POTION
+    - ICE HEAL
+    - AWAKENING
+    - PARLYZ HEAL
+    - REPEL
+  150:  # Lavender Poke Mart
+    - GREAT BALL
+    - SUPER POTION
+    - REVIVE
+    - ESCAPE ROPE
+    - SUPER REPEL
+    - ANTIDOTE
+    - BURN HEAL
+    - ICE HEAL
+    - PARLYZ HEAL
+  123:  # Celadon Dept 2F — CLERK 1 (general goods) only; clerk 2 sells
+        # TMs (TM32,TM33,TM02,TM07,TM37,TM01,TM05,TM09,TM17) and is NOT
+        # modeled (two clerks, one map id — extend the schema if a TM
+        # buy ever enters the plan)
+    - GREAT BALL
+    - SUPER POTION
+    - REVIVE
+    - SUPER REPEL
+    - ANTIDOTE
+    - BURN HEAL
+    - ICE HEAL
+    - AWAKENING
+    - PARLYZ HEAL
+  125:  # Celadon Dept 4F (Wiseman gifts — evolution stones)
+    - POKE DOLL
+    - FIRE STONE
+    - THUNDER STONE
+    - WATER STONE
+    - LEAF STONE
+  # Celadon Dept 5F (map 136) omitted: two clerks (X-items / vitamins),
+  # both off-plan.
+  152:  # Fuchsia Poke Mart
+    - ULTRA BALL
+    - GREAT BALL
+    - SUPER POTION
+    - REVIVE
+    - FULL HEAL
+    - SUPER REPEL
+  172:  # Cinnabar Poke Mart
+    - ULTRA BALL
+    - GREAT BALL
+    - HYPER POTION
+    - MAX REPEL
+    - ESCAPE ROPE
+    - FULL HEAL
+    - REVIVE
+  180:  # Saffron Poke Mart
+    - GREAT BALL
+    - HYPER POTION
+    - MAX REPEL
+    - ESCAPE ROPE
+    - FULL HEAL
+    - REVIVE
+  174:  # Indigo Plateau Lobby
+    - ULTRA BALL
+    - GREAT BALL
+    - FULL RESTORE
+    - MAX POTION
+    - FULL HEAL
+    - REVIVE
+    - MAX REPEL

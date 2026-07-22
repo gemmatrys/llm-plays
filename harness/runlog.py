@@ -26,6 +26,7 @@ checkpoints with specific objectives.)
 class RunLog:
     def __init__(self, base: Path, game: str, run_id: str | None = None,
                  initial_goals: str | None = None,
+                 initial_quests: str | None = None,
                  alert_cmd: list[str] | None = None,
                  alert_cooldown_s: float = 300.0):
         self.alert_cmd = alert_cmd
@@ -42,6 +43,12 @@ class RunLog:
         if not self.resumed:
             self.goals_path.write_text(initial_goals or DEFAULT_GOALS,
                                        encoding="utf-8")
+        # structured quest feed: seeded once from prompts/<game>/quests.yaml;
+        # never clobbered on restart (the live copy carries model stamps and
+        # checkpoint edits). When present it supersedes goals.md (loop.py).
+        self.quests_path = self.dir / "quests.yaml"
+        if initial_quests and not self.quests_path.exists():
+            self.quests_path.write_text(initial_quests, encoding="utf-8")
         # the model's own notes ("I am upstairs in the Viridian Pokemon Center,
         # here to heal"). Written by the model, carried verbatim, survives
         # restarts; checkpoints may correct false beliefs in it.
@@ -57,6 +64,11 @@ class RunLog:
 
     def goals(self) -> str:
         return self.goals_path.read_text(encoding="utf-8")
+
+    def quests(self) -> str:
+        if self.quests_path.is_file():
+            return self.quests_path.read_text(encoding="utf-8")
+        return ""
 
     def memory(self) -> str:
         if self.memory_path.is_file():
