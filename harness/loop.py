@@ -57,6 +57,10 @@ class GameLoop:
         self._maps_cache: tuple[float, dict[int, str]] | None = None
         self._marts_cache: tuple[float, dict[int, list[str]]] | None = None
         self._goals_alarmed = False  # latch for the all-goals-done escalation
+        # single-goal feed + time budget (user 2026-07-22): the model sees
+        # ONE goal; the checkpoint holds the rest. (goal number, first-seen
+        # ts, overtime-alarmed latch)
+        self._goal_clock: tuple[int, float, bool] | None = None
         self._nav: dict | None = None  # this tick's pathfinding inputs
         self._grass_seen: dict[int, tuple[int, int]] = {}  # map_id -> map (x,y)
         self._nav_blocked = 0  # consecutive walk-attempts with zero movement
@@ -404,7 +408,8 @@ class GameLoop:
         if dyn:
             extra["dynamic_behaviors"] = dyn
             extra["dynamic_legend"] = legend
-        obs = Observation(frame=frame, ram=ram_ctx, goals=self.runlog.goals(),
+        obs = Observation(frame=frame, ram=ram_ctx,
+                          goals=self._present_goals(),
                           recent=self._recent, memory=self.runlog.memory(),
                           tilemap=tilemap, extra=extra)
         decision = self.watchdog.decide(obs)
@@ -474,6 +479,16 @@ class GameLoop:
             if self.runlog.mark_goal_done(decision.done_goal):
                 self.runlog.log_metric("goal_done", goal=decision.done_goal)
                 self._recent.append(f"[goal {decision.done_goal} marked DONE]")
+                # every stamp is a checkpoint alarm (user 2026-07-22: feed
+                # FEW goals, escalate on completion - the checkpoint
+                # validates the stamp against ground truth and only then
+                # issues the next goal; the model has false-stamped three
+                # times, so a stamp is a claim, not a fact)
+                self.runlog.escalate(
+                    "goal_stamped",
+                    f"the model marked goal {decision.done_goal} done - "
+                    "validate against RAM/screen evidence, then write the "
+                    "next goal (or un-stamp)")
 
         # out of objectives: ALARM once (toast + checkpoint wake), don't
         # silently idle — the model wanders on a finished list. Trigger is
@@ -800,6 +815,61 @@ class GameLoop:
             return names
         except Exception:  # noqa: BLE001 — names are context, never fatal
             return self._maps_cache[1] if self._maps_cache else {}
+
+    def _present_goals(self) -> str:
+        """The model's view of goals.md: everything finished collapses to
+        one 'Done so far' line, the CURRENT goal shows in full, and later
+        goals are WITHHELD - the checkpoint feeds them one at a time after
+        validating each stamp (user 2026-07-22: feed less, alarm more).
+        Also runs the goal clock: a 'Time budget: N minutes' line in the
+        current goal escalates once when exceeded, so the checkpoint steps
+        in on schedule instead of on luck. Rules always show."""
+        full = self.runlog.goals()
+        blocks = re.split(r"(?=^\d+\. )", full, flags=re.M)
+        head = blocks[0] if blocks and not re.match(r"^\d+\. ", blocks[0]) \
+            else ""
+        goal_blocks = [b for b in blocks if re.match(r"^\d+\. ", b)]
+        rules = ""
+        if goal_blocks:
+            m = re.search(r"^Rules:.*", goal_blocks[-1], re.S | re.M)
+            if m:
+                rules = m.group(0)
+                goal_blocks[-1] = goal_blocks[-1][:m.start()]
+        done_lines, current = [], None
+        for b in goal_blocks:
+            n = int(re.match(r"^(\d+)\.", b).group(1))
+            if re.match(r"^\d+\. \[DONE\]", b):
+                first = b.splitlines()[0]
+                done_lines.append(
+                    re.sub(r"^\d+\. \[DONE\]\s*", "", first).rstrip(" .-"))
+            elif current is None:
+                current = (n, b.rstrip() + "\n")
+        out = head
+        if done_lines:
+            out += "Done so far: " + "; ".join(done_lines) + ".\n\n"
+        if current is not None:
+            n, text = current
+            out += ("Your CURRENT goal - the only one; the next arrives "
+                    "when this one is truly done:\n\n" + text + "\n")
+            now = time.time()
+            if self._goal_clock is None or self._goal_clock[0] != n:
+                self._goal_clock = (n, now, False)
+            bm = re.search(r"Time budget:\s*(\d+)\s*min", text, re.I)
+            if bm and not self._goal_clock[2]:
+                mins = (now - self._goal_clock[1]) / 60
+                if mins > int(bm.group(1)):
+                    self._goal_clock = (n, self._goal_clock[1], True)
+                    self.runlog.escalate(
+                        "goal_overtime",
+                        f"goal {n} has run {mins:.0f} min against a "
+                        f"{bm.group(1)}-min budget - the checkpoint should "
+                        "step in (unstick, reroute, or rewrite the goal)")
+        else:
+            out += ("Every written goal is done - hold position; new "
+                    "instructions are on the way.\n")
+        if rules:
+            out += "\n" + rules
+        return out
 
     def _mart_items(self) -> dict[int, list[str]]:
         """HOT mart-map-id -> inventory table (data/<game>/marts.yaml)."""
