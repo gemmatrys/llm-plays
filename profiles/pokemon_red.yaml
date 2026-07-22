@@ -72,8 +72,11 @@ context_ram_map:
 state_lines:
   place: "You are in {v}."
   map_id: ~            # pure jargon; "place" already names the area
-  pos_x: "Your map position, west-east: x = {v}."
-  pos_y: "Your map position, north-south: y = {v} (walking north makes it smaller)."
+  pos_x: ~             # raw coordinates are jargon (core principle 3,
+  pos_y: ~             # user 2026-07-22): bearings/edges/can_move/
+                       # last_move carry position in player-speak; quest
+                       # texts are landmark-only. The harness still
+                       # reads x/y internally for all of those.
   badges: "You have {v} gym badges."
   money: "You are carrying ¥{v}."
   party_count: ~       # the team line below already shows every Pokemon

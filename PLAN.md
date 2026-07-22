@@ -34,7 +34,27 @@ Three hard invariants, enforced by the harness (never delegated to any LLM):
   staged: one bounded random-input self-rescue first, then escalation rather than
   waiting for the next scheduled checkpoint.
 
-**The harness is GLUE (user, 2026-07-22 — the definitive role statement).**
+**THE CORE PRINCIPLES (user, 2026-07-22 — the frame everything else
+elaborates):**
+
+1. **The checkpoint THINKS, the local LLM ACTS, the harness BRIDGES the
+   gap between them.** Strategy, plans, validation, and hard calls are
+   checkpoint work; every in-game choice is the local LLM's; the harness
+   is the bridge and nothing more — it never thinks and it never acts on
+   its own judgment.
+2. **The local LLM is limited but a bit smart — the checkpoint breaks
+   tasks down FOR it.** Never hand it a plan it must decompose itself:
+   hand it one small quest with a checkable DONE line, sized so that
+   "a bit smart" is enough. When it struggles, the fix is a smaller or
+   clearer task, not a smarter harness.
+3. **Communication with the local LLM is NATURAL LANGUAGE, only.** The
+   harness may read RAM, grids, and tables, but everything it conveys is
+   plain-language sentences a player could say ("You are in Pewter City.
+   From this tile you can step: south, east."). No field names, no
+   coordinates, no jargon, no structures — if it cannot be said plainly,
+   it is not ready to be served.
+
+**The harness is GLUE (the same statement, mechanism-side).**
 Three parties: the LOCAL LLM plays the game; the CHECKPOINT (Claude) plans
 the strategy; the HARNESS glues them — it (a) provides useful information
 the player cannot infer for itself, (b) provides the mechanisms that
