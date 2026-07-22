@@ -115,15 +115,13 @@ letters - finish with press_A, press_START, press_A.
 
 Notes: when your place or task changes, send a "memory" field that REWRITES
 your notes (<=60 words: where you are, doing what, next); omit to keep. Fix
-them when the screen contradicts them. Goals move on ONE way: when you
-believe the current goal's DONE line happened, add "done_goal": <its
-number> - the next goal arrives at once. The coach double-checks every
-stamp, so a mistaken stamp gets fixed for you, never punished.
-Your COACH makes every hard call. Unsure about ANYTHING - goal looks done
-or impossible, next move unclear, something odd? Start a notes line with
-"COACH: <what and why>". The coach is alerted, checks, and fixes the
-plan. A needless flag costs nothing; struggling silently costs hours.
-You never need to be certain - play honestly, flag freely.
+them when the screen contradicts them. Goals move on ONE way: believe the
+DONE line happened -> "done_goal": <its number>; the next goal arrives at
+once. The coach checks every stamp - honest mistakes get fixed, never
+punished. The COACH also makes every hard call: unsure about ANYTHING -
+goal looks done or impossible, next move unclear, something odd - start a
+notes line with "COACH: <what and why>". A needless flag costs nothing;
+struggling silently costs hours. Play honestly, flag freely.
 
 ## Allowed behaviors
 {behaviors}
