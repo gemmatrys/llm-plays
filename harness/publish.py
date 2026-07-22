@@ -48,20 +48,17 @@ class LivePublisher:
         self._index_path = runlog.dir / ".publish.index"  # runs/ is gitignored
         rel = runlog.dir.relative_to(self.base).as_posix()
 
-        def _run_file(name: str):
-            def _read() -> str:
-                p = runlog.dir / name
-                try:
-                    return p.read_text(encoding="utf-8") if p.is_file() else ""
-                except OSError:
-                    return ""  # mid-write; next pass catches up
-            return _read
+        def _read_wp() -> str:
+            p = runlog.dir / "waypoints.yaml"
+            try:
+                return p.read_text(encoding="utf-8") if p.is_file() else ""
+            except OSError:
+                return ""  # mid-write; next pass catches up
 
         self._run_sources = {f"{rel}/goals.md": runlog.goals,
                              f"{rel}/memory.md": runlog.memory,
                              f"{rel}/learnings.md": runlog.learnings,
-                             f"{rel}/waypoints.yaml": _run_file("waypoints.yaml"),
-                             f"{rel}/route.yaml": _run_file("route.yaml")}
+                             f"{rel}/waypoints.yaml": _read_wp}
         # hot surfaces watched straight from disk (uncommitted edits included)
         self._watch: list[tuple[str, str]] = []
         if profile is not None:
