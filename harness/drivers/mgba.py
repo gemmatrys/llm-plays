@@ -25,7 +25,6 @@ from pathlib import Path
 
 from PIL import Image
 
-from ..interfaces import Unsupported
 from ..types import Frame
 
 

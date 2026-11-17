@@ -207,7 +207,6 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     dist, parents = _bfs(grid, start, ledge_blocks)
 
     goal: tuple[int, int] | None = None
-    counter_face: str | None = None
     if name == "walk_to_counter":
         # [person][counter tile][open space] in a straight line — the Gen 1
         # talk-across-the-counter geometry, using the game's own counter
@@ -499,9 +498,4 @@ def resolve(name: str, tiles: bytes, cfg, walkable: set[int],
     # time before the next input or the rest of the path desyncs
     steps = [Step(button=d.rstrip("*"), hold_frames=8,
                   wait_frames=30 if d.endswith("*") else 8) for d in seq]
-    # finish the job: on arriving at the counter spot, a short tap turns to
-    # face across the counter — only when the route actually got there
-    if (name == "walk_to_counter" and len(full) <= MAX_STEPS
-            and counter_face is not None):
-        steps.append(Step(button=counter_face, hold_frames=4, wait_frames=8))
     return Behavior(name=orig, source="builtin", steps=steps)

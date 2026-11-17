@@ -40,14 +40,21 @@ and record never disagree.
 ## Layout
 
 ```
-harness/            the Python package (loop, watchdog, executor, policies, drivers)
-emulator/           mGBA Lua bridge script
-profiles/           per-game YAML config (buttons, ladder, ratchet, RAM map)
+harness/            the Python package (loop, watchdog, executor, policies, drivers, quests)
+emulator/           mGBA launcher + Lua bridge script
+profiles/           per-game YAML config (buttons, ladder, ratchet, RAM map, state_lines)
+prompts/            Gemma-facing prompt templates, quest trees, and checkpoint guide
+plans/              per-game master plans and progression ledgers
+data/               static game lookup tables (items, maps, marts, moves, species, tiles, types)
 skills/             behavior library — grows over time, partly Claude-authored
-runs/               per-run state: goals.md, logs, metrics, escalations, snapshots
+server/             vLLM / Gemma inference server setup and launch scripts
+tools/              standalone utilities (goals viewer, server validation, escalation alert)
+runs/               per-run state: quests/goals, memory, logs, metrics, escalations, snapshots
 ```
 
 ## Status
 
-Phase 1 scaffold. Untested against a live mGBA yet — the Lua bridge and the mGBA
-driver are the first things to validate (Phase 0 exit criteria in PLAN.md §7).
+Live Pokémon Red harness active (mGBA bridge, Gemma 4 local LLM policy, structured
+`quests.yaml` feed, pathfinding/navigation, OBS stream overlay, and `live/<run-id>`
+branch publishing). See [PLAN.md](PLAN.md), [LEARNINGS.md](LEARNINGS.md), and
+[BENCHMARKS.md](BENCHMARKS.md) for architecture, run notes, and benchmarks.

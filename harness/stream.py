@@ -115,8 +115,6 @@ def start_server(state: StreamState, port: int) -> ThreadingHTTPServer:
     return server
 
 
-RUNG_LABELS = {1: "GEMMA", 2: "SCRIPT", 3: "IDLE", 4: "FISH"}
-
 OVERLAY_HTML = """<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>llm-plays overlay</title><style>
   :root { --fg:#e8e8f0; --dim:#9aa0b4; --gemma:#7ee787; --script:#79c0ff;

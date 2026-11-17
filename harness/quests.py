@@ -53,10 +53,6 @@ from pathlib import Path
 import yaml
 
 
-class _LiteralStr(str):
-    pass
-
-
 def _literal_presenter(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data,
                                    style="|" if "\n" in data else None)
@@ -67,7 +63,6 @@ class _Dumper(yaml.SafeDumper):
 
 
 _Dumper.add_representer(str, _literal_presenter)
-_Dumper.add_representer(_LiteralStr, _literal_presenter)
 
 
 class QuestBook:
@@ -140,10 +135,6 @@ class QuestBook:
     def all_done(self) -> bool:
         self._refresh()
         return self.active and self.current() is None
-
-    def act_of_current(self) -> dict | None:
-        cur = self.current()
-        return cur[1] if cur else None
 
     # ---------- model marks ----------
 

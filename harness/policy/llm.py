@@ -18,7 +18,6 @@ import base64
 import hashlib
 import io
 import json
-import re
 from pathlib import Path
 
 import requests
@@ -198,7 +197,7 @@ class LLMPolicy:
                 {"role": "user", "content": [
                     {"type": "text", "text": text},
                     {"type": "image_url",
-                     "image_url": {"url": self._frame_data_url(obs)}},
+                     "image_url": {"url": self._frame_data_url(obs.frame)}},
                 ]},
             ],
             # thinking budget: when confused the model thinks LONGEST, and if
@@ -295,13 +294,7 @@ class LLMPolicy:
         if not content:
             raise ValueError("no answer content; thinking may have consumed the "
                              "max_tokens budget")
-        try:
-            action = json.loads(content)
-        except json.JSONDecodeError:  # tolerate any leading text before the JSON
-            i, j = content.find("{"), content.rfind("}")
-            if i == -1 or j == -1:
-                raise ValueError(f"no JSON object in content: {content[:80]!r}")
-            action = json.loads(content[i:j + 1])
+        action = _parse_json_object(content, "content")
         plan = []
         for name in action["plan"]:
             behavior = self.library.get(name) or items.stub(name)
@@ -339,14 +332,7 @@ Answer from the screenshot only, immediately - do not deliberate. \
                     else self.DEFAULT_VERIFY_TEMPLATE)
         if "{expect}" not in template:
             template = self.DEFAULT_VERIFY_TEMPLATE
-        img = frame.image
-        if max(img.size) > self.max_image_px:
-            scale = self.max_image_px / max(img.size)
-            img = img.resize((int(img.width * scale), int(img.height * scale)),
-                             resample=0)
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        url = f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode()}"
+        url = self._frame_data_url(frame)
         payload = {
             "model": self.model,
             "messages": [{"role": "user", "content": [
@@ -378,17 +364,11 @@ Answer from the screenshot only, immediately - do not deliberate. \
         content = (r.json()["choices"][0]["message"].get("content") or "").strip()
         if not content:
             raise ValueError("judge reply empty (thinking ate the budget)")
-        try:
-            verdict = json.loads(content)
-        except json.JSONDecodeError:
-            i, j = content.find("{"), content.rfind("}")
-            if i == -1 or j == -1:
-                raise ValueError(f"judge reply not JSON: {content[:80]!r}")
-            verdict = json.loads(content[i:j + 1])
+        verdict = _parse_json_object(content, "judge reply")
         return bool(verdict.get("matches")), str(verdict.get("seen", ""))[:200]
 
-    def _frame_data_url(self, obs: Observation) -> str:
-        img = obs.frame.image
+    def _frame_data_url(self, frame) -> str:
+        img = frame.image
         if max(img.size) > self.max_image_px:
             scale = self.max_image_px / max(img.size)
             img = img.resize((int(img.width * scale), int(img.height * scale)),
@@ -397,3 +377,14 @@ Answer from the screenshot only, immediately - do not deliberate. \
         img.save(buf, format="PNG")
         b64 = base64.b64encode(buf.getvalue()).decode()
         return f"data:image/png;base64,{b64}"
+
+
+def _parse_json_object(content: str, label: str) -> dict:
+    """Parse a JSON object from model output, tolerating leading/trailing text."""
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        i, j = content.find("{"), content.rfind("}")
+        if i == -1 or j == -1:
+            raise ValueError(f"no JSON object in {label}: {content[:80]!r}")
+        return json.loads(content[i:j + 1])
